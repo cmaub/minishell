@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/15 16:04:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/15 18:44:58 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,42 +41,16 @@ int	ft_nb_quote(char *input, char c)
 	return (count);
 }
 
-void	ft_lstadd(t_data **list, t_data *new)
+int	handle_quote(char *input, char quote, int *end, int *start, int *i)
 {
-	t_data    *current;
-
-	if (!list || !new)
-		return ;
-	if (*list == NULL)
-	{
-		*list = new;
-		return ;
-	}
-	current = *list;
-	while (current->next != NULL)
-		current = current->next;
-	current->next = new;
-}
-	
-t_data	*create_node(char *input)
-{
-	t_data	*new;
-
-	new = malloc (sizeof(t_data));
-	if (!new)
-		return (NULL);
-	new->value = input;
-	new->next = NULL;
-	return (new);
-}
-
-void	print_list(t_data *list)
-{
-	while (list != NULL)
-	{
-		printf("[%s]\n", list->value);
-		list = list->next;
-	}
+	(*i)++;
+	*start = *i;
+	while (input[*i] != '\0' && input[*i] != quote)
+		(*i)++;
+	*end = *i;
+	if (input[*i] == '\0')
+		return (false);
+	return (true);
 }
 
 t_data	*fill_list(char *input)
@@ -93,14 +67,11 @@ t_data	*fill_list(char *input)
 	{
 		start = i;
 		while (input[i] != 34 && input[i] != 39 && input[i] != 32 && input[i])
-		{
 			i++;
-			// if (input[i] == 34 || input[i] == 39)
-			// {
-				
-			// }	
-		}
 		end = i;
+		if (input[i] == 34 || input[i] == 39)
+			if (!handle_quote(input, input[i], &end, &start, &i))
+				return (NULL);
 		if (end > start)
 		{
 			new_node = create_node(ft_substr(input, start, end - start));
@@ -108,6 +79,8 @@ t_data	*fill_list(char *input)
 		}
 		if (input[i] != '\0')
 			i++;
+		else
+			break ;
 	}
 	return (list);
 }
