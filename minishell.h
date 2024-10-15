@@ -1,30 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
+/*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/15 11:11:37 by cmaubert         ###   ########.fr       */
+/*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
+/*   Updated: 2024/10/15 10:34:06 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#ifndef MINISHELL_H
 
-// char ft_readline(char **argv)
-// {
-// 	char	*prompt;
-// 	char
+# include <stdio.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 
-// 	prompt = "~$";
-// 	readline()
-// }
-
-int		main(int argc, char **argv)
-{
-	if (argc > 1)
-	{
-		
-	}
-}
+#endif
