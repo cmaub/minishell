@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
+#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/22 08:22:29 by cmaubert          #+#    #+#              #
-#    Updated: 2024/10/09 14:28:49 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/10/15 12:11:22 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
