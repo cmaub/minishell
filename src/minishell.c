@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/17 11:09:54 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 11:31:57 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	handle_quote(char *input, char quote, int *end, int *start, int *i)
 	while (input[*i] != '\0' && input[*i] != quote)
 		(*i)++;
 	*end = *i;
-	if (input[*i] == '\0' || *i == 1)    /* (*i == 1) si 2 quotes de meme nature se suivent */
+	if (input[*i] == '\0' || *i == 1)    /* (*i == 1) si 2 quotes de meme nature se suivent - a revoir*/
 	{
 		printf("invalid quoting\n");
 		return (false);
@@ -83,8 +83,8 @@ int	is_input_valid(t_token *list)
 	/* l'input commence soit par une redirection soit par une commande */
 	if (!current->prev && current->type > 4 && current->type != COMMAND)
 		return (0);
-	if (current->type == ARGUMENT || current->type == PIPE)
-		return (0);
+	// if (current->type == ARGUMENT || current->type == PIPE)
+	// 	return (0);
 	if (list_size(list) == 1 && current->type != COMMAND) /* Attention certains caracteres fonctionnent cf tests 2 a 6 */
 		return (0);
 	while (current->next != NULL)

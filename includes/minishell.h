@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/17 11:02:18 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 11:23:12 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,15 @@
 # define true 1
 # define false 0
 
-# define REDIRECT_IN 1
-# define REDIRECT_OUT 2
-# define APPEND_OUT 3
-# define HEREDOC 4
-# define PIPE 5
+# define REDIRECT_IN 1 /* < */
+# define REDIRECT_OUT 2 /* > */
+# define APPEND_OUT 3 /* >> */
+# define HEREDOC 4 /* << */
+# define PIPE 5 /* | */
 # define COMMAND 6
-# define OPTION 7
-# define ARGUMENT 8
-# define FILENAME 9
+# define OPTION 7 /* - + taile de 3 */
+# define ARGUMENT 8 
+# define FILENAME 9 
 # define TBD 10
 
 typedef struct s_token
