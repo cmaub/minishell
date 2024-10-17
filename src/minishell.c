@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/15 18:44:58 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 12:49:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,9 +85,8 @@ t_data	*fill_list(char *input)
 	return (list);
 }
 
-int		main(int argc, char **argv)
+int		main(int argc, char **argv, char **env)
 {
-	(void)argv;
 	char	*input;
 	t_data	*tokens;
 
