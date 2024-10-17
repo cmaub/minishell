@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/16 18:00:23 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 10:57:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	handle_quote(char *input, char quote, int *end, int *start, int *i)
 	while (input[*i] != '\0' && input[*i] != quote)
 		(*i)++;
 	*end = *i;
-	if (input[*i] == '\0' || *i == 1)
+	if (input[*i] == '\0' || *i == 1)    /* (*i == 1) si 2 quotes de meme nature se suivent */
 	{
 		printf("invalid quoting\n");
 		return (false);
@@ -47,8 +47,6 @@ int	give_type_to_token(t_token *token)
 {
 	if (!token || !token->value)
 		return (TBD);
-	else if (!token->prev && is_str(token->value))
-		return (COMMAND);
 	else if (token->value[0] == '|' && !token->value[1])
 		return (PIPE);
 	else if (token->value[0] == '>' && !token->value[1])
@@ -58,7 +56,9 @@ int	give_type_to_token(t_token *token)
 	else if (token->value[0] == '>' && token->value[1] == '>' && !token->value[2])
 		return (APPEND_OUT);
 	else if (token->value[0] == '<' && token->value[1] == '<' && !token->value[2])
-		return (HEREDOC);	
+		return (HEREDOC);
+	else if (!token->prev)
+		return (COMMAND); /* Il faudra verifier qu'il s'agit bien d'une commande */
 	if (token->prev)
 	{
 		if (token->prev->type == REDIRECT_IN || token->prev->type == REDIRECT_OUT
@@ -70,6 +70,7 @@ int	give_type_to_token(t_token *token)
 		else if (token->prev->type == PIPE || token->prev->type == FILENAME)
 			return (COMMAND);
 	}
+	/* Si TBD a ce stade, ca ne peut etre qu'une cmde un arg ou un file*/
 	return (TBD);
 }
 
@@ -81,17 +82,18 @@ int	is_input_valid(t_token *list)
 	current = list;
 	if (current->type == ARGUMENT || current->type == PIPE)
 		return (0);
-	if (list_size(list) == 1 && current->type != COMMAND && current->type != FILENAME)
+	if (list_size(list) == 1 && current->type != COMMAND) /* Attention certains caracteres fonctionnent cf tests 2 a 6 */
 		return (0);
 	while (current->next != NULL)
 	{
 		if (current->type == PIPE && current->next->type != COMMAND)
 			return (0);
-		if (current->type == FILENAME && current->prev->type > PIPE)
+		if (current->type == OPTION && current->prev->type != COMMAND)
 			return (0);
 		current = current->next;
 	}
-	if (current->next == NULL && current->type < 5)
+	/* l'input ne pas terminer par une redirection ou un pipe */
+	if (current->next == NULL && current->type < 5) 
 		return (0);
 	return (1);
 }

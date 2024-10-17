@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/16 17:58:22 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 10:40:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@
 # define ARGUMENT 8
 # define FILENAME 9
 # define TBD 10
-# define PRINTABLE 11
 
 typedef struct s_token
 {
