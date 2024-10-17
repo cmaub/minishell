@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/17 10:57:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 11:09:54 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	give_type_to_token(t_token *token)
 		return (APPEND_OUT);
 	else if (token->value[0] == '<' && token->value[1] == '<' && !token->value[2])
 		return (HEREDOC);
-	else if (!token->prev)
+	else if (!token->prev && token->value[0] != '-')
 		return (COMMAND); /* Il faudra verifier qu'il s'agit bien d'une commande */
 	if (token->prev)
 	{
@@ -80,6 +80,9 @@ int	is_input_valid(t_token *list)
 	t_token	*current;
 
 	current = list;
+	/* l'input commence soit par une redirection soit par une commande */
+	if (!current->prev && current->type > 4 && current->type != COMMAND)
+		return (0);
 	if (current->type == ARGUMENT || current->type == PIPE)
 		return (0);
 	if (list_size(list) == 1 && current->type != COMMAND) /* Attention certains caracteres fonctionnent cf tests 2 a 6 */
@@ -93,7 +96,7 @@ int	is_input_valid(t_token *list)
 		current = current->next;
 	}
 	/* l'input ne pas terminer par une redirection ou un pipe */
-	if (current->next == NULL && current->type < 5) 
+	if (current->next == NULL && current->type < 6) 
 		return (0);
 	return (1);
 }

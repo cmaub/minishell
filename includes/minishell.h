@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/17 10:40:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 11:02:18 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,6 @@ void	print_tokens_list(t_token *list);
 void	ft_free_tab(char **tab);
 
 int	    give_type_to_token(t_token *token);
-int	    list_size(t_token *list);
 int	    list_size(t_token *list);
 int	    is_str(char *str);
 
