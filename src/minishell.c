@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/17 13:02:14 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/17 15:14:39 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,11 +106,13 @@ t_token	*fill_list_of_tokens(char *input)
 	int		i;
 	int		start;
 	int		end;
+	int		token_index;
 	t_token	*list;
 	t_token	*new_node;
 	
 	i = 0;
 	list = NULL;
+	token_index = 0;
 	while (input[i] != '\0')
 	{
 		start = i;
@@ -124,6 +126,8 @@ t_token	*fill_list_of_tokens(char *input)
 		{
 			new_node = create_new_token(ft_substr(input, start, end - start));
 			add_new_token(&list, new_node);
+			new_node->index = token_index;
+			token_index++;
 			if (input[start - 1] == 34 || input[start - 1] == 39)
 				new_node->type = ARGUMENT;
 			else
@@ -140,6 +144,7 @@ t_token	*fill_list_of_tokens(char *input)
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
+	(void)env;
 	char		*input;
 	t_token	*tokens;
 

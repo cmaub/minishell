@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/16 16:04:18 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/17 15:13:24 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void	print_tokens_list(t_token *list)
 {
 	while (list != NULL)
 	{
-		printf("[%s] de type %d\n", list->value, list->type);
+		printf("[%s] de type %d et d'index %d\n", list->value, list->type, list->index);
 		list = list->next;
 	}
 }
