@@ -2,7 +2,7 @@ NAME = minishell
 
 # Compiler
 CC		= gcc
-CFLAGS	= -Wall -Wextra -Werror -fPIC
+CFLAGS	= -Wall -Wextra -Werror -fPIC -g3
 
 # Libft
 LIBFT_PATH	= libft/
@@ -15,7 +15,7 @@ INC			=	-I ./includes/\
 
 # Sources
 SRC_PATH	=	src/
-SRC_FILES			=	minishell.c token.c utils.c exec_pipe.c exec_simple.c path.c
+SRC_FILES			=	minishell.c token.c utils.c exec_pipe.c exec_simple.c path.c get_next_line.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects

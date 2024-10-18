@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/18 13:03:08 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/18 17:49:28 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	safe_close(int fd)
 	{
 		if (close(fd) == -1)
 		{
-			perror("close");
+			perror("close AC");
 			exit (EXIT_FAILURE);
 		}
 		fd = -1;
@@ -115,5 +115,29 @@ int	no_envp(char **tab)
 			return (1);
 	}
 	return (0);
+}
+
+void	get_lines(t_token *current, int fd_heredoc)
+{
+	char	*str;
+	
+	dprintf(2, "current->value %s\n", current->value);
+	while (1)
+	{
+		write(1, "pipe heredoc>", 13);
+		str = get_next_line(0);
+		if (!str)
+			break ;
+		if ((ft_strncmp(str, current->value, ft_strlen(current->value)) == 0 && str[ft_strlen(current->value)] == '\n'))
+		{
+			get_next_line(-42);
+			break ;
+		}
+		write(fd_heredoc, str, ft_strlen(str));
+		free(str);
+	}
+	safe_close(fd_heredoc);
+	// close(fd_heredoc);
+	free(str);
 }
 

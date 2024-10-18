@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:34:09 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/18 13:14:39 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/18 17:52:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,27 +24,21 @@ char	**fill_cmd_tab(char *cmd, t_token *current, char **split_cmd)
 {
 	split_cmd = ft_calloc(4, sizeof(char *));
 	if (!split_cmd)
-		return (NULL);
-		
+		return (NULL);	
 	split_cmd[0] = cmd;
-	
 	if (current->next)
-		current = current->next;
-		
-	if (current->type == OPTION || current->type == ARGUMENT || current->type == TBD || current->type == FILENAME)
+		current = current->next;	
+	if (current->type == OPTION || current->type == ARGUMENT)
 		split_cmd[1] = current->value;
 	else
 		split_cmd[1] = NULL;	
-	
 	if (current->next)
 		current = current->next;
-	if (current->type == OPTION || current->type == ARGUMENT || current->type == TBD || current->type == FILENAME)
+	if (current->type == OPTION || current->type == ARGUMENT)
 		split_cmd[2] = current->value;
 	else 
-		split_cmd[2] = NULL;		
-	
+		split_cmd[2] = NULL;
 	split_cmd[3] = NULL;
-	
 	return (split_cmd);
 }
 
@@ -73,6 +67,7 @@ void	execute(char *cmd, t_token *current, t_pipex *p)
 	else if (!ft_strchr(cmd, '/') && !no_envp(p->envp))
 	{
 		path = get_path_and_check(&split_cmd[0], p->envp);
+		dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, split_cmd[0], split_cmd[1], split_cmd[2], split_cmd[3]);
 		if (execve(path, split_cmd, p->envp) == -1)
 			free(path);
 	}
@@ -81,16 +76,24 @@ void	execute(char *cmd, t_token *current, t_pipex *p)
 	exit (EXIT_FAILURE);
 }
 
-int	handle_input_redirection(t_pipex *p)
+int	handle_input_redirection(t_pipex *p, char *heredoc)
 {
 	int	fd_in;
 
-	fd_in = open(p->token->next->value, O_RDONLY | 0644);
+	fd_in = -1;
+	if (heredoc)
+	{
+		fd_in = open(heredoc, O_RDONLY | 0644);
+		dprintf(2, "fd_in dans handle input %d\n", fd_in);
+	}
+	else
+		fd_in = open(p->token->next->value, O_RDONLY | 0644);
 	if (fd_in == -1)
 		ft_error("open");
 	if (dup2(fd_in, STDIN_FILENO) == -1)
 		ft_error("dup2");
-	safe_close(fd_in);
+	// safe_close(fd_in);
+	close(fd_in);
 	return (1);
 }
 
@@ -102,13 +105,13 @@ void	handle_output_redirection(t_token *current)
 {
 	int	fd_out;
 
+	fd_out = -1;
 	if (current->type == REDIRECT_OUT)
 		fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	else if (current->type == APPEND_OUT)
 		fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else
 		return ;
-		
 	if (fd_out == -1)
 		ft_error("open");
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
@@ -116,34 +119,36 @@ void	handle_output_redirection(t_token *current)
 	safe_close(fd_out);
 }
 
-int	simple_cmd(t_pipex *p)
+int	simple_cmd(t_pipex *p, char *heredoc)
 {
 	pid_t		pid;
 	t_token	*current;
+	int		status;
 	// int		exit_code;
-	int		is_infile;
+	// int		is_infile;
 	
-
-	is_infile = 0;
+	// is_infile = 0;
 	current = p->token;
 	pid = fork();
 	if (pid == - 1)
 		ft_error("fork");
 	else if (pid == 0)
 	{
-		if (p->token->type == REDIRECT_IN)
-			is_infile = handle_input_redirection(p);
+		if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
+			// is_infile = handle_input_redirection(p);
+			handle_input_redirection(p, heredoc);
 		/* ATTENTION AU HEREDOC*/
 		while (current->next && current->type != REDIRECT_OUT && current->type != APPEND_OUT)
 			current = current->next;
-		handle_output_redirection(current);			
-		while (current->prev && current->type != 6)
+		handle_output_redirection(current);
+		while (current->prev && current->type != COMMAND)
 			current = current->prev;
-		if (is_infile == 0)
-			execute(p->token->value, current, p);
-		else
+		// if (is_infile == 0)
+		// 	execute(current->value, current, p);
+		// else
 			execute(current->value, current, p);
 	}
+	waitpid(pid, &status, 0);
 	// return (ft_wait(pid));
 	return (0);
 }

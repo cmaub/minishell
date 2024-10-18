@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/18 13:01:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/18 17:55:54 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,19 +139,44 @@
 // 	return (ft_wait(last_pid));
 // }
 
+char	*ft_heredoc(t_token *token, char *heredoc)
+{
+	t_token	*current;
+	int		fd_heredoc;
+
+	current = token;
+	fd_heredoc = -1;
+	// while (current)
+	// {
+		if (current->type == HEREDOC)
+		{
+			heredoc = "heredoc";
+			fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+			get_lines(current->next, fd_heredoc);
+			// safe_close(fd_heredoc);
+		}
+	// 	else
+	// 		current = current->next;
+	// }
+	return (heredoc);
+}
+
 int	handle_input(t_token *token, char **envp, int ac)
 {
-	t_pipex *p;
-	// t_token	*current;
-
+	t_pipex	*p;
+	char		*heredoc;	
+	
+	heredoc = NULL;
 	p = malloc(sizeof(*p));
 	ft_init_struct(p, ac, token, envp);
-	// current = token;
+	heredoc = ft_heredoc(token, heredoc);
 	// while (current)
 	// {
 	// 	if (current->type == PIPE)
 	// 		return(pipex(p));
 	// 	current = current->next;
 	// }
-	return(simple_cmd(p));
+	simple_cmd(p, heredoc);
+	// unlink(heredoc);
+	return(0);
 }

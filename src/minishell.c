@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/18 11:36:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/18 17:25:11 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ int	give_type_to_token(t_token *token)
 			return (OPTION);
 		else if (token->prev->type == PIPE || token->prev->type == FILENAME)
 			return (COMMAND);
+		else if (token->prev->type == HEREDOC)
+			return (DELIMITER);
 	}
 	/* Si TBD a ce stade, ca ne peut etre qu'une cmde un arg ou un file*/
 	return (TBD);
@@ -172,7 +174,9 @@ int		main(int argc, char **argv, char **env)
 				printf("invalid input\n");
 				return (0);
 			}
+			printf("ICI\n");
 			handle_input(tokens, env, argc);
+			// write(2, "\n", 1);
 			free (input);
 		}
 	}
