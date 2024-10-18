@@ -15,7 +15,7 @@ INC			=	-I ./includes/\
 
 # Sources
 SRC_PATH	=	src/
-SRC_FILES			=	minishell.c token.c utils.c
+SRC_FILES			=	minishell.c token.c utils.c exec_pipe.c exec_simple.c path.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects

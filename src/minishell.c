@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/17 15:14:39 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/18 11:36:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,6 @@ t_token	*fill_list_of_tokens(char *input)
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
-	(void)env;
 	char		*input;
 	t_token	*tokens;
 
@@ -173,6 +172,7 @@ int		main(int argc, char **argv, char **env)
 				printf("invalid input\n");
 				return (0);
 			}
+			handle_input(tokens, env, argc);
 			free (input);
 		}
 	}
