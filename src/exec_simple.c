@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:34:09 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/21 11:18:43 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/21 15:41:45 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ char	**fill_cmd_tab(char *cmd, t_token *current, char **split_cmd)
 - search for the path of the command
 - execute the cmd with its option and arguments
 */
-void	execute(char *cmd, t_token *current, t_pipex *p)
+int	execute(char *cmd, t_token *current, t_pipex *p)
 {
 	char	**split_cmd;
 	char	*path;
@@ -60,7 +60,7 @@ void	execute(char *cmd, t_token *current, t_pipex *p)
 		{
 			ft_free_tab(split_cmd);
 			perror("access");
-			exit (EXIT_FAILURE);
+			return (-1);
 		}
 		execve(split_cmd[0], split_cmd, NULL);
 	}
@@ -73,53 +73,87 @@ void	execute(char *cmd, t_token *current, t_pipex *p)
 	}
 	ft_free_tab(split_cmd);
 	perror("exec");
-	exit (EXIT_FAILURE);
+	return (-1);
 }
 
-int	handle_input_redirection(t_pipex *p, char *heredoc)
+int	handle_input_redirection(t_pipex *p, char *heredoc, int pipefd[2])
 {
 	int	fd_in;
-
+	
 	fd_in = -1;
 	if (heredoc)
 		fd_in = open(heredoc, O_RDONLY | 0644);
 	else
 		fd_in = open(p->token->next->value, O_RDONLY | 0644);
 	if (fd_in == -1)
+	{
+		safe_close(pipefd[0]);
+		safe_close(pipefd[1]);
 		ft_error("open");
+	}
 	if (dup2(fd_in, STDIN_FILENO) == -1)
+	{
+		dprintf(2, "Hey input \n");
+		safe_close(pipefd[0]);
+		safe_close(pipefd[1]);
+		safe_close(fd_in);
+		dprintf(2, "line = %d passee\n", __LINE__);		
 		ft_error("dup2");
+	}
 	safe_close(fd_in);
-	return (1);
+	return (fd_in);
 }
 
 /*
 This function opens fd_out or stops if no output redirection
 then dup2 and close fd_out
 */
-void	handle_output_redirection(t_token *current)
+void	handle_output_redirection(t_token *current, int pipefd[2], int fd_in)
 {
 	int	fd_out;
 
 	fd_out = -1;
-	if (current->type == REDIRECT_OUT)
-		fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else if (current->type == APPEND_OUT)
-		fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (current->type != PIPE)
+	{
+		if (current->type == REDIRECT_OUT)
+			fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		else if (current->type == APPEND_OUT)
+			fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		else
+			return ;
+		if (fd_out == -1) // fermer les fd ouverts precedemment
+		{
+			safe_close(pipefd[0]);
+			safe_close(pipefd[1]);
+			ft_error("open");
+		}
+		if (dup2(fd_out, STDOUT_FILENO) == -1) 
+		{
+			dprintf(2, "Hey output file \n");
+			safe_close(pipefd[0]);
+			safe_close(pipefd[1]);
+			safe_close(fd_out);	
+			ft_error("dup2");
+		}
+	}
 	else
-		return ;
-	if (fd_out == -1) // fermer les fd ouverts precedemment
-		ft_error("open");
-	if (dup2(fd_out, STDOUT_FILENO) == -1) 
-		ft_error("dup2");
+	{
+		if (dup2(pipefd[1], STDOUT_FILENO) == -1)
+		{
+			dprintf(2, "Hey output pipe \n");
+			ft_close_error(&fd_in, pipefd, "dup2");
+		}
+	}
 	safe_close(fd_out);
+
 }
 
-int	simple_cmd(t_pipex *p, char *heredoc)
+int	simple_cmd(t_pipex *p, char *heredoc, int pipefd[2])
 {
 	pid_t		pid;
 	t_token	*current;
 	int		status;
+	int		fd_in;
 	// int		exit_code;
 	
 	// is_infile = 0;
@@ -130,10 +164,10 @@ int	simple_cmd(t_pipex *p, char *heredoc)
 	else if (pid == 0)
 	{
 		if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
-			handle_input_redirection(p, heredoc);
+			fd_in = handle_input_redirection(p, heredoc, pipefd);
 		while (current->next && current->type != REDIRECT_OUT && current->type != APPEND_OUT)
 			current = current->next;
-		handle_output_redirection(current);
+		handle_output_redirection(current, pipefd, fd_in);
 		while (current->prev && current->type != COMMAND)
 			current = current->prev;
 		// 	execute(current->value, current, p);

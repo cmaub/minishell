@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/18 17:49:28 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 14:29:02 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ void	ft_init_struct(t_pipex *p, int ac, t_token *token, char **envp)
 	p->ac = ac;
 	p->token = token;
 	p->envp = envp;
+	p->heredoc = NULL;
 	p->nb_cmd = 0;
 	// if (ft_strncmp(token->type, "here_doc", 9) == 0)
 	// 	p->nb_cmd--;
@@ -137,7 +138,38 @@ void	get_lines(t_token *current, int fd_heredoc)
 		free(str);
 	}
 	safe_close(fd_heredoc);
-	// close(fd_heredoc);
 	free(str);
+}
+
+void    ft_close_error(int *fd, int pipefd[2], char *str)
+{
+    close(*fd);
+    close(pipefd[1]);
+    close(pipefd[0]);
+    perror(str);
+    exit(EXIT_FAILURE);
+}
+
+int    ft_wait(pid_t last_pid)
+{
+    int        status;
+    int        exit_code;
+    pid_t    waited_pid;
+
+    exit_code = 0;
+    while (true)
+    {
+        waited_pid = waitpid(-1, &status, 0);
+        {
+            if (waited_pid == -1)
+                break ;
+        }
+        if (waited_pid == last_pid)
+        {
+            if (WIFEXITED(status))
+                exit_code = WEXITSTATUS(status);
+        }
+    }
+    return (exit_code);
 }
 

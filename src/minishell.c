@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/21 11:05:45 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/21 14:33:17 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,6 @@ int		main(int argc, char **argv, char **env)
 				printf("invalid input\n");
 				return (0);
 			}
-			printf("ICI\n");
 			handle_input(tokens, env, argc);
 			// write(2, "\n", 1);
 			free (input);
