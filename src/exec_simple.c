@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_simple.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:34:09 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/18 17:52:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 11:18:43 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,18 +82,14 @@ int	handle_input_redirection(t_pipex *p, char *heredoc)
 
 	fd_in = -1;
 	if (heredoc)
-	{
 		fd_in = open(heredoc, O_RDONLY | 0644);
-		dprintf(2, "fd_in dans handle input %d\n", fd_in);
-	}
 	else
 		fd_in = open(p->token->next->value, O_RDONLY | 0644);
 	if (fd_in == -1)
 		ft_error("open");
 	if (dup2(fd_in, STDIN_FILENO) == -1)
 		ft_error("dup2");
-	// safe_close(fd_in);
-	close(fd_in);
+	safe_close(fd_in);
 	return (1);
 }
 
@@ -112,9 +108,9 @@ void	handle_output_redirection(t_token *current)
 		fd_out = open(current->next->value, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	else
 		return ;
-	if (fd_out == -1)
+	if (fd_out == -1) // fermer les fd ouverts precedemment
 		ft_error("open");
-	if (dup2(fd_out, STDOUT_FILENO) == -1)
+	if (dup2(fd_out, STDOUT_FILENO) == -1) 
 		ft_error("dup2");
 	safe_close(fd_out);
 }
@@ -125,7 +121,6 @@ int	simple_cmd(t_pipex *p, char *heredoc)
 	t_token	*current;
 	int		status;
 	// int		exit_code;
-	// int		is_infile;
 	
 	// is_infile = 0;
 	current = p->token;
@@ -135,15 +130,12 @@ int	simple_cmd(t_pipex *p, char *heredoc)
 	else if (pid == 0)
 	{
 		if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
-			// is_infile = handle_input_redirection(p);
 			handle_input_redirection(p, heredoc);
-		/* ATTENTION AU HEREDOC*/
 		while (current->next && current->type != REDIRECT_OUT && current->type != APPEND_OUT)
 			current = current->next;
 		handle_output_redirection(current);
 		while (current->prev && current->type != COMMAND)
 			current = current->prev;
-		// if (is_infile == 0)
 		// 	execute(current->value, current, p);
 		// else
 			execute(current->value, current, p);

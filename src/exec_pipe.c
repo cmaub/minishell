@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_pipe.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/18 17:55:54 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 11:16:45 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,18 +146,12 @@ char	*ft_heredoc(t_token *token, char *heredoc)
 
 	current = token;
 	fd_heredoc = -1;
-	// while (current)
-	// {
-		if (current->type == HEREDOC)
-		{
-			heredoc = "heredoc";
-			fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-			get_lines(current->next, fd_heredoc);
-			// safe_close(fd_heredoc);
-		}
-	// 	else
-	// 		current = current->next;
-	// }
+	if (current->type == HEREDOC)
+	{
+		heredoc = "heredoc";
+		fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		get_lines(current->next, fd_heredoc);
+	}
 	return (heredoc);
 }
 
@@ -167,7 +161,7 @@ int	handle_input(t_token *token, char **envp, int ac)
 	char		*heredoc;	
 	
 	heredoc = NULL;
-	p = malloc(sizeof(*p));
+	p = malloc(sizeof(*p)); //penser a free
 	ft_init_struct(p, ac, token, envp);
 	heredoc = ft_heredoc(token, heredoc);
 	// while (current)
@@ -177,6 +171,6 @@ int	handle_input(t_token *token, char **envp, int ac)
 	// 	current = current->next;
 	// }
 	simple_cmd(p, heredoc);
-	// unlink(heredoc);
+	unlink(heredoc);
 	return(0);
 }

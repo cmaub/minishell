@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/18 17:25:11 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 11:05:45 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,7 +157,7 @@ int		main(int argc, char **argv, char **env)
 			if (!input)
 				break ;
 			if (ft_strnstr(input, "exit", ft_strlen(input)))
-				break ;
+				break ; // quand on appuie sur entree OU quand quote pas fermee puis fermee
 			else
 				rl_on_new_line();
 			if (input)
