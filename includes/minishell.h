@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/21 14:29:14 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:20:05 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ typedef struct s_pipex
 	int		 	nb_cmd;
 	int		       i;
 	int		       prev_fd;
+	int			pipefd[2];
 	pid_t	        	pid;
 	pid_t	        	last_pid;
 }	t_pipex;
@@ -69,16 +70,16 @@ void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, int ac, t_token *token, char **envp);
 void	safe_close(int fd);
 void	get_lines(t_token *current, int fd_heredoc);
-void	handle_output_redirection(t_token *current, int pipefd[2], int fd_in);
-void    ft_close_error(int *fd, int pipefd[2], char *str);
+void	handle_output_redirection(t_token *current, t_pipex *p, int fd_in);
+void    ft_close_error(int *fd, t_pipex *p, char *str);
 
 int	give_type_to_token(t_token *token);
 int	list_size(t_token *list);
 int	is_str(char *str);
-int	simple_cmd(t_pipex *p, char *heredoc, int pipefd[2]);
+int	simple_cmd(t_pipex *p, char *heredoc);
 int	no_envp(char **tab);
 int	handle_input(t_token *token, char **envp, int ac);
-int	handle_input_redirection(t_pipex *p, char *heredoc, int pipefd[2]);
+int	handle_input_redirection(t_pipex *p, char *heredoc);
 int	execute(char *cmd, t_token *current, t_pipex *p);
 int    ft_wait(pid_t last_pid);
 

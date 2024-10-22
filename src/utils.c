@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/21 14:29:02 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:26:37 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ void	ft_init_struct(t_pipex *p, int ac, t_token *token, char **envp)
 	p->i = 0;
 	p->prev_fd = -1;
 	p->pid = 0;
+	// p->pipefd[0] = -1;
+	// p->pipefd[1] = -1;
 	p->last_pid = 0;
 }
 
@@ -141,11 +143,11 @@ void	get_lines(t_token *current, int fd_heredoc)
 	free(str);
 }
 
-void    ft_close_error(int *fd, int pipefd[2], char *str)
+void    ft_close_error(int *fd, t_pipex *p, char *str)
 {
     close(*fd);
-    close(pipefd[1]);
-    close(pipefd[0]);
+    close(p->pipefd[1]);
+    close(p->pipefd[0]);
     perror(str);
     exit(EXIT_FAILURE);
 }

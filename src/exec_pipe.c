@@ -6,32 +6,33 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/21 15:57:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:44:07 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	first_child(t_pipex *p, int pipefd[2])
+void	first_child(t_pipex *p)
 {
 	int		fd_in;
 	t_token	*current;
 
 	current = p->token;
 	// fd_in = ft_open(av);
+	safe_close(p->pipefd[0]);
 	if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
-			fd_in = handle_input_redirection(p, p->heredoc, pipefd);
+			fd_in = handle_input_redirection(p, p->heredoc);
 
 	while (current->next && current->type != PIPE)
 		current = current->next;
-	handle_output_redirection(current, pipefd, fd_in);
+	handle_output_redirection(current, p, fd_in);
 
 	while (current->prev && current->type != COMMAND)
 		current = current->prev;
 	if (execute(current->value, current, p) == -1)
 	{
-		safe_close(pipefd[0]);
-		safe_close(pipefd[1]);
+		safe_close(p->pipefd[0]);
+		safe_close(p->pipefd[1]);
 		safe_close(fd_in);
 		exit (EXIT_FAILURE);
 	}
@@ -41,7 +42,7 @@ void	first_child(t_pipex *p, int pipefd[2])
 	dprintf(2, "p->token->value = %s\n", p->token->value);
 }
 
-void	inter_child(int *prev_fd, t_pipex *p, int pipefd[2], char *heredoc)
+void	inter_child(int *prev_fd, t_pipex *p, char *heredoc)
 {
 	int		fd_in;
 	t_token	*current;
@@ -49,33 +50,28 @@ void	inter_child(int *prev_fd, t_pipex *p, int pipefd[2], char *heredoc)
 
 	current = p->token->next;
 	if (p->token->type == HEREDOC)
-		fd_in = handle_input_redirection(p, heredoc, pipefd);
+		fd_in = handle_input_redirection(p, heredoc);
 	else
 	{
 		fd_in = *prev_fd;
 		if (dup2(fd_in, STDIN_FILENO) == -1)
-		{
-			dprintf(2, "Hey INTER \n");
-			ft_close_error(&fd_in, pipefd, "dup2");
-		}
+			ft_close_error(&fd_in, p, "dup2");
 	}
-	handle_output_redirection(p->token, pipefd, fd_in);
+	handle_output_redirection(p->token, p, fd_in);
 	while (current->prev && current->type != COMMAND)
 		current = current->prev;
+	safe_close(p->pipefd[0]);
+	safe_close(p->pipefd[1]);
+	safe_close(fd_in);
 	if (execute(current->value, current, p) == -1)
-	{
-		safe_close(pipefd[0]);
-		safe_close(pipefd[1]);
-		safe_close(fd_in);
 		exit (EXIT_FAILURE);
-	}
 	while (current && current->type != PIPE)
 		current = current->next;
 	p->token = current;
 	dprintf(2, "p->token->value = %s\n", p->token->value);
 }
 
-void	last_child(t_pipex *p, int pipefd[2], char *heredoc, int *prev_fd)
+void	last_child(t_pipex *p, char *heredoc, int *prev_fd)
 {
 	int		fd_in;
 	t_token	*current;
@@ -83,60 +79,45 @@ void	last_child(t_pipex *p, int pipefd[2], char *heredoc, int *prev_fd)
 
 	current = p->token->next;
 	if (p->token->type == HEREDOC)
-	{
-		fd_in = handle_input_redirection(p, heredoc, pipefd);
-	
-	}
+		fd_in = handle_input_redirection(p, heredoc);
 	else
 	{
-		// fd_in = *prev_fd;
-		// if (dup2(fd_in, STDIN_FILENO) == -1)
-		if (dup2(pipefd[0], STDIN_FILENO) == -1)
-		{
-			dprintf(2, "Hey LAST \n");
-			ft_close_error(&fd_in, pipefd, "dup2");	
-		}
+		fd_in = *prev_fd;
+		if (dup2(fd_in, STDIN_FILENO) == -1)
+			ft_close_error(&fd_in, p, "dup2");
 	}
-
-	handle_output_redirection(current, pipefd, fd_in);
-
+	handle_output_redirection(current, p, fd_in);
+	// safe_close(p->pipefd[0]);
+	safe_close(p->pipefd[1]);
+	safe_close(fd_in);
 	while (current->prev && current->type != COMMAND)
 		current = current->prev;
-
 	if (execute(current->value, current, p) == -1)
-	{
-		safe_close(pipefd[0]);
-		safe_close(pipefd[1]);
-		safe_close(fd_in);
 		exit (EXIT_FAILURE);
-	}
 }
 
-void	create_process(int pipefd[2], t_pipex *p, int *prev_fd, pid_t pid, int count)
+void	create_process(t_pipex *p, int *prev_fd, pid_t pid, int count)
 {
 	if (pid == -1)
 		ft_error("fork");
 	else if (pid == 0)
 	{
 		if (p->i == 0)
-			first_child(p, pipefd);
+			first_child(p);
 		else if (p->i < count)
-			inter_child(prev_fd, p, pipefd, p->heredoc);
+			inter_child(prev_fd, p, p->heredoc);
 		else if (p->i == count)
-			last_child(p, pipefd, p->heredoc, prev_fd);
+			last_child(p, p->heredoc, prev_fd);
 	}
 	else
 	{
 		if (*prev_fd != -1)
-		{
 			safe_close(*prev_fd);
-		
-		}
 		if (p->i <= count)
 		{
-			// safe_close(pipefd[1]);
-			*prev_fd = pipefd[0];
-			pipefd[0] = -1;
+			// close(pipefd[1]);
+			*prev_fd = p->pipefd[0];
+			// p->pipefd[0] = -1;
 			// safe_close(pipefd[0]);
 		
 		}	
@@ -161,20 +142,31 @@ char	*ft_heredoc(t_token *token)
 		return (NULL);
 	return (heredoc);
 }
-int	pipex(t_pipex *p, int count, int pipefd[2])
+int	pipex(t_pipex *p, int count)
 {
 	pid_t	pid;
-	pid_t	last_pid;
+	// pid_t	last_pid;
 
 	while (p->i <= count)
 	{
+		if (p->i < count)
+		{
+			if (pipe(p->pipefd) == -1)
+				ft_error("pipe");
+		}
 		pid = fork();
 		if (p->i == count)
-			last_pid = pid;
-		create_process(pipefd, p, &p->prev_fd, pid, count);
+			p->last_pid = pid;
+		create_process(p, &p->prev_fd, pid, count);
 		p->i++;
 	}
-	return (ft_wait(last_pid));
+	p->i = 0;
+	while (p->i <= count +1)
+	{
+		waitpid(pid, NULL, 0);
+		p->i++;
+	}
+	return (0);
 }
 
 int	handle_input(t_token *token, char **envp, int ac)
@@ -182,11 +174,8 @@ int	handle_input(t_token *token, char **envp, int ac)
 	t_pipex	*p;
 	t_token	*current;
 	int		count;
-	int		pipefd[2];
 	
 	current = token;
-	pipefd[0] = -1;
-	pipefd[1] = -1;
 	count = 0;
 	p = malloc(sizeof(*p));
 	if (!p)
@@ -197,16 +186,11 @@ int	handle_input(t_token *token, char **envp, int ac)
 	while (current)
 	{
 		if (current->type == PIPE)
-		{
 			count++;
-			if (pipe(pipefd) == -1)
-				ft_error("pipe");
-			dprintf(2, "nombre de pipe %d\n", count);
-		}
 		current = current->next;	
 	}
-	pipex(p, count, pipefd);
-	simple_cmd(p, p->heredoc, pipefd);
+	pipex(p, count);
+	simple_cmd(p, p->heredoc);
 	unlink(p->heredoc);
 	return(0);
 }
