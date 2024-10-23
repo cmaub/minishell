@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    lexer.yacc                                         :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
+#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/22 12:24:16 by anvander          #+#    #+#              #
-#    Updated: 2024/10/22 16:50:12 by anvander         ###   ########.fr        #
+#    Updated: 2024/10/23 17:40:22 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,11 +35,13 @@ HAT = '^'
 
 ows = *SP
 
+ws = 1*(SP)
+
 squote = SQUOTE *(PRINTABLE / H_TAB / V_TAB) SQUOTE
 
 dquote = DQUOTE *(PRINTABLE / H_TAB / V_TAB) DQUOTE
 
-arg = 1*(LOW_ALPHA 
+arg = ows 1*(LOW_ALPHA 
        / UP_ALPHA
        / squote
        / dquote
@@ -54,9 +56,10 @@ redir = R_ARROW arg
        / R_ARROW R_ARROW arg
        / L_ARROW L_ARROW arg
 
-command = ows *(redir / arg)
+command = ows ( redir / arg )
 
-expr = command ows*([ PIPE ] ows command)
+expr = command  ows *(0*1[PIPE] 1*(command) )
+                     / *( ws command)
 
 start = [expr]
 
