@@ -3,14 +3,44 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/17 15:13:24 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/24 17:29:19 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+/*
+Cette fonction permet de changer la nature du token identifie en supprimant celui qui vient d'etre ajoute s'il peut etre precise 
+*/
+void	replace_prev_token(t_token **list, t_token *new)
+{
+	t_token	*current;
+	
+	if (!list || !new)
+		return ;
+	if (*list == NULL)
+	{
+		*list = new;
+		return ;
+	}
+	else
+	{
+		current = *list;
+		while (current->next != NULL)
+			current = current->next;
+		if (current->prev != NULL)
+			current->prev->next = new;
+		else
+			*list = new;
+		new->prev = current->prev;
+		new->next = NULL;
+		free(current->value);
+		free(current);
+	}
+}
 
 void	add_new_token(t_token **list, t_token *new)
 {
@@ -21,39 +51,53 @@ void	add_new_token(t_token **list, t_token *new)
 	if (*list == NULL)
 	{
 		*list = new;
-		new->prev = NULL;
 		return ;
 	}
 	else
 	{
 		current = *list;
 		while (current->next != NULL)
+		{
 			current = current->next;
+		}
+		
 		current->next = new;
 		new->prev = current;
 	}
 }
 	
-t_token	*create_new_token(char *input)
+t_token	*create_new_token(LEXER *input, int start, int end, int type)
 {
 	t_token	*new;
+	int		len;
 
+	len = end - start;
 	new = malloc (sizeof(t_token));
 	if (!new)
 		return (NULL);
-	new->value = input;
-	new->type = 0;
+	new->value = ft_substr(input->data, start, len);
+	if (!new->value)
+	{
+		free(new);
+		return (NULL);
+	}
+	new->type = type;
 	new->prev = NULL;
 	new->next = NULL;
 	return (new);
 }
 
-void	print_tokens_list(t_token *list)
+void	print_tokens_list(t_token **list)
 {
-	while (list != NULL)
+	if (!*list)
+		return ;
+	while ((*list))
 	{
-		printf("[%s] de type %d et d'index %d\n", list->value, list->type, list->index);
-		list = list->next;
+		if ((*list)->value)
+        	{
+         	   	printf("[%s] de type %d\n", (*list)->value, (*list)->type);
+			(*list) = (*list)->next;
+		}
 	}
 }
 

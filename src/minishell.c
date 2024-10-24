@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/21 14:33:17 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/24 17:30:29 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,155 +28,160 @@
 // 	return (count);
 // }
 
-int	handle_quote(char *input, char quote, int *end, int *start, int *i)
-{
-	(*i)++;
-	*start = *i;
-	while (input[*i] != '\0' && input[*i] != quote)
-		(*i)++;
-	*end = *i;
-	if (input[*i] == '\0' || *i == 1)    /* (*i == 1) si 2 quotes de meme nature se suivent - a revoir*/
-	{
-		printf("invalid quoting\n");
-		return (false);
-	}
-	return (true);
-}
+// int	handle_quote(char *input, char quote, int *end, int *start, int *i)
+// {
+// 	(*i)++;
+// 	*start = *i;
+// 	while (input[*i] != '\0' && input[*i] != quote)
+// 		(*i)++;
+// 	*end = *i;
+// 	if (input[*i] == '\0' || *i == 1)    /* (*i == 1) si 2 quotes de meme nature se suivent - a revoir*/
+// 	{
+// 		printf("invalid quoting\n");
+// 		return (false);
+// 	}
+// 	return (true);
+// }
 
-int	give_type_to_token(t_token *token)
-{
-	if (!token || !token->value)
-		return (TBD);
-	else if (token->value[0] == '|' && !token->value[1])
-		return (PIPE);
-	else if (token->value[0] == '>' && !token->value[1])
-		return (REDIRECT_OUT);
-	else if (token->value[0] == '<' && !token->value[1])
-		return (REDIRECT_IN);
-	else if (token->value[0] == '>' && token->value[1] == '>' && !token->value[2])
-		return (APPEND_OUT);
-	else if (token->value[0] == '<' && token->value[1] == '<' && !token->value[2])
-		return (HEREDOC);
-	else if (!token->prev && token->value[0] != '-')
-		return (COMMAND); /* Il faudra verifier qu'il s'agit bien d'une commande */
-	if (token->prev)
-	{
-		if (token->prev->type == REDIRECT_IN || token->prev->type == REDIRECT_OUT
-			|| token->prev->type == APPEND_OUT)
-			return (FILENAME);
-		else if (token->value[0] == '-' && ft_strlen(token->value) <= 3
-			&& token->prev->type == COMMAND)
-			return (OPTION);
-		else if (token->prev->type == PIPE || token->prev->type == FILENAME)
-			return (COMMAND);
-		else if (token->prev->type == HEREDOC)
-			return (DELIMITER);
-	}
-	/* Si TBD a ce stade, ca ne peut etre qu'une cmde un arg ou un file*/
-	return (TBD);
-}
+// int	give_type_to_token(t_token *token)
+// {
+// 	if (!token || !token->value)
+// 		return (TBD);
+// 	else if (token->value[0] =	printf("[command]\n");
+// 		return (PIPE);
+// 	else if (token->value[0] == '>' && !token->value[1])
+// 		return (REDIRECT_OUT);
+// 	else if (token->value[0] == '<' && !token->value[1])
+// 		return (REDIRECT_IN);
+// 	else if (token->value[0] == '>' && token->value[1] == '>' && !token->value[2])
+// 		return (APPEND_OUT);
+// 	else if (token->value[0] == '<' && token->value[1] == '<' && !token->value[2])
+// 		return (HEREDOC);
+// 	else if (!token->prev && token->value[0] != '-')
+// 		return (COMMAND); /* Il faudra verifier qu'il s'agit bien d'une commande */
+// 	if (token->prev)
+// 	{
+// 		if (token->prev->type == REDIRECT_IN || token->prev->type == REDIRECT_OUT
+// 			|| token->prev->type == APPEND_OUT)
+// 			return (FILENAME);
+// 		else if (token->value[0] == '-' && ft_strlen(token->value) <= 3
+// 			&& token->prev->type == COMMAND)
+// 			return (OPTION);
+// 		else if (token->prev->type == PIPE || token->prev->type == FILENAME)
+// 			return (COMMAND);
+// 		else if (typedef struct LEXER LEXER;
+// 			return (DELIMITER);
+// 	}
+// 	/* Si TBD a ce stade, ca ne peut etre qu'une cmde un arg ou un file*/
+// 	return (TBD);
+// }
 
-/* INCOMPLETE */
-int	is_input_valid(t_token *list)
-{
-	t_token	*current;
+// /* INCOMPLETE */
+// int	is_input_valid(t_token *list)
+// {
+// 	t_token	*current;
+// 	{
+// 		if (current->type == PIPE && current->next->type != COMMAND)
+// 			return (0);
+// 		if (current->type == OPTION && current->prev->type != COMMAND)
+// 			return (0);
+// 		current = current->next;
+// 	}
+// 	/* l'input ne pas terminer par une redirection ou un pipe */
+// 	if (current->next == NULL && current->type < 6) 
+// 		return (0);
+// 	return (1);
+// }
 
-	current = list;
-	/* l'input commence soit par une redirection soit par une commande */
-	if (!current->prev && current->type > 4 && current->type != COMMAND)
-		return (0);
-	// if (current->type == ARGUMENT || current->type == PIPE)
-	// 	return (0);
-	if (list_size(list) == 1 && current->type != COMMAND) /* Attention certains caracteres fonctionnent cf tests 2 a 6 */
-		return (0);
-	while (current->next != NULL)
-	{
-		if (current->type == PIPE && current->next->type != COMMAND)
-			return (0);
-		if (current->type == OPTION && current->prev->type != COMMAND)
-			return (0);
-		current = current->next;
-	}
-	/* l'input ne pas terminer par une redirection ou un pipe */
-	if (current->next == NULL && current->type < 6) 
-		return (0);
-	return (1);
-}
-
-t_token	*fill_list_of_tokens(char *input)
-{
-	int		i;
-	int		start;
-	int		end;
-	int		token_index;
-	t_token	*list;
-	t_token	*new_node;
+// t_token	*fill_list_of_tokens(char *input)
+// {
+// 	int		i;
+// 	int		start;
+// 	int		end;
+// 	int		token_index;
+// 	t_token	*list;
+// 	t_token	*new_node;
 	
-	i = 0;
-	list = NULL;
-	token_index = 0;
-	while (input[i] != '\0')
-	{
-		start = i;
-		while (input[i] != 34 && input[i] != 39 && input[i] != 32 && input[i])
-			i++;
-		end = i;
-		if (input[i] == 34 || input[i] == 39)
-			if (!handle_quote(input, input[i], &end, &start, &i))
-				return (NULL);
-		if (end > start)
-		{
-			new_node = create_new_token(ft_substr(input, start, end - start));
-			add_new_token(&list, new_node);
-			new_node->index = token_index;
-			token_index++;
-			if (input[start - 1] == 34 || input[start - 1] == 39)
-				new_node->type = ARGUMENT;
-			else
-				new_node->type = give_type_to_token(new_node);
-		}
-		if (input[i] != '\0')
-			i++;
-		else
-			break ;
-	}
-	return (list);
+// 	i = 0;
+// 	list = NULL;
+// 	token_index = 0;
+	
+// 	while (input[i] != '\0')
+// 	{
+// 		start = i;
+// 		while (input[i] != 34 && input[i] != 39 && input[i] != 32 && input[i])
+// 			i++;
+// 		end = i;
+// 		if (input[i] == 34 || input[i] == 39)
+// 			if (!handle_quote(input, input[i], &end, &start, &i))
+// 				return (NULL);
+// 		if (end > start)
+// 		{
+// 			new_node = create_new_token(ft_substr(input, start, end - start));
+// 			add_new_token(&list, new_node);
+// 			new_node->index = token_index;
+// 			token_index++;
+// 			if (input[start - 1] == 34 || input[start - 1] == 39)
+// 				new_node->type = ARGUMENT;
+// 			else
+// 				new_node->type = give_type_to_token(new_node);
+// 		}
+// 		if (input[i] != '\0')
+// 			i++;
+// 		else
+// 			break ;
+// 	}
+// 	return (list);
+// }
+
+int	fill_list_of_tokens(LEXER *L_input, t_token **list)
+{
+	if (!expr(L_input, list))
+		return (FALSE);
+	return (TRUE);
 }
 
+
+/*
+Le parsing ne fonctionne qu'au premier appel de readline. 
+Peut-etre que la tokens n'est pas bien videe d'un input a l'autre
+*/
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
-	char		*input;
-	t_token	*tokens;
-
+	(void)env;
+	char		*str_input;
+	LEXER		*L_input;
+	t_token	**tokens;
+	
+	L_input = ft_calloc(1, sizeof(L_input));
+	tokens = ft_calloc(1, sizeof(t_token **));
+	
+	L_input->data = NULL;
+	L_input->len = 0;
+	L_input->head = 0;
 	if (argc >= 1)
 	{
 		while (1)
 		{
-			input = readline("~$");
-			if (!input)
+			str_input = readline("~$");
+			if (!str_input)
 				break ;
-			if (ft_strnstr(input, "exit", ft_strlen(input)))
+			if (ft_strnstr(str_input, "exit", ft_strlen(str_input)))
 				break ; // quand on appuie sur entree OU quand quote pas fermee puis fermee
 			else
 				rl_on_new_line();
-			if (input)
-				add_history(input);
-			tokens = fill_list_of_tokens(input);
-			if (!tokens)
-			{
-				free (input);
-				return (0);
-			}
-			print_tokens_list(tokens);
-			if (!is_input_valid(tokens))
-			{
-				printf("invalid input\n");
-				return (0);
-			}
-			handle_input(tokens, env, argc);
-			// write(2, "\n", 1);
-			free (input);
+			if (str_input)
+				add_history(str_input);
+			L_input->data = str_input;
+			L_input->len = ft_strlen(str_input);
+			if (fill_list_of_tokens(L_input, tokens))
+				print_tokens_list(tokens);
+			else
+				printf("input non valide\n");
+			free(tokens);
+			// handle_input(tokens, env, argc);
+			free (str_input);
 		}
 	}
 	return (0);
