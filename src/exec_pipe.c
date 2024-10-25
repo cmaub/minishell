@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   exec_pipe.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/24 12:24:59 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/25 18:07:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// #include "minishell.h"
+#include "minishell.h"
 
 // void	first_child(t_pipex *p)
 // {
@@ -124,73 +124,73 @@
 // 	}
 // }
 
-// char	*ft_heredoc(t_token *token)
-// {
-// 	t_token	*current;
-// 	int		fd_heredoc;
-// 	char *heredoc;
+char	*ft_heredoc(t_token *token)
+{
+	t_token	*current;
+	int		fd_heredoc;
+	char *heredoc;
 
-// 	current = token;
-// 	fd_heredoc = -1;
-// 	if (current->type == HEREDOC)
-// 	{
-// 		heredoc = "heredoc";
-// 		fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-// 		get_lines(current->next, fd_heredoc);
-// 	}
-// 	else
-// 		return (NULL);
-// 	return (heredoc);
-// }
-// int	pipex(t_pipex *p, int count)
-// {
-// 	pid_t	pid;
-// 	// pid_t	last_pid;
+	current = token;
+	fd_heredoc = -1;
+	if (current->type == HEREDOC)
+	{
+		heredoc = "heredoc";
+		fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		get_lines(current->next, fd_heredoc);
+	}
+	else
+		return (NULL);
+	return (heredoc);
+}
+int	pipex(t_pipex *p, int count)
+{
+	pid_t	pid;
+	// pid_t	last_pid;
 
-// 	while (p->i <= count)
-// 	{
-// 		if (p->i < count)
-// 		{
-// 			if (pipe(p->pipefd) == -1)
-// 				ft_error("pipe");
-// 		}
-// 		pid = fork();
-// 		if (p->i == count)
-// 			p->last_pid = pid;
-// 		create_process(p, &p->prev_fd, pid, count);
-// 		p->i++;
-// 	}
-// 	p->i = 0;
-// 	while (p->i <= count +1)
-// 	{
-// 		waitpid(pid, NULL, 0);
-// 		p->i++;
-// 	}
-// 	return (0);
-// }
+	while (p->i <= count)
+	{
+		if (p->i < count)
+		{
+			if (pipe(p->pipefd) == -1)
+				ft_error("pipe");
+		}
+		pid = fork();
+		if (p->i == count)
+			p->last_pid = pid;
+		create_process(p, &p->prev_fd, pid, count);
+		p->i++;
+	}
+	p->i = 0;
+	while (p->i <= count +1)
+	{
+		waitpid(pid, NULL, 0);
+		p->i++;
+	}
+	return (0);
+}
 
-// int	handle_input(t_token *token, char **envp, int ac)
-// {
-// 	t_pipex	*p;
-// 	t_token	*current;
-// 	int		count;
-	
-// 	current = token;
-// 	count = 0;
-// 	p = malloc(sizeof(*p));
-// 	if (!p)
-// 		return (free (token), free(current), 0);
-// 	 //penser a free
-// 	ft_init_struct(p, ac, token, envp);
-// 	p->heredoc = ft_heredoc(token);
-// 	while (current)
-// 	{
-// 		if (current->type == PIPE)
-// 			count++;
-// 		current = current->next;	
-// 	}
-// 	pipex(p, count);
-// 	simple_cmd(p, p->heredoc);
-// 	unlink(p->heredoc);
-// 	return(0);
-// }
+int	handle_input(t_token *token, char **envp, int ac)
+{
+	t_pipex	*p;
+	t_token	*current;
+	int		count;
+
+	current = token;
+	count = 0;
+	p = malloc(sizeof(*p));
+	if (!p)
+		return (free (token), free(current), 0);
+	 // penser a free
+	ft_init_struct(p, ac, token, envp);
+	p->heredoc = ft_heredoc(token);
+	while (current)
+	{
+		if (current->type == PIPE)
+			count++;
+		current = current->next;	
+	}
+	pipex(p, count);
+	simple_cmd(p, p->heredoc);
+	unlink(p->heredoc);
+	return(0);
+}

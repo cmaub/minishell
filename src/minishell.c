@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/24 17:30:29 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/25 18:01:39 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,29 +141,37 @@ int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 	return (TRUE);
 }
 
+// void	init_LEX_TOKEN(LEXER *L_input, t_token **tokens)
+// {
+// 	L_input = ft_calloc(1, sizeof(L_input)); //mettre dans la boucle while ?
+// 	L_input->data = NULL;
+// 	L_input->len = 0;
+// 	L_input->head = 0;
+// 	tokens = ft_calloc(1, sizeof(t_token **));
+// 	(*tokens)->value = NULL;
+// 	(*tokens)->type = 0;
+// 	(*tokens)->index = 0;
+// 	(*tokens)->prev = NULL;
+// 	(*tokens)->next = NULL;
+// }
 
-/*
-Le parsing ne fonctionne qu'au premier appel de readline. 
-Peut-etre que la tokens n'est pas bien videe d'un input a l'autre
-*/
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
 	(void)env;
 	char		*str_input;
-	LEXER		*L_input;
-	t_token	**tokens;
+	LEXER		*L_input = NULL;
+	t_token	**tokens = NULL;
 	
-	L_input = ft_calloc(1, sizeof(L_input));
-	tokens = ft_calloc(1, sizeof(t_token **));
-	
-	L_input->data = NULL;
-	L_input->len = 0;
-	L_input->head = 0;
 	if (argc >= 1)
 	{
 		while (1)
 		{
+			L_input = ft_calloc(1, sizeof(L_input)); // faire fonciton init a part
+			L_input->data = NULL;
+			L_input->len = 0;
+			L_input->head = 0;
+			tokens = ft_calloc(1, sizeof(t_token **));
 			str_input = readline("~$");
 			if (!str_input)
 				break ;
@@ -179,8 +187,8 @@ int		main(int argc, char **argv, char **env)
 				print_tokens_list(tokens);
 			else
 				printf("input non valide\n");
-			free(tokens);
 			// handle_input(tokens, env, argc);
+			free(tokens);
 			free (str_input);
 		}
 	}

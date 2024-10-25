@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/24 12:25:39 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/25 18:06:31 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,22 +35,22 @@
 // 	i++;
 // }
 
-// void	ft_init_struct(t_pipex *p, int ac, t_token *token, char **envp)
-// {
-// 	p->ac = ac;
-// 	p->token = token;
-// 	p->envp = envp;
-// 	p->heredoc = NULL;
-// 	p->nb_cmd = 0;
-// 	// if (ft_strncmp(token->type, "here_doc", 9) == 0)
-// 	// 	p->nb_cmd--;
-// 	p->i = 0;
-// 	p->prev_fd = -1;
-// 	p->pid = 0;
-// 	// p->pipefd[0] = -1;
-// 	// p->pipefd[1] = -1;
-// 	p->last_pid = 0;
-// }
+void	ft_init_struct(t_pipex *p, int ac, t_token *token, char **envp)
+{
+	p->ac = ac;
+	p->token = token;
+	p->envp = envp;
+	p->heredoc = NULL;
+	p->nb_cmd = 0;
+	// if (ft_strncmp(token->type, "here_doc", 9) == 0)
+	// 	p->nb_cmd--;
+	p->i = 0;
+	p->prev_fd = -1;
+	p->pid = 0;
+	// p->pipefd[0] = -1;
+	// p->pipefd[1] = -1;
+	p->last_pid = 0;
+}
 
 // int	is_str(char *str)
 // {

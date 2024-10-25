@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/24 17:29:50 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/25 17:56:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,7 @@ int	PRINTABLE_DQUOTE(LEXER *input)
 	return (FALSE);
 }
 
+// entree comprise comme [""cat""] -> devrait peut-etre etre compris comme [""][cat][""] ?
 int	dquote(LEXER *input)
 {
 	int	save;
@@ -271,6 +272,8 @@ int	redir(LEXER *input, t_token **list)
 				new_node = create_new_token(input, start, end, APPEND_OUT);
 				add_new_token(list, new_node);
 			}
+			start = end;
+			end = input->head;
 			if (!arg(input, list))
 			{
 				input->head = start;
@@ -285,13 +288,15 @@ int	redir(LEXER *input, t_token **list)
 			}
 			return (TRUE);
 		}
-		start = end;
+		// start = end;
 		end = input->head;
 		if (end > start)
 		{
 			new_node = create_new_token(input, start, end, REDIRECT_OUT);
 			add_new_token(list, new_node);
 		}
+		ows(input);
+		end = input->head;
 		if (!arg(input, list))
 		{
 			input->head = start;
@@ -317,6 +322,8 @@ int	redir(LEXER *input, t_token **list)
 				new_node = create_new_token(input, start, end, HEREDOC);
 				add_new_token(list, new_node);
 			}
+			ows(input);
+			end = input->head;
 			if (!arg(input, list))
 			{
 				input->head = start;
@@ -331,13 +338,15 @@ int	redir(LEXER *input, t_token **list)
 			}
 			return (TRUE);
 		}
-		start = end;
+		// start = end;
 		end = input->head;
 		if (end > start)
 		{
 			new_node = create_new_token(input, start, end, REDIRECT_IN);
 			add_new_token(list, new_node);
 		}
+		ows(input);
+		end = input->head;
 		if (!arg(input, list))
 		{
 			input->head = start;
@@ -383,11 +392,12 @@ int	command(LEXER *input, t_token **list)
 	
 	start = input->head;
 	ows(input);
-	if (!arg(input, list) && !redir(input, list))
+	if (!arg(input, list) && ows(input) && !redir(input, list))
 	{
 		input->head = start;
 		return (FALSE);
 	}
+	ows(input);
 	while (arg(input, list) || redir(input, list))
 		ows(input); 
 	return (TRUE);
