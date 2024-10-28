@@ -6,123 +6,122 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/25 18:07:21 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/28 12:51:20 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// void	first_child(t_pipex *p)
-// {
-// 	int		fd_in;
-// 	t_token	*current;
+void	first_child(t_pipex *p)
+{
+	int		fd_in;
+	t_token	*current;
 
-// 	current = p->token;
-// 	// fd_in = ft_open(av);
-// 	safe_close(p->pipefd[0]);
-// 	if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
-// 			fd_in = handle_input_redirection(p, p->heredoc);
+	current = p->token;
+	// fd_in = ft_open(av);
+	safe_close(p->pipefd[0]);
+	if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
+			fd_in = handle_input_redirection(p, p->heredoc);
+	while (current->next && current->type != PIPE)
+		current = current->next;
+	handle_output_redirection(current, p, fd_in);
 
-// 	while (current->next && current->type != PIPE)
-// 		current = current->next;
-// 	handle_output_redirection(current, p, fd_in);
+	while (current->prev && current->type != COMMAND)
+		current = current->prev;
+	if (execute(current->value, current, p) == -1)
+	{
+		safe_close(p->pipefd[0]);
+		safe_close(p->pipefd[1]);
+		safe_close(fd_in);
+		exit (EXIT_FAILURE);
+	}
+	while (current && current->type != PIPE)
+		current = current->next;
+	p->token = current;
+	dprintf(2, "p->token->value = %s\n", p->token->value);
+}
 
-// 	while (current->prev && current->type != COMMAND)
-// 		current = current->prev;
-// 	if (execute(current->value, current, p) == -1)
-// 	{
-// 		safe_close(p->pipefd[0]);
-// 		safe_close(p->pipefd[1]);
-// 		safe_close(fd_in);
-// 		exit (EXIT_FAILURE);
-// 	}
-// 	while (current && current->type != PIPE)
-// 		current = current->next;
-// 	p->token = current;
-// 	dprintf(2, "p->token->value = %s\n", p->token->value);
-// }
-
-// void	inter_child(int *prev_fd, t_pipex *p, char *heredoc)
-// {
-// 	int		fd_in;
-// 	t_token	*current;
+void	inter_child(int *prev_fd, t_pipex *p, char *heredoc)
+{
+	int		fd_in;
+	t_token	*current;
 	
 
-// 	current = p->token->next;
-// 	if (p->token->type == HEREDOC)
-// 		fd_in = handle_input_redirection(p, heredoc);
-// 	else
-// 	{
-// 		fd_in = *prev_fd;
-// 		if (dup2(fd_in, STDIN_FILENO) == -1)
-// 			ft_close_error(&fd_in, p, "dup2");
-// 	}
-// 	handle_output_redirection(p->token, p, fd_in);
-// 	while (current->prev && current->type != COMMAND)
-// 		current = current->prev;
-// 	safe_close(p->pipefd[0]);
-// 	safe_close(p->pipefd[1]);
-// 	safe_close(fd_in);
-// 	if (execute(current->value, current, p) == -1)
-// 		exit (EXIT_FAILURE);
-// 	while (current && current->type != PIPE)
-// 		current = current->next;
-// 	p->token = current;
-// 	dprintf(2, "p->token->value = %s\n", p->token->value);
-// }
+	current = p->token->next;
+	if (p->token->type == HEREDOC)
+		fd_in = handle_input_redirection(p, heredoc);
+	else
+	{
+		fd_in = *prev_fd;
+		if (dup2(fd_in, STDIN_FILENO) == -1)
+			ft_close_error(&fd_in, p, "dup2");
+	}
+	handle_output_redirection(p->token, p, fd_in);
+	while (current->prev && current->type != COMMAND)
+		current = current->prev;
+	safe_close(p->pipefd[0]);
+	safe_close(p->pipefd[1]);
+	safe_close(fd_in);
+	if (execute(current->value, current, p) == -1)
+		exit (EXIT_FAILURE);
+	while (current && current->type != PIPE)
+		current = current->next;
+	p->token = current;
+	dprintf(2, "p->token->value = %s\n", p->token->value);
+}
 
-// void	last_child(t_pipex *p, char *heredoc, int *prev_fd)
-// {
-// 	int		fd_in;
-// 	t_token	*current;
-// 	(void)prev_fd;
+void	last_child(t_pipex *p, char *heredoc, int *prev_fd)
+{
+	int		fd_in;
+	t_token	*current;
+	(void)prev_fd;
 
-// 	current = p->token->next;
-// 	if (p->token->type == HEREDOC)
-// 		fd_in = handle_input_redirection(p, heredoc);
-// 	else
-// 	{
-// 		fd_in = *prev_fd;
-// 		if (dup2(fd_in, STDIN_FILENO) == -1)
-// 			ft_close_error(&fd_in, p, "dup2");
-// 	}
-// 	handle_output_redirection(current, p, fd_in);
-// 	// safe_close(p->pipefd[0]);
-// 	safe_close(p->pipefd[1]);
-// 	safe_close(fd_in);
-// 	while (current->prev && current->type != COMMAND)
-// 		current = current->prev;
-// 	if (execute(current->value, current, p) == -1)
-// 		exit (EXIT_FAILURE);
-// }
+	current = p->token->next;
+	if (p->token->type == HEREDOC)
+		fd_in = handle_input_redirection(p, heredoc);
+	else
+	{
+		fd_in = *prev_fd;
+		if (dup2(fd_in, STDIN_FILENO) == -1)
+			ft_close_error(&fd_in, p, "dup2");
+	}
+	handle_output_redirection(current, p, fd_in);
+	// safe_close(p->pipefd[0]);
+	safe_close(p->pipefd[1]);
+	safe_close(fd_in);
+	while (current->prev && current->type != COMMAND)
+		current = current->prev;
+	if (execute(current->value, current, p) == -1)
+		exit (EXIT_FAILURE);
+}
 
-// void	create_process(t_pipex *p, int *prev_fd, pid_t pid, int count)
-// {
-// 	if (pid == -1)
-// 		ft_error("fork");
-// 	else if (pid == 0)
-// 	{
-// 		if (p->i == 0)
-// 			first_child(p);
-// 		else if (p->i < count)
-// 			inter_child(prev_fd, p, p->heredoc);
-// 		else if (p->i == count)
-// 			last_child(p, p->heredoc, prev_fd);
-// 	}
-// 	else
-// 	{
-// 		if (*prev_fd != -1)
-// 			safe_close(*prev_fd);
-// 		if (p->i <= count)
-// 		{
-// 			// close(pipefd[1]);
-// 			*prev_fd = p->pipefd[0];
-// 			// p->pipefd[0] = -1;
-// 			// safe_close(pipefd[0]);
+void	create_process(t_pipex *p, int *prev_fd, pid_t pid, int count)
+{
+	if (pid == -1)
+		ft_error("fork");
+	else if (pid == 0)
+	{
+		if (p->i == 0)
+			first_child(p);
+		else if (p->i < count)
+			inter_child(prev_fd, p, p->heredoc);
+		else if (p->i == count)
+			last_child(p, p->heredoc, prev_fd);
+	}
+	else
+	{
+		if (*prev_fd != -1)
+			safe_close(*prev_fd);
+		if (p->i <= count)
+		{
+			// close(pipefd[1]);
+			*prev_fd = p->pipefd[0];
+			// p->pipefd[0] = -1;
+			// safe_close(pipefd[0]);
 		
-// 		}	
-// 	}
-// }
+		}	
+	}
+}
 
 char	*ft_heredoc(t_token *token)
 {
@@ -169,7 +168,7 @@ int	pipex(t_pipex *p, int count)
 	return (0);
 }
 
-int	handle_input(t_token *token, char **envp, int ac)
+int	handle_input(t_token **token, char **envp, int ac)
 {
 	t_pipex	*p;
 	t_token	*current;
@@ -190,7 +189,7 @@ int	handle_input(t_token *token, char **envp, int ac)
 		current = current->next;	
 	}
 	pipex(p, count);
-	simple_cmd(p, p->heredoc);
+	// simple_cmd(p, p->heredoc);
 	unlink(p->heredoc);
 	return(0);
 }

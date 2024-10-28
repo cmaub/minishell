@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 11:06:39 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/28 12:50:31 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,10 +184,11 @@ int		main(int argc, char **argv, char **env)
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
 			if (fill_list_of_tokens(L_input, tokens))
-				print_tokens_list(tokens);
+			{}
+				// print_tokens_list(tokens);
 			else
 				printf("input non valide\n");
-			// handle_input(tokens, env, argc);
+			handle_input(tokens, env, argc);
 			free(tokens);
 			free (str_input);
 		}

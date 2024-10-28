@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/28 11:42:03 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/28 12:45:08 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -271,138 +271,121 @@ int	arg(LEXER *input, t_token **list)
 	return (TRUE);
 }
 
-int add_redir_token(LEXER *input, int start, int end, t_token **list, int type) 
+int handle_delimiter(LEXER *input, t_token **list, int start)
 {
-    t_token *new_node = create_new_token(input, start, end, type);
-    if (!new_node) return FALSE;
-    add_new_token(list, new_node);
-    return TRUE;
-}
+	t_token	*new_node;
+    int		end;
 
-int add_filename_token(LEXER *input, int start, int end, t_token **list, int type) 
-{
-    t_token *new_node = create_new_token(input, start, end, type);
-    if (!new_node) return FALSE;
-    replace_prev_token(list, new_node);
-    return TRUE;
-}
-
-// int parse_filename(LEXER *input, t_token **list, int start)
-// {
-//     int end = input->head;
-//     if (!arg(input, list)) {
-//         input->head = start;
-//         return FALSE;
-//     }
-//     if ((int)input->head > end) 
-//         return add_filename_token(input, end, input->head, list, FILENAME);
-//     return TRUE;
-// }
-
-int parse_filename(LEXER *input, t_token **list, int start)
-{
-    int end = input->head;
-
-    ows(input); // Ignore les espaces
+	end = input->head;
+    if (!arg(input, list))
+        return (FALSE);
     end = input->head;
+    if (end > start)
+    {
+        new_node = create_new_token(input, start, end, DELIMITER);
+        replace_prev_token(list, new_node);
+    }
+    return (TRUE);
+}
 
-    if (!arg(input, list)) // Si aucun argument n'est trouvé, erreur
+int process_heredoc(LEXER *input, t_token **list, int start, int end)
+{
+	t_token *new_node;
+
+    end = input->head;
+    if (end > start)
+    {
+        new_node = create_new_token(input, start, end, HEREDOC);
+        add_new_token(list, new_node);
+    }
+    ows(input);
+	start = end;
+	end = input->head;
+    if (!handle_delimiter(input, list, end))
     {
         input->head = start;
-        return FALSE;
+        return (FALSE);
     }
+    return (TRUE);
+}
 
-    // Déterminer le type du token en fonction du contexte (DELIMITER pour HEREDOC)
-    int token_type = (list && (*list)->type == HEREDOC) ? DELIMITER : FILENAME;
+int handle_filename(LEXER *input, t_token **list, int start)
+{
+    int end;
+	t_token *new_node;
+	
+	end = input->head;
+    if (!arg(input, list))
+        return (FALSE);
+    end = input->head;
+    if (end > start)
+    {
+        new_node = create_new_token(input, start, end, FILENAME);
+        replace_prev_token(list, new_node);
+    }
+    return (TRUE);
+}
 
-    return create_and_add_token(input, start, end, list, token_type);
+int process_redirect(LEXER *input, t_token **list, int start, int end, int redirect_type)
+{
+	t_token *new_node;
+
+    end = input->head;
+    if (end > start)
+    {
+        new_node = create_new_token(input, start, end, redirect_type);
+        add_new_token(list, new_node);
+    }
+    ows(input);
+	start = end;
+	end = input->head;
+    if (!handle_filename(input, list, end))
+    {
+        input->head = start;
+        return (FALSE);
+    }
+    return (TRUE);
 }
 
 int handle_redirect_out(LEXER *input, t_token **list)
 {
-    int start = input->head;
-    int end = input->head;
+    int start;
+    int end;
 
-    if (R_ARROW(input)) {
-        end = input->head; // fin après le premier '>'
-        
-        int type = REDIRECT_OUT;
-        if (R_ARROW(input)) { // si un second '>' est trouvé
-            end = input->head; // fin après le second '>'
-            type = APPEND_OUT;
-        }
-
-        if (!add_redir_token(input, start, end, list, type))
-            return FALSE;
-
-        return parse_filename(input, list, input->head);
+	start = input->head;
+	end = input->head;
+    if (R_ARROW(input))
+    {
+        if (R_ARROW(input)) // Double flèche (>>)
+            return (process_redirect(input, list, start, end, APPEND_OUT));
+        return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
     }
-    return FALSE;
+    return (FALSE);
 }
 
 int handle_redirect_in(LEXER *input, t_token **list)
 {
-    int start = input->head;
-    int end = input->head;
+    int start;
+    int end;
 
-    if (L_ARROW(input)) {
-        end = input->head; // fin après le premier '<'
-        
-        int type = REDIRECT_IN;
-        if (L_ARROW(input)) { // si un second '<' est trouvé
-            end = input->head; // fin après le second '<'
-            type = HEREDOC;
-        }
-
-        if (!add_redir_token(input, start, end, list, type))
-            return FALSE;
-
-        return parse_filename(input, list, input->head);
+	start = input->head;
+	end = input->head;
+    if (L_ARROW(input))
+    {
+        if (L_ARROW(input)) // Double flèche (<<)
+            return (process_heredoc(input, list, start, end));
+        return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
     }
-    return FALSE;
+    return (FALSE);
 }
-
-// int handle_redirect_out(LEXER *input, t_token **list)
-// {
-//     int start = input->head;
-//     int end = input->head;
-    
-//     if (R_ARROW(input)) {
-//         end = input->head;
-//         int type = (R_ARROW(input)) ? APPEND_OUT : REDIRECT_OUT;
-        
-//         if (!add_redir_token(input, start, end, list, type))
-//             return FALSE;
-
-//         return parse_filename(input, list, input->head);
-//     }
-//     return FALSE;
-// }
-
-// int handle_redirect_in(LEXER *input, t_token **list)
-// {
-//     int start = input->head;
-//     int end = input->head;
-    
-//     if (L_ARROW(input)) {
-//         end = input->head;
-//         int type = (L_ARROW(input)) ? HEREDOC : REDIRECT_IN;
-        
-//         if (!add_redir_token(input, start, end, list, type))
-//             return FALSE;
-
-//         return parse_filename(input, list, input->head);
-//     }
-//     return FALSE;
-// }
 
 int redir(LEXER *input, t_token **list)
 {
     int start = input->head;
     if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
-        return TRUE;
+        return (TRUE);
     input->head = start;
-    return FALSE;
+    return (FALSE);
 }
 
 int command(LEXER *input, t_token **list)
@@ -410,7 +393,8 @@ int command(LEXER *input, t_token **list)
     int start = input->head;
     ows(input);
     
-    if (!arg(input, list) && ows(input) && !redir(input, list)) {
+    if (!arg(input, list) && ows(input) && !redir(input, list)) 
+	{
         input->head = start;
         return (FALSE);
     }
@@ -419,139 +403,6 @@ int command(LEXER *input, t_token **list)
         ows(input);
     return (TRUE);
 }
-
-/*
-Sorry pour la treees longue fonction. C'est un travail pour notre 3e binome !
-*/
-
-// int	redir(LEXER *input, t_token **list)
-// {
-// 	int	start;
-// 	int	end;
-// 	t_token	*new_node;
-	
-// 	start = input->head;
-// 	end = start; 
-// 	if (R_ARROW(input))
-// 	{
-// 		end = input->head;
-// 		if (R_ARROW(input))
-// 		{
-// 			end = input->head;
-// 			if (end > start)
-// 			{
-// 				new_node = create_new_token(input, start, end, APPEND_OUT);
-// 				add_new_token(list, new_node);
-// 			}
-// 			start = end;
-// 			end = input->head;
-// 			if (!arg(input, list))
-// 			{
-// 				input->head = start;
-// 				return (FALSE);
-// 			}
-// 			start = end;
-// 			end = input->head;
-// 			if (end > start)
-// 			{
-// 				new_node = create_new_token(input, start, end, FILENAME);
-// 				replace_prev_token(list, new_node);
-// 			}
-// 			return (TRUE);
-// 		}
-// 		// start = end;
-// 		end = input->head;
-// 		if (end > start)
-// 		{
-// 			new_node = create_new_token(input, start, end, REDIRECT_OUT);
-// 			add_new_token(list, new_node);
-// 		}
-// 		ows(input);
-// 		end = input->head;
-// 		if (!arg(input, list))
-// 		{
-// 			input->head = start;
-// 			return (FALSE);
-// 		}
-// 		start = end;
-// 		end = input->head;
-// 		if (end > start)
-// 		{
-// 			new_node = create_new_token(input, start, end, FILENAME);
-// 			replace_prev_token(list, new_node);
-// 		}
-// 		return (TRUE);
-// 	}
-// 	else if (L_ARROW(input))
-// 	{
-// 		end =input->head;
-// 		if (L_ARROW(input))
-// 		{
-// 			end = input->head;
-// 			if (end > start)
-// 			{
-// 				new_node = create_new_token(input, start, end, HEREDOC);
-// 				add_new_token(list, new_node);
-// 			}
-// 			ows(input);
-// 			end = input->head;
-// 			if (!arg(input, list))
-// 			{
-// 				input->head = start;
-// 				return (FALSE);
-// 			}
-// 			start = end;
-// 			end = input->head;
-// 			if (end > start)
-// 			{
-// 				new_node = create_new_token(input, start, end, DELIMITER);
-// 				replace_prev_token(list, new_node);
-// 			}
-// 			return (TRUE);
-// 		}
-// 		// start = end;
-// 		end = input->head;
-// 		if (end > start)
-// 		{
-// 			new_node = create_new_token(input, start, end, REDIRECT_IN);
-// 			add_new_token(list, new_node);
-// 		}
-// 		ows(input);
-// 		end = input->head;
-// 		if (!arg(input, list))
-// 		{
-// 			input->head = start;
-// 			return (FALSE);
-// 		}
-// 		start = end;
-// 		end = input->head;
-// 		if (end > start)
-// 		{
-// 			new_node = create_new_token(input, start, end, FILENAME);
-// 			replace_prev_token(list, new_node);
-// 		}
-// 		return (TRUE);
-// 	}
-// 	input->head = start;
-// 	return (FALSE);
-// }
-
-// int	command(LEXER *input, t_token **list)
-// {
-// 	int	start;
-	
-// 	start = input->head;
-// 	ows(input);
-// 	if (!arg(input, list) && ows(input) && !redir(input, list))
-// 	{
-// 		input->head = start;
-// 		return (FALSE);
-// 	}
-// 	ows(input);
-// 	while (arg(input, list) || redir(input, list))
-// 		ows(input); 
-// 	return (TRUE);
-// }
 
 int    expr(LEXER *input, t_token **list)
 {
