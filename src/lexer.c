@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/28 12:45:08 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/28 16:47:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,12 +119,12 @@ int	UNDERSCORE(LEXER *input)
 
 int	HAT(LEXER *input)
 {
-	return (eat(input, '_'));
+	return (eat(input, '^'));
 }
 
 int	MINUS(LEXER *input)
 {
-	return (eat(input, '_'));
+	return (eat(input, '-'));
 }
 
 int	LOW_ALPHA(LEXER *input)
@@ -392,7 +392,7 @@ int command(LEXER *input, t_token **list)
 {
     int start = input->head;
     ows(input);
-    
+    		
     if (!arg(input, list) && ows(input) && !redir(input, list)) 
 	{
         input->head = start;
@@ -411,8 +411,8 @@ int    expr(LEXER *input, t_token **list)
 	save = input->head;
 	if (!command(input, list))
        	return (FALSE);
-    	ows(input);
-    	while (TRUE) 
+    ows(input);
+    while (TRUE) 
 	{
 		if (input->len == input->head)
 			break;
@@ -420,13 +420,14 @@ int    expr(LEXER *input, t_token **list)
 		{
 			if ((ws(input) && command(input, list)) == FALSE)
 			{
+				printf("FALSE command at input->data[input->head] = %c\n", input->data[input->head]);
 				input->head = save;
 				return (FALSE);
 			}
 		}
 	}
     printf("[expr OK]\n");
-    print_tokens_list(list);
+    // print_tokens_list(list);
     return (TRUE);
 }
 

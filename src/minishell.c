@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 12:50:31 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/28 16:54:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,7 @@ int		main(int argc, char **argv, char **env)
 	{
 		while (1)
 		{
-			L_input = ft_calloc(1, sizeof(L_input)); // faire fonciton init a part
+			L_input = ft_calloc(1, sizeof(L_input)); // faire une fonction pour initialiser a part
 			L_input->data = NULL;
 			L_input->len = 0;
 			L_input->head = 0;
@@ -183,14 +183,14 @@ int		main(int argc, char **argv, char **env)
 				add_history(str_input);
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
-			if (fill_list_of_tokens(L_input, tokens))
-			{}
+			if (fill_list_of_tokens(L_input, tokens)){}
 				// print_tokens_list(tokens);
 			else
 				printf("input non valide\n");
 			handle_input(tokens, env, argc);
 			free(tokens);
-			free (str_input);
+			free(str_input);
+			// free(L_input);
 		}
 	}
 	return (0);

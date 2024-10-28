@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 12:49:19 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/28 16:15:34 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 # define APPEND_OUT 3 /* >> */
 # define HEREDOC 4 /* << */
 # define PIPEX 5 /* | */
-# define COMMAND 6
+# define COMMAND 6 // plus besoin ?
 # define OPTION 7 /* - + taile de 3 */
 # define ARGUMENT 8 
 # define FILENAME 9 
@@ -82,7 +82,7 @@ void	print_tokens_list(t_token **list);
 void	ft_free_tab(char **tab);
 void	ft_error(char *str);
 void	check_open(int fd);
-void	ft_init_struct(t_pipex *p, int ac, t_token *token, char **envp);
+void	ft_init_struct(t_pipex *p, int ac, t_token **token, char **envp);
 void	safe_close(int fd);
 void	get_lines(t_token *current, int fd_heredoc);
 void	handle_output_redirection(t_token *current, t_pipex *p, int fd_in);
