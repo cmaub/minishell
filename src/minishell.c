@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 16:54:21 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/29 10:48:48 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,8 +183,8 @@ int		main(int argc, char **argv, char **env)
 				add_history(str_input);
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
-			if (fill_list_of_tokens(L_input, tokens)){}
-				// print_tokens_list(tokens);
+			if (fill_list_of_tokens(L_input, tokens))
+				print_tokens_list(tokens);
 			else
 				printf("input non valide\n");
 			handle_input(tokens, env, argc);

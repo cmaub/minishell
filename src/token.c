@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/28 16:28:55 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/29 13:48:14 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void	print_tokens_list(t_token **list)
 {
 	if (!*list)
 		return ;
-	while ((*list))
+	while ((*list)->next)
 	{
 		if ((*list)->value)
         	{
@@ -112,6 +112,7 @@ void	print_tokens_list(t_token **list)
 			(*list) = (*list)->next;
 		}
 	}
+	printf("[%s] de type %d\n", (*list)->value, (*list)->type);
 }
 
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_pipe.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 15:16:29 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/29 14:46:49 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,9 @@ char	*ft_heredoc(t_token **token)
 
 	current = *token;
 	fd_heredoc = -1;
+	dprintf(2, "current->type = %d\n", current->type);
+	while (current->prev && current->type != HEREDOC)
+		current = current->prev;
 	if (current->type == HEREDOC)
 	{
 		heredoc = "heredoc";
@@ -182,6 +185,7 @@ int	handle_input(t_token **token, char **envp, int ac)
 	 // penser a free
 	ft_init_struct(p, ac, token, envp);
 	p->heredoc = ft_heredoc(token);
+	dprintf(2, "p->heredoc = %s\n", p->heredoc);
 	while (current)
 	{
 		if (current->type == PIPEX)

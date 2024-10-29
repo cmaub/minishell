@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 16:15:34 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/29 15:11:15 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc);
 int	no_envp(char **tab);
 int	handle_input(t_token **token, char **envp, int ac);
-int	handle_input_redirection(t_pipex *p, char *heredoc);
+int	handle_input_redirection(t_pipex *p, t_token *current, char *heredoc);
 int	execute(char *cmd, t_token *current, t_pipex *p);
 int    ft_wait(pid_t last_pid);
 
