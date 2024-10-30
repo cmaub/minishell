@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/28 14:35:22 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/30 10:48:17 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,7 +159,7 @@ int    ft_wait(pid_t last_pid)
     pid_t    waited_pid;
 
     exit_code = 0;
-    while (true)
+    while (TRUE)
     {
         waited_pid = waitpid(-1, &status, 0);
         {

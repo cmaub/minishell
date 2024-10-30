@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/29 15:11:15 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/30 12:05:59 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,36 @@
 
 # define FALSE 0
 # define TRUE 1
+
+// < file1 cat > file2 >> file3 
+
+// infile[0] = "file1"
+// outfile[0] = "file2"
+// outfile[1] = "file2"
+// command[0] = "cat"
+
+// redir_type_in[0] = REDIRECT_IN;
+// redir_type_out[0] = REDIRECT_OUT;
+// redir_type_out[1] = APPEND_OUT;
+
+// i = 0;
+
+// while (infile[j])
+// {
+// 	j++;
+// }
+// fonction_infile(infile[j], redir_type_in[j]);
+
+typedef struct PARSER
+{
+	char	**infile; // ne dup que le dernier
+	char	**outfile; // ne dup que le dernier
+	char	**command; // n'exec que la premiere
+	int		index; // place du noeud si multipipe
+	int		*redir_type_in;
+	int		*redir_type_out;
+	struct PARSER	*next;
+} PARSER ;
 
 typedef struct _LEXER {
     char    *data;
@@ -100,6 +130,8 @@ int	execute(char *cmd, t_token *current, t_pipex *p);
 int    ft_wait(pid_t last_pid);
 
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
+void	print_nodes_list(PARSER *nodes);
+void	add_new_node(PARSER *nodes, PARSER *new_node);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

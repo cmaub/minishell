@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/29 10:48:48 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/30 15:27:46 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 // 	if (input[*i] == '\0' || *i == 1)    /* (*i == 1) si 2 quotes de meme nature se suivent - a revoir*/
 // 	{
 // 		printf("invalid quoting\n");
-// 		return (false);
+// 		return (FALSE);
 // 	}
 // 	return (true);
 // }
@@ -155,6 +155,67 @@ int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 	return (TRUE);
 }
 
+void	create_nodes(t_token **tokens, PARSER *nodes)
+{
+	t_token	*current;
+	PARSER	*new_node;
+	int		i;
+	int		o;
+	int		cmd;
+
+	current = *tokens;
+
+	// nodes->index = -1;
+	while (current != NULL)
+	{
+		o = 0;
+		i = 0;
+		cmd = 0;
+		new_node = ft_calloc(1, sizeof(PARSER));
+		new_node->infile = ft_calloc(10, sizeof(char *));
+		new_node->outfile = ft_calloc(10, sizeof(char *));
+		new_node->command = ft_calloc(10, sizeof(char *));
+		new_node->redir_type_in = ft_calloc(10, sizeof(int));
+		new_node->redir_type_out = ft_calloc(10, sizeof(int));
+		// new_node->command[cmd] = ft_calloc(10, sizeof(char *));
+		while (current && current->type != PIPEX)
+		{
+			// printf("nodes->index = %d, ligne %d\n", current->index, __LINE__);
+			if (current->type == REDIRECT_IN)
+			{
+				new_node->infile[i] = ft_strdup(current->next->value);
+				new_node->redir_type_in[i] = current->type;
+				i++;
+			}
+			else if (current->type == HEREDOC)
+			{ 
+				new_node->infile[i] = ft_strdup("heredoc");
+				new_node->redir_type_in[i] = current->type;
+				i++;
+			}
+			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
+			{
+				new_node->outfile[o] = ft_strdup(current->next->value);
+				new_node->redir_type_out[o] = current->type;
+				// printf("new_node->outfile[%d] = %s, type = %d\n", o, new_node->outfile[o], new_node->redir_type_out[o]);
+				o++;
+			}
+			else if (current->type == ARGUMENT)
+			{
+				new_node->command[cmd] = ft_strdup(current->value);
+				cmd++;
+			}
+			current = current->next;
+		}
+		add_new_node(nodes, new_node);
+		nodes->index++;
+		printf("HEY nodes->index = %d\n", nodes->index);
+		if (current && current->type == PIPEX)
+			current = current->next;
+	}
+}
+
+
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
@@ -162,6 +223,7 @@ int		main(int argc, char **argv, char **env)
 	char		*str_input;
 	LEXER		*L_input = NULL;
 	t_token	**tokens = NULL;
+	PARSER		*nodes;
 	
 	if (argc >= 1)
 	{
@@ -171,7 +233,8 @@ int		main(int argc, char **argv, char **env)
 			L_input->data = NULL;
 			L_input->len = 0;
 			L_input->head = 0;
-			tokens = ft_calloc(1, sizeof(t_token **));
+			tokens = ft_calloc(1, sizeof(t_token *));
+			nodes = ft_calloc(1, sizeof(PARSER));
 			str_input = readline("~$");
 			if (!str_input)
 				break ;
@@ -184,13 +247,17 @@ int		main(int argc, char **argv, char **env)
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
 			if (fill_list_of_tokens(L_input, tokens))
-				print_tokens_list(tokens);
+			// print_tokens_list(tokens);
+			{}
 			else
 				printf("input non valide\n");
-			handle_input(tokens, env, argc);
+			create_nodes(tokens, nodes);
+			print_nodes_list(nodes);
+			// handle_input(tokens, env, argc);
 			free(tokens);
 			free(str_input);
-			// free(L_input);
+			free(nodes);
+			free(L_input);
 		}
 	}
 	return (0);

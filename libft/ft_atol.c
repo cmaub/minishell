@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/29 23:41:22 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/09/19 15:19:29 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/30 10:48:26 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 // {
 // 	_Bool error = false;
 // 	long nb = ft_atol(str, &error);
-// 	if (error == true)
+// 	if (error == TRUE)
 // 	{
-// 		return (false);
+// 		return (FALSE);
 // 	}
 // 	return (nb);
 // }
