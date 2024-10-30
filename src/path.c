@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/29 10:46:05 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/30 17:42:45 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,9 +55,7 @@ char	*get_path(char *cmd, char **env)
 	path = find_path_line(env);
 	while (path[i])
 	{
-		dprintf(2, "path existe\n");
 		tmp_filename = create_tmp_filename(path[i], cmd);
-		dprintf(2, "tmp_filename = %s\n", tmp_filename);
 		if (!tmp_filename)
 			return (ft_free_tab(path), NULL);
 		if (access(tmp_filename, F_OK | R_OK) == 0)
@@ -76,7 +74,6 @@ char	*get_path_and_check(char **split_cmd, char **env)
 	char	*new_path;
 
 	new_path = get_path(split_cmd[0], env);
-	dprintf(2, "split_cmd[0] = %s\n", split_cmd[0]);
 	if (!new_path)
 	{
 		dprintf(2, "new_path n'existe pas\n");

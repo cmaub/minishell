@@ -6,112 +6,99 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 13:07:14 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/29 14:46:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/30 18:26:36 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	first_child(t_pipex *p)
+void	first_child(t_pipex *p, PARSER *current, PARSER *nodes)
 {
 	int		fd_in;
-	t_token	*current;
 
-	current = p->token;
-	// fd_in = ft_open(av);
+	current->cmd = 0;
 	safe_close(p->pipefd[0]);
-	if (p->token->type == REDIRECT_IN || p->token->type == HEREDOC)
-			fd_in = handle_input_redirection(p, p->heredoc);
-	while (current->next && current->type != PIPEX)
-		current = current->next;
-	handle_output_redirection(current, p, fd_in);
-	while (current->prev && current->type != COMMAND)
-		current = current->prev;
-	if (execute(current->value, current, p) == -1)
+	if (current->redir_type_in == REDIRECT_IN || current->redir_type_in == HEREDOC)
+			fd_in = handle_input_redirection(p, current, p->heredoc);
+	handle_output_redirection(current, nodes, p, fd_in);
+	if (execute(current, p) == -1)
 	{
 		safe_close(p->pipefd[0]);
 		safe_close(p->pipefd[1]);
 		safe_close(fd_in);
 		exit (EXIT_FAILURE);
 	}
-	while (current && current->type != PIPEX)
-		current = current->next;
-	p->token = current;
-	dprintf(2, "p->token->value = %s\n", p->token->value);
+	current = current->next;
 }
 
-void	inter_child(int *prev_fd, t_pipex *p, char *heredoc)
+void	inter_child(int *prev_fd, t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes)
 {
 	int		fd_in;
-	t_token	*current;
-	
 
-	current = p->token->next;
-	if (p->token->type == HEREDOC)
-		fd_in = handle_input_redirection(p, heredoc);
+	if (current->redir_type_in == HEREDOC)
+		fd_in = handle_input_redirection(p, current, heredoc);
 	else
 	{
 		fd_in = *prev_fd;
 		if (dup2(fd_in, STDIN_FILENO) == -1)
 			ft_close_error(&fd_in, p, "dup2");
 	}
-	handle_output_redirection(p->token, p, fd_in);
-	while (current->prev && current->type != COMMAND)
-		current = current->prev;
+	handle_output_redirection(current, nodes, p, fd_in);
 	safe_close(p->pipefd[0]);
 	safe_close(p->pipefd[1]);
 	safe_close(fd_in);
-	if (execute(current->value, current, p) == -1)
+	if (execute(current, p) == -1)
 		exit (EXIT_FAILURE);
-	while (current && current->type != PIPEX)
-		current = current->next;
-	p->token = current;
-	dprintf(2, "p->token->value = %s\n", p->token->value);
 }
 
-void	last_child(t_pipex *p, char *heredoc, int *prev_fd)
+void	last_child(t_pipex *p, char *heredoc, int *prev_fd, PARSER *current, PARSER *nodes)
 {
 	int		fd_in;
-	t_token	*current;
 	(void)prev_fd;
 
-	current = p->token->next;
-	if (p->token->type == HEREDOC)
-		fd_in = handle_input_redirection(p, heredoc);
+	if (current->redir_type_out == HEREDOC)
+		fd_in = handle_input_redirection(p, current, heredoc);
 	else
 	{
 		fd_in = *prev_fd;
 		if (dup2(fd_in, STDIN_FILENO) == -1)
 			ft_close_error(&fd_in, p, "dup2");
 	}
-	handle_output_redirection(current, p, fd_in);
-	// safe_close(p->pipefd[0]);
+	if (current->outfile)
+		handle_output_redirection(current, nodes, p, fd_in);
 	safe_close(p->pipefd[1]);
 	safe_close(fd_in);
-	while (current->prev && current->type != COMMAND)
-		current = current->prev;
-	if (execute(current->value, current, p) == -1)
+	if (execute(current, p) == -1)
 		exit (EXIT_FAILURE);
 }
 
-void	create_process(t_pipex *p, int *prev_fd, pid_t pid, int count)
+void	create_process(t_pipex *p, int *prev_fd, pid_t pid, PARSER *current, PARSER *nodes)
 {
 	if (pid == -1)
 		ft_error("fork");
 	else if (pid == 0)
 	{
 		if (p->i == 0)
-			first_child(p);
-		else if (p->i < count)
-			inter_child(prev_fd, p, p->heredoc);
-		else if (p->i == count)
-			last_child(p, p->heredoc, prev_fd);
+		{
+			dprintf(2, "first_child cree\n");
+			first_child(p, current, nodes);
+		}
+		else if (p->i < nodes->index - 1)
+		{
+			dprintf(2, "inter_child cree\n");
+			inter_child(prev_fd, p, p->heredoc, current, nodes);
+		}
+		else if (p->i == nodes->index - 1)
+		{
+			dprintf(2, "last_child cree\n");
+			last_child(p, p->heredoc, prev_fd, current, nodes);
+		}
 	}
 	else
 	{
 		if (*prev_fd != -1)
 			safe_close(*prev_fd);
-		if (p->i <= count)
+		if (p->i <= nodes->index)
 		{
 			// close(pipefd[1]);
 			*prev_fd = p->pipefd[0];
@@ -122,48 +109,48 @@ void	create_process(t_pipex *p, int *prev_fd, pid_t pid, int count)
 	}
 }
 
-char	*ft_heredoc(t_token **token)
-{
-	t_token	*current;
-	int		fd_heredoc;
-	char *heredoc;
+// char	*ft_heredoc(t_token **token)
+// {
+// 	t_token	*current;
+// 	int		fd_heredoc;
+// 	char *heredoc;
 
-	current = *token;
-	fd_heredoc = -1;
-	dprintf(2, "current->type = %d\n", current->type);
-	while (current->prev && current->type != HEREDOC)
-		current = current->prev;
-	if (current->type == HEREDOC)
-	{
-		heredoc = "heredoc";
-		fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-		get_lines(current->next, fd_heredoc);
-	}
-	else
-		return (NULL);
-	return (heredoc);
-}
+// 	current = *token;
+// 	fd_heredoc = -1;
+// 	dprintf(2, "current->type = %d\n", current->type);
+// 	while (current->prev && current->type != HEREDOC)
+// 		current = current->prev;
+// 	if (current->type == HEREDOC)
+// 	{
+// 		heredoc = "heredoc";
+// 		fd_heredoc = open(heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+// 		get_lines(current->next, fd_heredoc);
+// 	}
+// 	else
+// 		return (NULL);
+// 	return (heredoc);
+// }
 
-int	pipex(t_pipex *p, int count)
+int	pipex(t_pipex *p, PARSER *nodes, PARSER *current)
 {
 	pid_t	pid;
-	// pid_t	last_pid;
 
-	while (p->i <= count)
+	while (p->i < nodes->index)
 	{
-		if (p->i < count)
+		if (p->i < nodes->index)
 		{
 			if (pipe(p->pipefd) == -1)
 				ft_error("pipe");
 		}
 		pid = fork();
-		if (p->i == count)
+		if (p->i == nodes->index)
 			p->last_pid = pid;
-		create_process(p, &p->prev_fd, pid, count);
+		create_process(p, &p->prev_fd, pid, current, nodes);
 		p->i++;
+		current = current->next;
 	}
 	p->i = 0;
-	while (p->i <= count +1)
+	while (p->i <= nodes->index)
 	{
 		waitpid(pid, NULL, 0);
 		p->i++;
@@ -171,31 +158,22 @@ int	pipex(t_pipex *p, int count)
 	return (0);
 }
 
-int	handle_input(t_token **token, char **envp, int ac)
+int	handle_input(PARSER *nodes, char **envp, int ac)
 {
 	t_pipex	*p;
-	t_token	*current;
-	int		count;
+	PARSER		*current;
 
-	current = *token;
-	count = 0;
+	current = nodes->next; //il semblerait qu'il y ait un premier noeud vide donc on passe direct a next
 	p = malloc(sizeof(*p));
 	if (!p)
-		return (free (token), free(current), 0);
+		return (free (nodes), free(current), 0);
 	 // penser a free
-	ft_init_struct(p, ac, token, envp);
-	p->heredoc = ft_heredoc(token);
-	dprintf(2, "p->heredoc = %s\n", p->heredoc);
-	while (current)
-	{
-		if (current->type == PIPEX)
-			count++;
-		current = current->next;	
-	}
-	if (count > 0)
-		pipex(p, count);
+	ft_init_struct(p, ac, envp);
+	// p->heredoc = ft_heredoc(token);
+	if (nodes->index > 1)
+		pipex(p, nodes, current);
 	else
-		simple_cmd(p, p->heredoc);
+		simple_cmd(p, p->heredoc, current, nodes);
 	unlink(p->heredoc);
 	return(0);
 }

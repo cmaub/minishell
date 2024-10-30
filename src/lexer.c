@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/28 16:47:12 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/10/30 17:13:57 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,11 @@ int	HAT(LEXER *input)
 int	MINUS(LEXER *input)
 {
 	return (eat(input, '-'));
+}
+
+int	DOT(LEXER *input)
+{
+	return (eat(input, '.'));
 }
 
 int	LOW_ALPHA(LEXER *input)
@@ -254,7 +259,7 @@ int	arg(LEXER *input, t_token **list)
 	start = input->head;
 	end = start;
 	ows(input);
-	while (LOW_ALPHA(input) || UP_ALPHA(input) || squote(input) 
+	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) 
 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input))
 		i++;
 	if (i < 1)
