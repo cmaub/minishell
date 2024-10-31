@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/30 17:11:21 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/31 15:34:21 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,37 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
     exit(EXIT_FAILURE);
 }
 
+// int    ft_wait(pid_t *pids, PARSER *nodes)
+// {
+//     int        status;
+//     int        exit_code;
+//     int	index;
+
+//     exit_code = 0;
+//     index = 0;
+//     while (index < 3)
+//     {
+// 	dprintf(2, "!!!!!!!!!!!!!!!!!! pids[index] = %d\n", pids[index]);
+// 	index++;
+//     }
+// 	index = 0;
+//     while (index < nodes->index)
+//     {
+// 	dprintf(2, "boucle ft_wait (%s, %d) ------- pids[index] = %d\n", __FILE__, __LINE__, pids[index]);
+	
+//        if (waitpid(pids[index], &status, 0) == -1)
+// 	{
+// 		perror("waitpid error");
+// 		continue ;
+// 	}
+// 	if (index == nodes->index - 1 && WIFEXITED(status))
+// 		exit_code = WEXITSTATUS(status);
+// 	index++;
+//     }
+//     dprintf(2, "fin de ft_wait (%s, %d)\n", __FILE__, __LINE__);
+//     return (exit_code);
+// }
+
 int    ft_wait(pid_t last_pid)
 {
     int        status;
@@ -156,19 +187,32 @@ int    ft_wait(pid_t last_pid)
     pid_t    waited_pid;
 
     exit_code = 0;
-    while (TRUE)
+    while (waited_pid != -1)
     {
-        waited_pid = waitpid(-1, &status, 0);
-        {
-            if (waited_pid == -1)
-                break ;
-        }
-        if (waited_pid == last_pid)
-        {
-            if (WIFEXITED(status))
-                exit_code = WEXITSTATUS(status);
-        }
+	// dprintf(2, "boucle ft_wait (%s, %d)\n", __FILE__, __LINE__);
+       // waited_pid = waitpid(-1, &status, 0);
+	// {
+	// 	if (waited_pid == -1)
+	// 	{
+	// 		dprintf(2, "waited_pid == -1\n");
+	// 		break ;
+	// 	}
+	// }
+       // if (waited_pid == last_pid)
+       // {
+	// 	if (WIFEXITED(status))
+	// 		exit_code = WEXITSTATUS(status);
+	// 	dprintf(2, "waited_pid == last_pid\n");
+       // }
+	waited_pid = wait(&status);
+	dprintf(2, "waited_pid == %d\n", waited_pid);
+	if (waited_pid == last_pid)
+	{
+		if (WIFEXITED(status))
+			exit_code = WEXITSTATUS(status);	
+	}
     }
+    dprintf(2, "fin de ft_wait (%s, %d)\n", __FILE__, __LINE__);
     return (exit_code);
 }
 

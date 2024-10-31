@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/28 13:02:42 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/30 18:28:38 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/31 17:06:23 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,11 @@ int	execute(PARSER *current, t_pipex *p)
 		if (execve(path, current->command, p->envp) == -1)
 		{
 			// split_cmd[1] = NULL;
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			free(current);
 			free(path);
 		}
 	}
-	// ft_free_tab(split_cmd);
 	perror("exec");
 	return (-1);
 }
@@ -54,9 +54,10 @@ int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc)
 	int	fd_in;
 	fd_in = -1;
 	(void)heredoc;
-	// if (heredoc)
-	// 	fd_in = open(heredoc, O_RDONLY | 0644);
-	// else
+	
+	if (heredoc)
+		fd_in = open(heredoc, O_RDONLY | 0644);
+	else
 		fd_in = open(current->infile, O_RDONLY | 0644);
 	if (fd_in == -1)
 	{
@@ -83,6 +84,8 @@ void	handle_output_redirection(PARSER *current, PARSER *nodes, t_pipex *p, int f
 {
 	int	fd_out;
 	fd_out = -1;
+	(void)nodes;
+
 	if (current->outfile)
 	{
 		if (current->redir_type_out == REDIRECT_OUT)
@@ -105,13 +108,16 @@ void	handle_output_redirection(PARSER *current, PARSER *nodes, t_pipex *p, int f
 			ft_error("dup2");
 		}
 	}
-	else if (nodes->index > 1)
+	else
 	{
 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
 			ft_close_error(&fd_in, p, "dup2");
-	}		
+	}
+	// safe_close(fd_in);
+	// safe_close(p->pipefd[1]);		
 	safe_close(fd_out);
 }
+
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes)
 {
 	pid_t		pid;
@@ -124,9 +130,7 @@ int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes)
 	else if (pid == 0)
 	{
 		if (current->redir_type_in == REDIRECT_IN || current->redir_type_in == HEREDOC)
-		{
 			fd_in = handle_input_redirection(p, current, heredoc);
-		}
 		if (current->outfile)
 			handle_output_redirection(current, nodes, p, fd_in);
 		execute(current, p);		

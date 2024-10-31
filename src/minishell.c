@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/30 18:28:56 by anvander         ###   ########.fr       */
+/*   Updated: 2024/10/31 11:49:08 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,11 +107,13 @@ int		main(int argc, char **argv, char **env)
 			create_nodes(tokens, nodes);
 			print_nodes_list(nodes);
 			handle_input(nodes, env, argc);
+			dprintf(2, "boucle de main (%s, %d)\n", __FILE__, __LINE__);
 			free(tokens);
 			free(str_input);
 			free(nodes);
 			free(L_input);
 		}
 	}
+	dprintf(2, "fin de main (%s, %d)\n", __FILE__, __LINE__);
 	return (0);
 }
