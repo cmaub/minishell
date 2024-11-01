@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/31 11:49:08 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/01 18:04:03 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,10 @@ void	create_nodes(t_token **tokens, PARSER *nodes)
 			current = current->next;
 		}
 		add_new_node(nodes, new_node);
-		nodes->index++;
 		if (current && current->type == PIPEX)
 			current = current->next;
 	}
-	printf("nodes->index %d\n", nodes->index);
+
 }
 
 int		main(int argc, char **argv, char **env)
@@ -106,7 +105,7 @@ int		main(int argc, char **argv, char **env)
 				printf("input non valide\n");
 			create_nodes(tokens, nodes);
 			print_nodes_list(nodes);
-			handle_input(nodes, env, argc);
+			// handle_input(nodes, env, argc);
 			dprintf(2, "boucle de main (%s, %d)\n", __FILE__, __LINE__);
 			free(tokens);
 			free(str_input);

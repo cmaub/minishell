@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/31 16:49:48 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/01 18:05:46 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,6 @@ typedef struct PARSER
 	char	*infile; // ne dup que le dernier
 	char	*outfile; // ne dup que le dernier
 	char	**command; // n'exec que la premiere
-	int		index; // nombre de noeuds si multipipe
 	int		redir_type_in;
 	int		redir_type_out;
 	int		cmd;
@@ -112,7 +111,7 @@ void	print_tokens_list(t_token **list);
 void	ft_free_tab(char **tab);
 void	ft_error(char *str);
 void	check_open(int fd);
-void	ft_init_struct(t_pipex *p, int ac, char **envp);
+void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes);
 void	safe_close(int fd);
 void	get_lines(t_token *current, int fd_heredoc);
 void	handle_output_redirection(PARSER *current, PARSER *nodes, t_pipex *p, int fd_in);
@@ -121,6 +120,7 @@ void	replace_prev_token(t_token **list, t_token *new);
 
 int	give_type_to_token(t_token *token);
 int	list_size(t_token *list);
+int		ft_size_list(PARSER *nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
 int	no_envp(char **tab);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/31 15:34:21 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/01 18:06:29 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,13 +34,28 @@ void	safe_close(int fd)
 	}
 	i++;
 }
+int		ft_size_list(PARSER *nodes)
+{
+	PARSER	*current;
+	int		size;
 
-void	ft_init_struct(t_pipex *p, int ac, char **envp)
+	current = nodes;
+	size = 0;
+	while (current != NULL)
+	{
+		size++;
+		current = current->next;
+	}
+	return(size);
+}
+
+void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes)
 {
 	p->ac = ac;
 	p->envp = envp;
 	p->heredoc = NULL;
-	p->nb_cmd = 0;
+	p->nb_cmd = ft_size_list(nodes);
+	printf("p->nb_cmd = %d\n", p->nb_cmd);
 	// if (ft_strncmp(token->type, "here_doc", 9) == 0)
 	// 	p->nb_cmd--;
 	p->i = 0;

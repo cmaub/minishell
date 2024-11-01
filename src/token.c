@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/30 18:22:45 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/01 18:05:08 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void	print_nodes_list(PARSER *nodes)
 	tmp = nodes;
 	if (!nodes)
 		return ;
-	while (index <= nodes->index)
+	while (index <= ft_size_list(nodes))
 	{
 		h = 0;
 		if (tmp->infile && tmp->infile != NULL)

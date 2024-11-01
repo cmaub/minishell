@@ -19,8 +19,7 @@ SRC_FILES			=	minishell.c \
 							token.c \
 							utils.c \
 							lexer.c \
-							exec_pipe.c \
-							exec_simple.c \
+							exec.c \
 							get_next_line.c \
 							path.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
