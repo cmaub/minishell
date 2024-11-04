@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/30 17:13:57 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/04 18:55:57 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,134 +279,134 @@ int	arg(LEXER *input, t_token **list)
 int handle_delimiter(LEXER *input, t_token **list, int start)
 {
 	t_token	*new_node;
-    int		end;
+    	int		end;
 
 	end = input->head;
-    if (!arg(input, list))
-        return (FALSE);
-    end = input->head;
-    if (end > start)
-    {
-        new_node = create_new_token(input, start, end, DELIMITER);
-        replace_prev_token(list, new_node);
-    }
-    return (TRUE);
+    	if (!arg(input, list))
+       	return (FALSE);
+    	end = input->head;
+    	if (end > start)
+    	{
+       	new_node = create_new_token(input, start, end, DELIMITER);
+       	replace_prev_token(list, new_node);
+    	}
+    	return (TRUE);
 }
 
 int process_heredoc(LEXER *input, t_token **list, int start, int end)
 {
 	t_token *new_node;
 
-    end = input->head;
-    if (end > start)
-    {
-        new_node = create_new_token(input, start, end, HEREDOC);
-        add_new_token(list, new_node);
-    }
-    ows(input);
+    	end = input->head;
+   	if (end > start)
+    	{
+       	new_node = create_new_token(input, start, end, HEREDOC);
+       	add_new_token(list, new_node);
+    	}
+    	ows(input);
 	start = end;
 	end = input->head;
-    if (!handle_delimiter(input, list, end))
-    {
-        input->head = start;
-        return (FALSE);
-    }
-    return (TRUE);
+    	if (!handle_delimiter(input, list, end))
+    	{
+       	input->head = start;
+       	return (FALSE);
+    	}
+    	return (TRUE);
 }
 
 int handle_filename(LEXER *input, t_token **list, int start)
 {
-    int end;
+	int end;
 	t_token *new_node;
 	
 	end = input->head;
-    if (!arg(input, list))
-        return (FALSE);
-    end = input->head;
-    if (end > start)
-    {
-        new_node = create_new_token(input, start, end, FILENAME);
-        replace_prev_token(list, new_node);
-    }
-    return (TRUE);
+    	if (!arg(input, list))
+       	return (FALSE);
+    	end = input->head;
+    	if (end > start)
+    	{
+       	new_node = create_new_token(input, start, end, FILENAME);
+       	replace_prev_token(list, new_node);
+    	}
+    	return (TRUE);
 }
 
 int process_redirect(LEXER *input, t_token **list, int start, int end, int redirect_type)
 {
 	t_token *new_node;
 
-    end = input->head;
-    if (end > start)
-    {
-        new_node = create_new_token(input, start, end, redirect_type);
-        add_new_token(list, new_node);
-    }
-    ows(input);
+   	end = input->head;
+    	if (end > start)
+   	{
+       	new_node = create_new_token(input, start, end, redirect_type);
+       	add_new_token(list, new_node);
+    	}
+    	ows(input);
 	start = end;
 	end = input->head;
-    if (!handle_filename(input, list, end))
-    {
-        input->head = start;
-        return (FALSE);
-    }
-    return (TRUE);
+    	if (!handle_filename(input, list, end))
+    	{
+       	input->head = start;
+       	return (FALSE);
+    	}
+    	return (TRUE);
 }
 
 int handle_redirect_out(LEXER *input, t_token **list)
 {
-    int start;
-    int end;
-
+    	int start;
+    	int end;
+	
 	start = input->head;
 	end = input->head;
-    if (R_ARROW(input))
-    {
-        if (R_ARROW(input)) // Double flèche (>>)
-            return (process_redirect(input, list, start, end, APPEND_OUT));
-        return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
-    }
-    return (FALSE);
+    	if (R_ARROW(input))
+    	{
+		if (R_ARROW(input)) // Double flèche (>>)
+			return (process_redirect(input, list, start, end, APPEND_OUT));
+    	    	return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
+    	}
+    	return (FALSE);
 }
 
 int handle_redirect_in(LEXER *input, t_token **list)
 {
-    int start;
-    int end;
-
+    	int start;
+    	int end;
+	
 	start = input->head;
 	end = input->head;
-    if (L_ARROW(input))
-    {
-        if (L_ARROW(input)) // Double flèche (<<)
-            return (process_heredoc(input, list, start, end));
-        return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
-    }
-    return (FALSE);
+    	if (L_ARROW(input))
+    	{
+    	    if (L_ARROW(input)) // Double flèche (<<)
+    	        return (process_heredoc(input, list, start, end));
+    	    return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
+    	}
+    	return (FALSE);
 }
 
 int redir(LEXER *input, t_token **list)
 {
-    int start = input->head;
-    if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
-        return (TRUE);
-    input->head = start;
-    return (FALSE);
+	int start = input->head;
+	if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
+       	return (TRUE);
+    	input->head = start;
+    	return (FALSE);
 }
 
 int command(LEXER *input, t_token **list)
 {
-    int start = input->head;
-    ows(input);
+	int start = input->head;
+	ows(input);
     		
-    if (!arg(input, list) && ows(input) && !redir(input, list)) 
+	if (!arg(input, list) && ows(input) && !redir(input, list)) 
 	{
-        input->head = start;
-        return (FALSE);
-    }
-    ows(input);
-    while (arg(input, list) || redir(input, list))
-        ows(input);
-    return (TRUE);
+		input->head = start;
+        	return (FALSE);
+    	}
+    	ows(input);
+    	while (arg(input, list) || redir(input, list))
+       	ows(input);
+    	return (TRUE);
 }
 
 int    expr(LEXER *input, t_token **list)
@@ -416,8 +416,8 @@ int    expr(LEXER *input, t_token **list)
 	save = input->head;
 	if (!command(input, list))
        	return (FALSE);
-    ows(input);
-    while (TRUE) 
+	ows(input);
+	while (TRUE) 
 	{
 		if (input->len == input->head)
 			break;
@@ -432,30 +432,6 @@ int    expr(LEXER *input, t_token **list)
 		}
 	}
     printf("[expr OK]\n");
-    // print_tokens_list(list);
     return (TRUE);
 }
-
-// int	start(LEXER *input)
-// {
-// 	if (!expr(input))
-// 		return (FALSE);
-// 	return (TRUE);
-// }
-
-// int	main(int argc, char **argv)
-// {
-// 	LEXER Linput;
-// 	Linput.data = argv[1];
-// 	Linput.len = strlen(Linput.data);
-// 	Linput.head = 0;
-// 	(void)argv;
-// 	if (argc > 0)
-// 	{
-// 		printf("result de start = %d\n", start(&Linput));
-// 		printf("head est a %d\n", Linput.head);
-// 		// printf("head est a %c\n", input.data[input.head + 1]);
-// 	}
-// 	return (0);
-// }
 

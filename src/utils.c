@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/01 18:06:29 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/04 18:41:45 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,30 +34,28 @@ void	safe_close(int fd)
 	}
 	i++;
 }
-int		ft_size_list(PARSER *nodes)
+int		ft_size_list(PARSER **nodes)
 {
 	PARSER	*current;
-	int		size;
+	int	size;
 
-	current = nodes;
+	current = *nodes;
 	size = 0;
 	while (current != NULL)
 	{
 		size++;
 		current = current->next;
 	}
-	return(size);
+	return (size);
 }
 
 void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes)
 {
 	p->ac = ac;
 	p->envp = envp;
-	p->heredoc = NULL;
-	p->nb_cmd = ft_size_list(nodes);
+	// p->heredoc = NULL;
+	p->nb_cmd = ft_size_list(&nodes);
 	printf("p->nb_cmd = %d\n", p->nb_cmd);
-	// if (ft_strncmp(token->type, "here_doc", 9) == 0)
-	// 	p->nb_cmd--;
 	p->i = 0;
 	p->prev_fd = -1;
 	p->pid = 0;
@@ -91,20 +89,20 @@ void	ft_free_tab(char **tab)
 	free(tab);
 }
 
-int	list_size(t_token *list)
-{
-	t_token	*temp;
-	int		size;
+// int	list_size(t_token *list)
+// {
+// 	t_token	*temp;
+// 	int		size;
 
-	temp = list;
-	size = 0;
-	while (temp != NULL)
-	{
-		size++;
-		temp = temp->next;
-	}
-	return (size);
-}
+// 	temp = list;
+// 	size = 0;
+// 	while (temp->next != NULL)
+// 	{
+// 		size++;
+// 		temp = temp->next;
+// 	}
+// 	return (size);
+// }
 
 void	check_open(int fd)
 {
@@ -132,19 +130,20 @@ int	no_envp(char **tab)
 	return (0);
 }
 
-void	get_lines(t_token *current, int fd_heredoc)
+void	get_lines(PARSER *nodes, int fd_heredoc)
 {
 	char	*str;
-	
-	dprintf(2, "current->value %s\n", current->value);
+
 	while (1)
 	{
-		write(1, "pipe heredoc>", 13);
+		write(1, "heredoc> ", 9);
 		str = get_next_line(0);
-		if (!str)
+		if (str == 0)
 			break ;
-		if ((ft_strncmp(str, current->value, ft_strlen(current->value)) == 0 && str[ft_strlen(current->value)] == '\n'))
+		if (ft_strncmp(str, nodes->delimiter[nodes->i], ft_strlen(nodes->delimiter[nodes->i])) == 0
+			&& str[ft_strlen(nodes->delimiter[nodes->i])] == '\n')
 		{
+			free(str);
 			get_next_line(-42);
 			break ;
 		}
@@ -152,48 +151,18 @@ void	get_lines(t_token *current, int fd_heredoc)
 		free(str);
 	}
 	safe_close(fd_heredoc);
-	free(str);
+	free (str);
 }
 
 void    ft_close_error(int *fd, t_pipex *p, char *str)
 {
-    close(*fd);
-    close(p->pipefd[1]);
-    close(p->pipefd[0]);
-    perror(str);
-    exit(EXIT_FAILURE);
+	if (fd)
+	    close(*fd);
+    	close(p->pipefd[1]);
+    	close(p->pipefd[0]);
+    	perror(str);
+    	exit(EXIT_FAILURE);
 }
-
-// int    ft_wait(pid_t *pids, PARSER *nodes)
-// {
-//     int        status;
-//     int        exit_code;
-//     int	index;
-
-//     exit_code = 0;
-//     index = 0;
-//     while (index < 3)
-//     {
-// 	dprintf(2, "!!!!!!!!!!!!!!!!!! pids[index] = %d\n", pids[index]);
-// 	index++;
-//     }
-// 	index = 0;
-//     while (index < nodes->index)
-//     {
-// 	dprintf(2, "boucle ft_wait (%s, %d) ------- pids[index] = %d\n", __FILE__, __LINE__, pids[index]);
-	
-//        if (waitpid(pids[index], &status, 0) == -1)
-// 	{
-// 		perror("waitpid error");
-// 		continue ;
-// 	}
-// 	if (index == nodes->index - 1 && WIFEXITED(status))
-// 		exit_code = WEXITSTATUS(status);
-// 	index++;
-//     }
-//     dprintf(2, "fin de ft_wait (%s, %d)\n", __FILE__, __LINE__);
-//     return (exit_code);
-// }
 
 int    ft_wait(pid_t last_pid)
 {
@@ -204,21 +173,6 @@ int    ft_wait(pid_t last_pid)
     exit_code = 0;
     while (waited_pid != -1)
     {
-	// dprintf(2, "boucle ft_wait (%s, %d)\n", __FILE__, __LINE__);
-       // waited_pid = waitpid(-1, &status, 0);
-	// {
-	// 	if (waited_pid == -1)
-	// 	{
-	// 		dprintf(2, "waited_pid == -1\n");
-	// 		break ;
-	// 	}
-	// }
-       // if (waited_pid == last_pid)
-       // {
-	// 	if (WIFEXITED(status))
-	// 		exit_code = WEXITSTATUS(status);
-	// 	dprintf(2, "waited_pid == last_pid\n");
-       // }
 	waited_pid = wait(&status);
 	dprintf(2, "waited_pid == %d\n", waited_pid);
 	if (waited_pid == last_pid)

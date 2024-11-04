@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/01 18:05:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/04 18:44:10 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,15 @@
 
 typedef struct PARSER
 {
-	char	*infile; // ne dup que le dernier
-	char	*outfile; // ne dup que le dernier
+	char	**infile; // ne dup que le dernier
+	char	**outfile; // ne dup que le dernier
 	char	**command; // n'exec que la premiere
-	int		redir_type_in;
-	int		redir_type_out;
+	char	**delimiter;
+	int		*redir_type_in;
+	int		*redir_type_out;
 	int		cmd;
+	int		i;
+	int		o;
 	struct PARSER	*next;
 } PARSER ;
 
@@ -91,7 +94,7 @@ typedef struct s_pipex
 {
 	int	         	ac;
 	char	        	**envp;
-	char			*heredoc;
+	// char			*heredoc;
 	int		 	nb_cmd;
 	int		       i;
 	int		       prev_fd;
@@ -99,6 +102,7 @@ typedef struct s_pipex
 	pid_t	        	pid;
 	pid_t	        	last_pid;
 }	t_pipex;
+
 
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 
@@ -113,25 +117,26 @@ void	ft_error(char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes);
 void	safe_close(int fd);
-void	get_lines(t_token *current, int fd_heredoc);
+void	get_lines(PARSER **nodes, int fd_heredoc);
 void	handle_output_redirection(PARSER *current, PARSER *nodes, t_pipex *p, int fd_in);
 void   ft_close_error(int *fd, t_pipex *p, char *str);
 void	replace_prev_token(t_token **list, t_token *new);
 
 int	give_type_to_token(t_token *token);
-int	list_size(t_token *list);
-int		ft_size_list(PARSER *nodes);
+// int	list_size(t_token *list);
+int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
 int	no_envp(char **tab);
-int	handle_input(PARSER *token, char **envp, int ac);
+int	handle_input(PARSER **nodes, char **envp, int ac);
+int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
 int	execute(PARSER *current, t_pipex *p);
 int    ft_wait(pid_t last_pid);
 
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
-void	print_nodes_list(PARSER *nodes);
-void	add_new_node(PARSER *nodes, PARSER *new_node);
+void	print_nodes_list(PARSER **nodes);
+void	add_new_node(PARSER **nodes, PARSER *new_node);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

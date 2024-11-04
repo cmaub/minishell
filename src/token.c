@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/01 18:05:08 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/04 19:06:26 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 	int		len;
 
 	len = end - start;
-	new = malloc (sizeof(t_token));
+	new = malloc(sizeof(t_token));
 	if (!new)
 		return (NULL);
 	new->value = ft_substr(input->data, start, len);
@@ -115,22 +115,34 @@ void	print_tokens_list(t_token **list)
 	printf("[%s] de type %d\n", (*list)->value, (*list)->type);
 }
 
-void	print_nodes_list(PARSER *nodes)
+void	print_nodes_list(PARSER **nodes)
 {
+	int	i = 0;
+	int	o = 0;
 	int	h = 0;
 	int	index = 0;
 	PARSER	*tmp;
 	
-	tmp = nodes;
-	if (!nodes)
+	tmp = (*nodes);
+	if (!(*nodes))
 		return ;
 	while (index <= ft_size_list(nodes))
 	{
+		i = 0;
+		o = 0;
 		h = 0;
-		if (tmp->infile && tmp->infile != NULL)
-			printf("tmp->infile = %s, type = %d\n", tmp->infile, tmp->redir_type_in);
-		if (tmp->outfile && tmp->outfile != NULL)
-			printf("tmp->outfile = %s, type = %d\n", tmp->outfile, tmp->redir_type_out);
+		while (i < 10 && tmp->infile && tmp->infile[i] != NULL)
+		{
+			printf("tmp->infile[%d] = %s, type = %d\n", i, tmp->infile[i], tmp->redir_type_in[i]);
+			if (tmp->delimiter[i] != NULL)
+				printf("tmp->delimiter = %s\n", tmp->delimiter[i]);
+			i++;
+		}
+		while (o < 10 && tmp->outfile && tmp->outfile[o] != NULL)
+		{
+			printf("tmp->outfile[%d] = %s, type = %d\n", o, tmp->outfile[o], tmp->redir_type_out[o]);
+			o++;
+		}
 		while (h < 10 && tmp->command && tmp->command[h] != NULL)
 		{
 			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
@@ -145,15 +157,24 @@ void	print_nodes_list(PARSER *nodes)
 	printf("\n");
 }
 
-void	add_new_node(PARSER *nodes, PARSER *new_node)
+void	add_new_node(PARSER **nodes, PARSER *new_node)
 {
 	PARSER	*current;
 	
 	if (!nodes || !new_node)
 		return ;
-	current = nodes;
-	while (current->next != NULL)
-		current = current->next;
-	current->next = new_node;
+	if (!(*nodes))
+	{
+		*nodes = new_node;
+		return ;
+	}
+	else
+	{
+		current = *nodes;
+		while (current->next != NULL)
+			current = current->next;
+		current->next = new_node;
+	}
+	
 }
 
