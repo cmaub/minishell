@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/04 18:55:57 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/05 12:56:01 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -378,7 +378,7 @@ int handle_redirect_in(LEXER *input, t_token **list)
     	if (L_ARROW(input))
     	{
     	    if (L_ARROW(input)) // Double flèche (<<)
-    	        return (process_heredoc(input, list, start, end));
+    	        return (process_heredoc(input, list, start, end)); // creer tous les heredoc a ce moment la ?
     	    return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
     	}
     	return (FALSE);

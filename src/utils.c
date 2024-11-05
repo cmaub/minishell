@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/04 18:41:45 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/05 15:46:31 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,28 +130,27 @@ int	no_envp(char **tab)
 	return (0);
 }
 
-void	get_lines(PARSER *nodes, int fd_heredoc)
+void	get_lines(PARSER *nodes, int i)
 {
 	char	*str;
-
 	while (1)
 	{
 		write(1, "heredoc> ", 9);
 		str = get_next_line(0);
 		if (str == 0)
 			break ;
-		if (ft_strncmp(str, nodes->delimiter[nodes->i], ft_strlen(nodes->delimiter[nodes->i])) == 0
-			&& str[ft_strlen(nodes->delimiter[nodes->i])] == '\n')
+		if (ft_strncmp(str, nodes->delimiter[i], ft_strlen(nodes->delimiter[i])) == 0
+			&& str[ft_strlen(nodes->delimiter[i])] == '\n')
 		{
 			free(str);
 			get_next_line(-42);
 			break ;
 		}
-		write(fd_heredoc, str, ft_strlen(str));
+		write(nodes->fd_heredoc[i], str, ft_strlen(str));
 		free(str);
 	}
-	safe_close(fd_heredoc);
-	free (str);
+	safe_close(nodes->fd_heredoc[i]);
+	// free (str);
 }
 
 void    ft_close_error(int *fd, t_pipex *p, char *str)
@@ -164,16 +163,26 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
     	exit(EXIT_FAILURE);
 }
 
-int    ft_wait(pid_t last_pid)
+int    ft_wait(pid_t last_pid, PARSER **nodes)
 {
     int        status;
     int        exit_code;
+    PARSER	*current;
     pid_t    waited_pid;
 
+	current = *nodes;
     exit_code = 0;
     while (waited_pid != -1)
     {
 	waited_pid = wait(&status);
+	dprintf(2, "current->redir_type_in[current->i] = %d\n", current->redir_type_in[current->i]);
+	if (current->redir_type_in[current->i] == 4)
+	{
+		dprintf(2, "current->infile[current->i] = %s\n", current->infile[current->i]);
+		unlink(current->infile[current->i]);
+	}
+	if (current->next)
+		current = current->next;
 	dprintf(2, "waited_pid == %d\n", waited_pid);
 	if (waited_pid == last_pid)
 	{

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/04 18:44:10 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/05 15:53:08 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,9 +69,14 @@ typedef struct PARSER
 	char	**delimiter;
 	int		*redir_type_in;
 	int		*redir_type_out;
+	int		*fd_heredoc;
 	int		cmd;
 	int		i;
 	int		o;
+	int	nb_infile;
+	int	nb_outfile;
+	int	nb_command;
+	int	nb_heredoc;
 	struct PARSER	*next;
 } PARSER ;
 
@@ -117,8 +122,8 @@ void	ft_error(char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes);
 void	safe_close(int fd);
-void	get_lines(PARSER **nodes, int fd_heredoc);
-void	handle_output_redirection(PARSER *current, PARSER *nodes, t_pipex *p, int fd_in);
+void	get_lines(PARSER *nodes, int i);
+void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out);
 void   ft_close_error(int *fd, t_pipex *p, char *str);
 void	replace_prev_token(t_token **list, t_token *new);
 
@@ -132,7 +137,7 @@ int	handle_input(PARSER **nodes, char **envp, int ac);
 int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
 int	execute(PARSER *current, t_pipex *p);
-int    ft_wait(pid_t last_pid);
+int    ft_wait(pid_t last_pid, PARSER **nodes);
 
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
 void	print_nodes_list(PARSER **nodes);
