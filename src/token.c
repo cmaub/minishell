@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/04 19:06:26 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/06 12:26:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,9 +117,11 @@ void	print_tokens_list(t_token **list)
 
 void	print_nodes_list(PARSER **nodes)
 {
+	dprintf(2, "LINE = %d, FILE = %s\n", __LINE__, __FILE__);
 	int	i = 0;
 	int	o = 0;
 	int	h = 0;
+	int	d = 0;
 	int	index = 0;
 	PARSER	*tmp;
 	
@@ -134,8 +136,11 @@ void	print_nodes_list(PARSER **nodes)
 		while (i < 10 && tmp->infile && tmp->infile[i] != NULL)
 		{
 			printf("tmp->infile[%d] = %s, type = %d\n", i, tmp->infile[i], tmp->redir_type_in[i]);
-			if (tmp->delimiter[i] != NULL)
-				printf("tmp->delimiter = %s\n", tmp->delimiter[i]);
+			if (tmp->delimiter && tmp->delimiter[d] != NULL)
+			{
+				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
+				d++;
+			}
 			i++;
 		}
 		while (o < 10 && tmp->outfile && tmp->outfile[o] != NULL)

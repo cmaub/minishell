@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/05 15:46:31 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/06 18:44:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,41 @@ int		ft_size_list(PARSER **nodes)
 	return (size);
 }
 
-void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes)
+char	**copy_env(char **envp)
+{
+	char	**mini_env;
+	int	i;
+
+	i = 0;
+	while (envp[i])
+		i++;
+	mini_env = ft_calloc(i + 1, sizeof(char *));
+	if (!mini_env)
+		return (NULL);
+	i = 0;
+	while (envp[i])
+	{
+		mini_env[i] = ft_strdup(envp[i]);
+		// dprintf(2, "mini_env[%d] = %s\n", i, mini_env[i]);
+		if (!mini_env[i])
+		{
+			while (i >= 0)
+			{
+				free(mini_env[i]);
+				i--;
+			}
+		}
+		i++;
+	}
+	mini_env[i] = NULL;
+	return (mini_env);
+}
+
+void	ft_init_struct(t_pipex *p, int ac, char **env, PARSER *nodes)
 {
 	p->ac = ac;
-	p->envp = envp;
-	// p->heredoc = NULL;
+	p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
-	printf("p->nb_cmd = %d\n", p->nb_cmd);
 	p->i = 0;
 	p->prev_fd = -1;
 	p->pid = 0;
@@ -89,21 +117,6 @@ void	ft_free_tab(char **tab)
 	free(tab);
 }
 
-// int	list_size(t_token *list)
-// {
-// 	t_token	*temp;
-// 	int		size;
-
-// 	temp = list;
-// 	size = 0;
-// 	while (temp->next != NULL)
-// 	{
-// 		size++;
-// 		temp = temp->next;
-// 	}
-// 	return (size);
-// }
-
 void	check_open(int fd)
 {
 	if (fd == -1)
@@ -130,7 +143,7 @@ int	no_envp(char **tab)
 	return (0);
 }
 
-void	get_lines(PARSER *nodes, int i)
+void	get_lines(PARSER *nodes, int i, int d)
 {
 	char	*str;
 	while (1)
@@ -139,8 +152,8 @@ void	get_lines(PARSER *nodes, int i)
 		str = get_next_line(0);
 		if (str == 0)
 			break ;
-		if (ft_strncmp(str, nodes->delimiter[i], ft_strlen(nodes->delimiter[i])) == 0
-			&& str[ft_strlen(nodes->delimiter[i])] == '\n')
+		if (ft_strncmp(str, nodes->delimiter[d], ft_strlen(nodes->delimiter[d])) == 0
+			&& str[ft_strlen(nodes->delimiter[d])] == '\n')
 		{
 			free(str);
 			get_next_line(-42);
@@ -150,7 +163,6 @@ void	get_lines(PARSER *nodes, int i)
 		free(str);
 	}
 	safe_close(nodes->fd_heredoc[i]);
-	// free (str);
 }
 
 void    ft_close_error(int *fd, t_pipex *p, char *str)
@@ -175,12 +187,8 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
     while (waited_pid != -1)
     {
 	waited_pid = wait(&status);
-	dprintf(2, "current->redir_type_in[current->i] = %d\n", current->redir_type_in[current->i]);
-	if (current->redir_type_in[current->i] == 4)
-	{
-		dprintf(2, "current->infile[current->i] = %s\n", current->infile[current->i]);
+	if (current->redir_type_in && current->redir_type_in[current->i] == 4)
 		unlink(current->infile[current->i]);
-	}
 	if (current->next)
 		current = current->next;
 	dprintf(2, "waited_pid == %d\n", waited_pid);

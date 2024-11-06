@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/10/30 17:42:45 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/06 10:48:55 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,12 +74,14 @@ char	*get_path_and_check(char **split_cmd, char **env)
 	char	*new_path;
 
 	new_path = get_path(split_cmd[0], env);
+	dprintf(2, "path = %s\n", new_path);
 	if (!new_path)
 	{
 		dprintf(2, "new_path n'existe pas\n");
 		ft_free_tab(split_cmd);
 		exit(EXIT_FAILURE);
 	}
+	dprintf(2, "new_path valide\n");
 	return (new_path);
 }
 

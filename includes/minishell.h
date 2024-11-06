@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/05 15:53:08 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/06 18:43:37 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,8 +98,7 @@ typedef struct s_token
 typedef struct s_pipex
 {
 	int	         	ac;
-	char	        	**envp;
-	// char			*heredoc;
+	char			**mini_env;
 	int		 	nb_cmd;
 	int		       i;
 	int		       prev_fd;
@@ -114,6 +113,7 @@ int create_and_add_token(LEXER *input, int start, int end, t_token **list, int t
 
 /* MINISHELL */
 char	*get_path_and_check(char **split_cmd, char **env);
+char	**copy_env(char **envp);
 
 void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
@@ -122,7 +122,7 @@ void	ft_error(char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes);
 void	safe_close(int fd);
-void	get_lines(PARSER *nodes, int i);
+void	get_lines(PARSER *nodes, int i, int d);
 void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out);
 void   ft_close_error(int *fd, t_pipex *p, char *str);
 void	replace_prev_token(t_token **list, t_token *new);
