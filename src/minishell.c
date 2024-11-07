@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/06 18:45:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/07 14:54:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,16 +47,65 @@ void free_new_node(PARSER *new_node)
 
 char	*return_var_from_env(char *str, char **mini_env)
 {
-	char	*save;
+	char	*save_after_dollar;
+	char	*save_before_dollar;
+	char	*rest_after_single_quote;
 	char	*temp;
 	char	*new_var;
 	int	i;
+	int	len;
+	int	len_save;
+	int	len_str;
 
 	i = 0;
-	save = ft_strchr(str, '$') + 1;
-	while (*mini_env && ft_strnstr(*mini_env, save, ft_strlen(save) + 1) == NULL)
+	len = 0;
+	rest_after_single_quote = NULL;
+	/*
+	Gerer le cas ou la premiere quote est situee avant le dollar
+	*/
+	len_str = ft_strlen(str);
+	save_after_dollar = ft_strchr(str, '$') + 1;
+	dprintf(2, "LINE = %d\n", __LINE__);
+	len_save = ft_strlen(save_after_dollar);
+	dprintf(2, "LINE = %d\n", __LINE__);
+	while (len_save >= 0)
+	{
+		len_str--;
+		len_save--;
+	}
+	dprintf(2, "LINE = %d, len_str = %d\n", __LINE__, len_str);
+	save_before_dollar = ft_calloc(len_str + 1, sizeof(char));
+	ft_memcpy(save_before_dollar, str, len_str);
+	if (ft_strchr_occur(save_before_dollar, 39) % 2 != 0)
+		return (str);
+	else if (ft_strchr(save_after_dollar, 39))
+	{
+		rest_after_single_quote = ft_strdup(ft_strchr(save_after_dollar, 39));
+		len = ft_strlen(rest_after_single_quote);
+		while (len >= 0 && save_after_dollar)
+		{
+			save_after_dollar[len_save - i] = '\0';
+			i++;
+			len--;
+		}
+		rest_after_single_quote = ft_strtrim(rest_after_single_quote, "'");
+	}
+	dprintf(2, "rest_after_single_quote = %s\n", rest_after_single_quote);
+	save_after_dollar = ft_strjoin(save_after_dollar, "=");
+	dprintf(2, "save_after_dollar = %s, Line = %d\n", save_after_dollar, __LINE__);
+	while (*mini_env && ft_strnstr(*mini_env, save_after_dollar, ft_strlen(save_after_dollar)) == NULL)
 		mini_env++;
-	new_var = ft_strdup(*mini_env + ft_strlen(save) + 1);
+	if (*mini_env == NULL)
+	{
+		if (rest_after_single_quote == NULL && save_before_dollar == NULL)
+			return (NULL);
+		else if (rest_after_single_quote != NULL || save_before_dollar != NULL)
+		{
+			return (ft_strjoin(save_before_dollar, rest_after_single_quote));
+		}
+	}
+	new_var = ft_strdup(*mini_env + ft_strlen(save_after_dollar));
+	i = 0;
 	while (str[i] != '\0' && str[i] != '$')
 		i++;
 	temp = ft_calloc(i + 1, sizeof(char));
@@ -68,6 +117,12 @@ char	*return_var_from_env(char *str, char **mini_env)
 	}
 	temp[i] = '\0';
 	str = ft_strjoin(temp, new_var);
+	if (rest_after_single_quote != NULL)
+	{
+		rest_after_single_quote = ft_strtrim(rest_after_single_quote, "'");
+		if (str != NULL)
+			str = ft_strjoin(str, rest_after_single_quote);
+	}
 	return (str);
 }
 
@@ -94,7 +149,18 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC)
 	{
 		if (ft_strchr(cur->next->value, '$'))
+		{
+			/*
+			1- Le $ est entoure de double quotes -> c'est un char
+			2- Il est precede d'un guillement mais suivi d'un char autre que guillement -> il devra expand ce qui est entre guillemets
+			3- Il n'ya pas de guillemet avant mais y en a un juste apres, il expand (ca donne rien) mais n'est pas un char
+
+			
+			4- Si entoure de single quote, le dollar est un char
+			5- ce qui est entre single quote suivant le dollar ne peut pas etre interprete parce qu'on a expand avant de retire les quotes
+			*/
 			cur->next->value = return_var_from_env(cur->next->value, mini_env);
+		}
 		new_node->nb_infile++;
 		if (cur->type == HEREDOC)
 		{
@@ -161,14 +227,14 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 			return ;
 		while (current && current->type != PIPEX)
 		{
-			if (current->type == REDIRECT_IN)
+			if (current->type == REDIRECT_IN && current->next->value != NULL)
 			{
 				new_node->infile[i] = ft_strdup(current->next->value);
 				new_node->redir_type_in[i++] = current->type;
 				// i++;
 			}
-			else if (current->type == HEREDOC)
-			{ 
+			else if (current->type == HEREDOC && current->next->value != NULL)
+			{
 				name_heredoc[ft_strlen(name_heredoc)] = index_heredoc + '0';
 				name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
 				new_node->fd_heredoc[i] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
@@ -182,17 +248,14 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 				// i++;
 				d++;
 			}
-			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
+			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT) 
+					&& current->next->value != NULL)
 			{
-				new_node->outfile[o] = ft_strdup(current->next->value);
-				new_node->redir_type_out[o++] = current->type;
-				// o++;
+					new_node->outfile[o] = ft_strdup(current->next->value);
+					new_node->redir_type_out[o++] = current->type;
 			}
-			else if (current->type == ARGUMENT)
-			{
-				new_node->command[cmd++] = ft_strdup(current->value);
-				// cmd++;
-			}
+			else if (current->type == ARGUMENT && current->value != NULL)
+					new_node->command[cmd++] = ft_strdup(current->value);
 			current = current->next;
 		}
 		if (i > 0)

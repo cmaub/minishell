@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 08:19:38 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/08 16:50:59 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/07 14:23:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ void	ft_bzero(void *s, size_t len);
 // str
 char	**ft_split(char const *s, char c);
 char	*ft_strchr(const char *s, int c);
+int	ft_strchr_occur(const char *s, int c);
 char	*ft_strdup(const char *s);
 void	ft_striteri(char *s, void (*f)(unsigned int, char *));
 char	*ft_strjoin(char const *s1, char const *s2);
@@ -74,6 +75,7 @@ size_t	ft_strlcpy(char *dst, const char *src, size_t dst_size);
 char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 char	*ft_strnstr(const char *big, const char *little, size_t len);
+char	*ft_strnchr(const char *s, int c, int len);
 char	*ft_strrchr(const char *s, int c);
 char	*ft_strtrim(char const *s1, char const *set);
 char	*ft_substr(char const *s, unsigned int start, size_t len);

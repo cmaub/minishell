@@ -6,7 +6,7 @@
 #    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/22 08:22:29 by cmaubert          #+#    #+#              #
-#    Updated: 2024/10/18 16:23:00 by anvander         ###   ########.fr        #
+#    Updated: 2024/11/07 14:23:42 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,6 +31,7 @@ FILES = ft_atoi.c \
 		ft_putstr_fd.c \
 		ft_split.c \
 		ft_strchr.c \
+		ft_strchr_occur.c \
 		ft_strrchr.c \
 		ft_strdup.c \
 		ft_striteri.c \
@@ -38,6 +39,7 @@ FILES = ft_atoi.c \
 		ft_strlcat.c \
 		ft_strlcpy.c \
 		ft_strlen.c \
+		ft_strnchr.c \
 		ft_strmapi.c \
 		ft_strncmp.c \
 		ft_strnstr.c \

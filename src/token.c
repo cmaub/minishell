@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/06 12:26:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/07 12:12:07 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,9 @@ void	add_new_node(PARSER **nodes, PARSER *new_node)
 	PARSER	*current;
 	
 	if (!nodes || !new_node)
+	{
 		return ;
+	}
 	if (!(*nodes))
 	{
 		*nodes = new_node;
