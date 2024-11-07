@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/07 14:54:06 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/07 15:31:03 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,34 @@ void free_new_node(PARSER *new_node)
     		free(new_node);
 	}
 }
+// // fonction qui interprete $
+// char	*expand(char *str, char **mini_env)
+// {
+// 	char	**dollars;
+	
+// 	dollars = NULL;
+// 	if (ft_strchr_occur(str, '$') > 0)
+// 	{
+// 		dollars = ft_split(str, '$');
+// 	}
+// 	if (dollars != NULL)
+// 	{
+// 		// boucle qui gere chague dollar
+// 		// je visualise pas comment faaaaaaire
+// 	}
+// 	else
+// 	{
+		
+// 	}
+// }
+
+// // fonction qui trim "" ''
+// char	*trim_quotes(char *str, int quote)
+// {
+	
+// }
+
+
 
 char	*return_var_from_env(char *str, char **mini_env)
 {
@@ -60,14 +88,9 @@ char	*return_var_from_env(char *str, char **mini_env)
 	i = 0;
 	len = 0;
 	rest_after_single_quote = NULL;
-	/*
-	Gerer le cas ou la premiere quote est situee avant le dollar
-	*/
 	len_str = ft_strlen(str);
 	save_after_dollar = ft_strchr(str, '$') + 1;
-	dprintf(2, "LINE = %d\n", __LINE__);
 	len_save = ft_strlen(save_after_dollar);
-	dprintf(2, "LINE = %d\n", __LINE__);
 	while (len_save >= 0)
 	{
 		len_str--;
@@ -161,6 +184,10 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 			*/
 			cur->next->value = return_var_from_env(cur->next->value, mini_env);
 		}
+		// if (ft_strchr(cur->next->value, '39'))
+			// cur->next->value = trim_quotes(cur->next->value, 39);
+		// if (ft_strchr(cur->next->value, '34'))
+			// cur->next->value = trim_quotes(cur->next->value, 34);
 		new_node->nb_infile++;
 		if (cur->type == HEREDOC)
 		{
