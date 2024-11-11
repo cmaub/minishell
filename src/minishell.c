@@ -3,17 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/07 15:31:03 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/11 17:06:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-// penser a gerer (ou pas)ls cat de commmandes multiples sans pipe "cat ls > file"
-
 
 int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 {
@@ -44,109 +41,35 @@ void free_new_node(PARSER *new_node)
     		free(new_node);
 	}
 }
-// // fonction qui interprete $
-// char	*expand(char *str, char **mini_env)
-// {
-// 	char	**dollars;
-	
-// 	dollars = NULL;
-// 	if (ft_strchr_occur(str, '$') > 0)
-// 	{
-// 		dollars = ft_split(str, '$');
-// 	}
-// 	if (dollars != NULL)
-// 	{
-// 		// boucle qui gere chague dollar
-// 		// je visualise pas comment faaaaaaire
-// 	}
-// 	else
-// 	{
-		
-// 	}
-// }
-
-// // fonction qui trim "" ''
-// char	*trim_quotes(char *str, int quote)
-// {
-	
-// }
-
-
 
 char	*return_var_from_env(char *str, char **mini_env)
 {
-	char	*save_after_dollar;
-	char	*save_before_dollar;
-	char	*rest_after_single_quote;
-	char	*temp;
 	char	*new_var;
-	int	i;
-	int	len;
-	int	len_save;
-	int	len_str;
-
-	i = 0;
-	len = 0;
-	rest_after_single_quote = NULL;
-	len_str = ft_strlen(str);
-	save_after_dollar = ft_strchr(str, '$') + 1;
-	len_save = ft_strlen(save_after_dollar);
-	while (len_save >= 0)
-	{
-		len_str--;
-		len_save--;
-	}
-	dprintf(2, "LINE = %d, len_str = %d\n", __LINE__, len_str);
-	save_before_dollar = ft_calloc(len_str + 1, sizeof(char));
-	ft_memcpy(save_before_dollar, str, len_str);
-	if (ft_strchr_occur(save_before_dollar, 39) % 2 != 0)
-		return (str);
-	else if (ft_strchr(save_after_dollar, 39))
-	{
-		rest_after_single_quote = ft_strdup(ft_strchr(save_after_dollar, 39));
-		len = ft_strlen(rest_after_single_quote);
-		while (len >= 0 && save_after_dollar)
-		{
-			save_after_dollar[len_save - i] = '\0';
-			i++;
-			len--;
-		}
-		rest_after_single_quote = ft_strtrim(rest_after_single_quote, "'");
-	}
-	dprintf(2, "rest_after_single_quote = %s\n", rest_after_single_quote);
-	save_after_dollar = ft_strjoin(save_after_dollar, "=");
-	dprintf(2, "save_after_dollar = %s, Line = %d\n", save_after_dollar, __LINE__);
-	while (*mini_env && ft_strnstr(*mini_env, save_after_dollar, ft_strlen(save_after_dollar)) == NULL)
+	
+	new_var = NULL;
+	str = ft_strjoin(str, "=");
+	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
 		mini_env++;
 	if (*mini_env == NULL)
 	{
-		if (rest_after_single_quote == NULL && save_before_dollar == NULL)
-			return (NULL);
-		else if (rest_after_single_quote != NULL || save_before_dollar != NULL)
-		{
-			return (ft_strjoin(save_before_dollar, rest_after_single_quote));
-		}
+		return (NULL);
 	}
-	new_var = ft_strdup(*mini_env + ft_strlen(save_after_dollar));
+	new_var = ft_strdup(*mini_env + (ft_strlen(str) + 1));
+	return (new_var);
+}
+
+char	*isolate_expand(char *str, int index)
+{
+	int	i;
+
 	i = 0;
-	while (str[i] != '\0' && str[i] != '$')
-		i++;
-	temp = ft_calloc(i + 1, sizeof(char));
-	i = 0 ;
-	while (str[i] != '\0' && str[i] != '$')
+	while (str[index + i] != '\0')
 	{
-		temp[i] = str[i];
+		if (str[index + i] == 39 || str[index + i] == 34 || str[index + i] == 32)
+			break;
 		i++;
 	}
-	temp[i] = '\0';
-	str = ft_strjoin(temp, new_var);
-	if (rest_after_single_quote != NULL)
-	{
-		rest_after_single_quote = ft_strtrim(rest_after_single_quote, "'");
-		if (str != NULL)
-			str = ft_strjoin(str, rest_after_single_quote);
-	}
-	return (str);
+	return (ft_substr(str, index, i));	
 }
 
 void	calloc_tab_of_node(PARSER *new_node)
@@ -167,45 +90,127 @@ void	calloc_tab_of_node(PARSER *new_node)
 		new_node->fd_heredoc = ft_calloc(new_node->nb_heredoc, sizeof(int));
 }
 
+int	search_closing_quote(char *str, char c)
+{
+	int	i;
+
+	i = 1;
+	while (str[i] != '\0')
+	{
+		if (str[i] == c)
+			return (i);
+		i++;
+	}
+	dprintf(2, "i = %d\n", i);
+	return (i);
+}
+
+char	*join_char(char c, char *tmp)
+{
+	char	single_char[2];
+
+	single_char[0] = c;
+	single_char[1] = '\0';
+	return (ft_strjoin(tmp, single_char));	
+}
+
+char	*process_unquoted(char *str, int *index)
+{
+	char	*result;
+
+	result = "";
+	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
+	{
+		result = join_char(str[*index], result);
+		(*index)++;
+	}
+	return (result);
+}
+
+char	*process_single_quotes(char *str, int *index)
+{
+	char	*result;
+
+	result = "";
+	(*index)++; // passer quote ouvrante
+	while (str[*index] != 39 && str[*index] != '\0')
+	{
+		result = join_char(str[*index], result);
+		(*index)++;
+	}
+	if (str[*index] == 39)
+		(*index)++;
+	return (result);
+}
+
+char	*process_double_quotes(char *str, int *index, char **mini_env)
+{
+	char	*result;
+	char	*expand_expr;
+	char	*expand_result;
+
+	result = "";
+	(*index)++; // Passer quote ouvrante
+	while (str[*index] != 34 && str[*index] != '\0')
+	{
+		if (str[*index] == '$' && str[*index + 1] != 39)
+		{
+			expand_expr = isolate_expand(str, *index +1);
+			expand_result = return_var_from_env(expand_expr, mini_env);
+			if (expand_result != NULL)
+				result = ft_strjoin(result, expand_result);
+			*index += ft_strlen(expand_expr) +1;
+		}
+		else
+		{
+			result = join_char(str[*index], result);
+			(*index)++;
+		}
+	}
+	if (str[*index] == 34)
+		(*index)++;
+	return (result);
+}
+
+char	*withdraw_quotes(char *str, char **mini_env)
+{
+	int	start;
+	char	*result;
+
+	start = 0;
+	result = "";
+	while (str[start] != '\0')
+	{
+		if (str[start] == 34)
+			result = ft_strjoin(result, process_double_quotes(str, &start, mini_env));
+		else if (str[start] == 39)
+			result = ft_strjoin(result, process_single_quotes(str, &start));
+		else
+			result = ft_strjoin(result, process_unquoted(str, &start));
+	}
+	return (result);
+}
+
 void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 {
 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC)
 	{
-		if (ft_strchr(cur->next->value, '$'))
-		{
-			/*
-			1- Le $ est entoure de double quotes -> c'est un char
-			2- Il est precede d'un guillement mais suivi d'un char autre que guillement -> il devra expand ce qui est entre guillemets
-			3- Il n'ya pas de guillemet avant mais y en a un juste apres, il expand (ca donne rien) mais n'est pas un char
-
-			
-			4- Si entoure de single quote, le dollar est un char
-			5- ce qui est entre single quote suivant le dollar ne peut pas etre interprete parce qu'on a expand avant de retire les quotes
-			*/
-			cur->next->value = return_var_from_env(cur->next->value, mini_env);
-		}
-		// if (ft_strchr(cur->next->value, '39'))
-			// cur->next->value = trim_quotes(cur->next->value, 39);
-		// if (ft_strchr(cur->next->value, '34'))
-			// cur->next->value = trim_quotes(cur->next->value, 34);
+		cur->next->value = withdraw_quotes(cur->next->value, mini_env);
 		new_node->nb_infile++;
 		if (cur->type == HEREDOC)
 		{
-			if (ft_strchr(cur->next->value, '$'))
-				cur->next->value = return_var_from_env(cur->next->value, mini_env);
+			cur->next->value = withdraw_quotes(cur->next->value, mini_env);
 		}
 		new_node->nb_heredoc++;
 	}
 	if (cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 	{
-		if (ft_strchr(cur->next->value, '$'))
-			cur->next->value = return_var_from_env(cur->next->value, mini_env);
+		cur->next->value = withdraw_quotes(cur->next->value, mini_env);
 		new_node->nb_outfile++;
 	}
 	else if (cur->type == ARGUMENT)
 	{
-		if (ft_strchr(cur->value, '$'))
-			cur->value = return_var_from_env(cur->value, mini_env);
+		cur->value = withdraw_quotes(cur->value, mini_env);
 		new_node->nb_command++;
 	}
 }
@@ -330,18 +335,25 @@ int		main(int argc, char **argv, char **env)
 				add_history(str_input);
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
-			if (fill_list_of_tokens(L_input, tokens))
-			{}
-			else
+			if (!fill_list_of_tokens(L_input, tokens))
+			{
 				printf("input non valide\n");
-			create_nodes(tokens, nodes, mini_env);
-			dprintf(2, "taille de list %d\n", ft_size_list(nodes));
-			print_nodes_list(nodes);
-			handle_input(nodes, mini_env, argc);
-			free(tokens);
-			free(str_input);
-			free(nodes);
-			free(L_input);
+				free(tokens);
+				free(str_input);
+				free(nodes);
+				free(L_input);
+			}
+			else
+			{
+				create_nodes(tokens, nodes, mini_env);
+				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
+				print_nodes_list(nodes);
+				handle_input(nodes, mini_env, argc);
+				free(tokens);
+				free(str_input);
+				free(nodes);
+				free(L_input);
+			}
 		}
 	}
 	return (0);
