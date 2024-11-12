@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/06 18:44:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/12 15:35:30 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ void	ft_init_struct(t_pipex *p, int ac, char **env, PARSER *nodes)
 	p->prev_fd = -1;
 	p->pid = 0;
 	p->last_pid = 0;
+	p->exit = 0;
 }
 
 int	is_str(char *str)
@@ -168,11 +169,13 @@ void	get_lines(PARSER *nodes, int i, int d)
 void    ft_close_error(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
+	{
 	    close(*fd);
     	close(p->pipefd[1]);
     	close(p->pipefd[0]);
     	perror(str);
     	exit(EXIT_FAILURE);
+	}
 }
 
 int    ft_wait(pid_t last_pid, PARSER **nodes)

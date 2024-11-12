@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/07 12:12:07 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/12 11:49:32 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,7 +133,7 @@ void	print_nodes_list(PARSER **nodes)
 		i = 0;
 		o = 0;
 		h = 0;
-		while (i < 10 && tmp->infile && tmp->infile[i] != NULL)
+		while (i < 30 && tmp->infile && tmp->infile[i] != NULL)
 		{
 			printf("tmp->infile[%d] = %s, type = %d\n", i, tmp->infile[i], tmp->redir_type_in[i]);
 			if (tmp->delimiter && tmp->delimiter[d] != NULL)
@@ -143,12 +143,12 @@ void	print_nodes_list(PARSER **nodes)
 			}
 			i++;
 		}
-		while (o < 10 && tmp->outfile && tmp->outfile[o] != NULL)
+		while (o < 30 && tmp->outfile && tmp->outfile[o] != NULL)
 		{
 			printf("tmp->outfile[%d] = %s, type = %d\n", o, tmp->outfile[o], tmp->redir_type_out[o]);
 			o++;
 		}
-		while (h < 10 && tmp->command && tmp->command[h] != NULL)
+		while (h < 30 && tmp->command && tmp->command[h] != NULL)
 		{
 			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
 			h++;

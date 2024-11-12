@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/06 18:42:54 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/12 16:03:59 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,50 @@ void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out
 	}
 }
 
+int	exec_builtin(PARSER *current, t_pipex *p)
+{
+	if (ft_strncmp(current->command[0], "echo", 4) == 0)
+		return (ft_echo(current->command));
+	if (ft_strncmp(current->command[0], "pwd", 3) == 0)
+		return (ft_pwd(p->mini_env));
+	if (ft_strncmp(current->command[0], "env", 3) == 0)
+		return (ft_env(current->command, p->mini_env));
+	if (ft_strncmp(current->command[0], "exit", 4) == 0)
+	{
+		p->exit = 1;
+		return (TRUE);
+	}
+	return (FALSE);
+
+}
+
+int	is_builtin(PARSER *current, t_pipex *p)
+{
+	if (ft_strncmp(current->command[0], "echo", 4) == 0)
+		return (TRUE);
+	if (ft_strncmp(current->command[0], "pwd", 3) == 0)
+		return (TRUE);
+	if (ft_strncmp(current->command[0], "env", 3) == 0)
+		return (TRUE);
+	if (ft_strncmp(current->command[0], "exit", 4) == 0)
+	{
+		p->exit = 1;
+		return (TRUE);
+	}
+	return (FALSE);
+}
+
 int	execute(PARSER *current, t_pipex *p)
 {
 	char	*path;
 
-	if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
+	if (is_builtin(current, p) == 1)
+	{
+		free(current);
+		dprintf(2, "dans execute p->exit = %d\n", p->exit);
+		exit(EXIT_SUCCESS);
+	}
+	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
 	{
 		if (access(current->command[0], F_OK | R_OK) == -1)
 		{
@@ -95,7 +134,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	{
 		handle_output_redirection(nodes, p, fd_in, fd_out);
 		(*nodes)->o++;
-	}
+	}	
 	if (execute((*nodes), p) == -1)
 		exit(EXIT_FAILURE);
 }
@@ -204,6 +243,11 @@ void	create_process(t_pipex *p, PARSER **nodes)
 	}
 	else 
 	{
+		// if (p->i == 0 && p->exit == 1)
+		// {
+		// 	dprintf(2, "dans create process (parent) p->exit = %d\n", p->exit);
+		// 	exit (EXIT_SUCCESS);
+		// }
 		if (p->prev_fd != - 1)
 			close (p->prev_fd);
 		if (p->i < p->nb_cmd -1)
@@ -213,7 +257,52 @@ void	create_process(t_pipex *p, PARSER **nodes)
 		}
 		else
 			close(p->pipefd[0]);
-	}	
+	}
+}
+
+void	handle_simple_process(PARSER *current, t_pipex *p)
+{
+	int	fd_in;
+	int	fd_out;
+
+	fd_in = -1;
+	fd_out = -1;
+	current->i = 0;
+	current->o = 0;
+	while (current->infile && current->infile[current->i] != NULL)
+	{
+		if (current->redir_type_in[current->i] == REDIRECT_IN )
+			fd_in = open(current->infile[current->i], O_RDONLY | 0644);
+		if (current->redir_type_in[current->i] == HEREDOC)
+			fd_in = open(current->infile[current->i], O_RDONLY  | 0644); // revenir sur e nom du fichier temp ?
+		if (fd_in == -1)
+		{
+			ft_error("FIRST open in");
+		}
+		if (dup2(fd_in, STDIN_FILENO) == -1)
+		{
+			safe_close(fd_in);
+			perror("dup2");
+		}
+			
+		safe_close(fd_in);
+		current->i++;
+	}
+	while (current->outfile && current->outfile[current->o] != NULL)
+	{
+		handle_output_redirection(&current, p, fd_in, fd_out);
+		current->o++;
+	}
+	if (exec_builtin(current, p))
+	{
+		free(current);
+		if (p->exit == 1)
+		{
+			ft_putstr_fd("exit\n", 2);
+			exit (EXIT_FAILURE);
+		}
+	}
+	// else if (execute(current, p) == -1)
 }
 
 int	handle_input(PARSER **nodes, char **env, int ac)
@@ -226,6 +315,11 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 	if (!p)
 		return (free (*nodes), free(current), 0);
 	ft_init_struct(p, ac, env, *nodes);
+	if (current->next == NULL && is_builtin(current, p))
+	{
+		handle_simple_process(current, p);
+		return (0);
+	}
 	while (p->i <= p->nb_cmd)
 	{
 		if(p->i < p->nb_cmd)

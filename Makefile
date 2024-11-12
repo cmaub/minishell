@@ -21,7 +21,10 @@ SRC_FILES			=	minishell.c \
 							lexer.c \
 							exec.c \
 							get_next_line.c \
-							path.c
+							path.c \
+							builtin_echo.c \
+							builtin_pwd.c \
+							builtin_env.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects

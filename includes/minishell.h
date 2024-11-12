@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/06 18:43:37 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/12 14:55:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <stddef.h>
 # include <stdio.h>
 # include <string.h>
+# include <unistd.h>
 
 # define true 1
 # define false 0
@@ -103,6 +104,7 @@ typedef struct s_pipex
 	int		       i;
 	int		       prev_fd;
 	int			pipefd[2];
+	int			exit;
 	pid_t	        	pid;
 	pid_t	        	last_pid;
 }	t_pipex;
@@ -142,6 +144,11 @@ int    ft_wait(pid_t last_pid, PARSER **nodes);
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
 void	print_nodes_list(PARSER **nodes);
 void	add_new_node(PARSER **nodes, PARSER *new_node);
+
+/* BUILTINS */
+int	ft_echo(char **cmd);
+int	ft_pwd(char **mini_env);
+int	ft_env(char **cmd, char **mini_env);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

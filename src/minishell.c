@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/11 17:06:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/12 15:49:17 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -327,7 +327,7 @@ int		main(int argc, char **argv, char **env)
 			str_input = readline("~$");
 			if (!str_input)
 				break ;
-			if (ft_strnstr(str_input, "exit", ft_strlen(str_input)))
+			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
 				break ; // quand on appuie sur entree OU quand quote pas fermee puis fermee
 			else
 				rl_on_new_line();
@@ -349,6 +349,8 @@ int		main(int argc, char **argv, char **env)
 				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
 				print_nodes_list(nodes);
 				handle_input(nodes, mini_env, argc);
+					// break ;
+
 				free(tokens);
 				free(str_input);
 				free(nodes);
