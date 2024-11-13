@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 12:03:59 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/13 19:40:45 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void	safe_close(int fd)
 	}
 	// i++;
 }
+
 int		ft_size_list(PARSER **nodes)
 {
 	PARSER	*current;
@@ -190,18 +191,18 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
     waited_pid = wait(&status);
     while (waited_pid != -1)
     {
-	waited_pid = wait(&status);
-	if (current->redir_type_in && current->redir_type_in[current->i] == 4)
-		unlink(current->infile[current->i]);
-	if (current->next)
-		current = current->next;
-	dprintf(2, "waited_pid == %d\n", waited_pid);
-	if (waited_pid == last_pid)
-	{
-		if (WIFEXITED(status))
-		{}
+		waited_pid = wait(&status);
+		if (current->redir_type_in && current->redir_type_in[current->i] == 4)
+			unlink(current->infile[current->i]);
+		if (current->next)
+			current = current->next;
+		dprintf(2, "waited_pid == %d\n", waited_pid);
+		if (waited_pid == last_pid)
+		{
+			if (WIFEXITED(status))
+			{}
 			exit_code = WEXITSTATUS(status);
-	}
+		}
     }
     dprintf(2, "fin de ft_wait (%s, %d)\n", __FILE__, __LINE__);
     return (exit_code);

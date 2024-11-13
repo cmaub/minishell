@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 11:45:28 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 22:16:08 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void free_new_node(PARSER *new_node)
 char	*return_var_from_env(char *str, char **mini_env)
 {
 	char	*new_var;
-	
+
 	new_var = NULL;
 	str = ft_strjoin(str, "=");
 	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
@@ -69,7 +69,7 @@ char	*isolate_expand(char *str, int index)
 			break;
 		i++;
 	}
-	return (ft_substr(str, index, i));	
+	return (ft_substr(str, index, i));
 }
 
 void	calloc_tab_of_node(PARSER *new_node)
@@ -111,7 +111,7 @@ char	*join_char(char c, char *tmp)
 
 	single_char[0] = c;
 	single_char[1] = '\0';
-	return (ft_strjoin(tmp, single_char));	
+	return (ft_strjoin(tmp, single_char));
 }
 
 char	*process_unquoted(char *str, int *index, char **mini_env)
@@ -311,7 +311,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 				// i++;
 				d++;
 			}
-			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT) 
+			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 					&& current->next->value != NULL)
 			{
 					new_node->outfile[o] = ft_strdup(current->next->value);
@@ -344,7 +344,8 @@ int		main(int argc, char **argv, char **env)
 	PARSER		**nodes = NULL;
 	char		**mini_env;
 
-	mini_env = copy_env(env);	
+	str_input = NULL;
+	mini_env = copy_env(env);
 	if (argc >= 1)
 	{
 		while (1)
