@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 11:45:57 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 12:03:59 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	ft_error(char *str)
 // an unsuccessful close will return (Bad file descriptor) in errno
 void	safe_close(int fd)
 {
-	static	int	i = 0;
+	// static	int	i = 0;
 	if (fd != -1)
 	{
 		if (close(fd) == -1)
@@ -32,7 +32,7 @@ void	safe_close(int fd)
 		}
 		fd = -1;
 	}
-	i++;
+	// i++;
 }
 int		ft_size_list(PARSER **nodes)
 {
@@ -200,7 +200,7 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 	{
 		if (WIFEXITED(status))
 		{}
-			exit_code = WEXITSTATUS(status);	
+			exit_code = WEXITSTATUS(status);
 	}
     }
     dprintf(2, "fin de ft_wait (%s, %d)\n", __FILE__, __LINE__);
