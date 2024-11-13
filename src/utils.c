@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/12 15:35:30 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/13 11:45:57 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,7 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 
 	current = *nodes;
     exit_code = 0;
+    waited_pid = wait(&status);
     while (waited_pid != -1)
     {
 	waited_pid = wait(&status);
@@ -198,6 +199,7 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 	if (waited_pid == last_pid)
 	{
 		if (WIFEXITED(status))
+		{}
 			exit_code = WEXITSTATUS(status);	
 	}
     }

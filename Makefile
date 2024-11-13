@@ -24,7 +24,8 @@ SRC_FILES			=	minishell.c \
 							path.c \
 							builtin_echo.c \
 							builtin_pwd.c \
-							builtin_env.c
+							builtin_env.c \
+							builtin_exit.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/12 16:03:59 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/13 11:43:42 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,15 +39,12 @@ int	exec_builtin(PARSER *current, t_pipex *p)
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
 		return (ft_env(current->command, p->mini_env));
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
-	{
-		p->exit = 1;
-		return (TRUE);
-	}
+		return (ft_exit(current->command, p));
 	return (FALSE);
 
 }
 
-int	is_builtin(PARSER *current, t_pipex *p)
+int	is_builtin(PARSER *current)
 {
 	if (ft_strncmp(current->command[0], "echo", 4) == 0)
 		return (TRUE);
@@ -56,10 +53,7 @@ int	is_builtin(PARSER *current, t_pipex *p)
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
 		return (TRUE);
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
-	{
-		p->exit = 1;
 		return (TRUE);
-	}
 	return (FALSE);
 }
 
@@ -67,10 +61,9 @@ int	execute(PARSER *current, t_pipex *p)
 {
 	char	*path;
 
-	if (is_builtin(current, p) == 1)
+	if (is_builtin(current) == 1)
 	{
 		free(current);
-		dprintf(2, "dans execute p->exit = %d\n", p->exit);
 		exit(EXIT_SUCCESS);
 	}
 	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
@@ -243,11 +236,6 @@ void	create_process(t_pipex *p, PARSER **nodes)
 	}
 	else 
 	{
-		// if (p->i == 0 && p->exit == 1)
-		// {
-		// 	dprintf(2, "dans create process (parent) p->exit = %d\n", p->exit);
-		// 	exit (EXIT_SUCCESS);
-		// }
 		if (p->prev_fd != - 1)
 			close (p->prev_fd);
 		if (p->i < p->nb_cmd -1)
@@ -297,12 +285,8 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	{
 		free(current);
 		if (p->exit == 1)
-		{
-			ft_putstr_fd("exit\n", 2);
 			exit (EXIT_FAILURE);
-		}
 	}
-	// else if (execute(current, p) == -1)
 }
 
 int	handle_input(PARSER **nodes, char **env, int ac)
@@ -315,7 +299,7 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 	if (!p)
 		return (free (*nodes), free(current), 0);
 	ft_init_struct(p, ac, env, *nodes);
-	if (current->next == NULL && is_builtin(current, p))
+	if (current->next == NULL && is_builtin(current))
 	{
 		handle_simple_process(current, p);
 		return (0);
@@ -337,5 +321,4 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 			break;	
 	}
 	return (ft_wait(p->last_pid, nodes));
-	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/06 15:16:41 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 10:37:53 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,7 +259,7 @@ int	arg(LEXER *input, t_token **list)
 	start = input->head;
 	end = start;
 	ows(input);
-	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) 
+	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input))
 		i++;
 	if (i < 1)

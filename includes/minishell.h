@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/12 14:55:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/13 11:42:12 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ typedef struct s_pipex
 	int		       prev_fd;
 	int			pipefd[2];
 	int			exit;
+	int			exit_status;
 	pid_t	        	pid;
 	pid_t	        	last_pid;
 }	t_pipex;
@@ -149,6 +150,7 @@ void	add_new_node(PARSER **nodes, PARSER *new_node);
 int	ft_echo(char **cmd);
 int	ft_pwd(char **mini_env);
 int	ft_env(char **cmd, char **mini_env);
+int	ft_exit(char **cmd, t_pipex *p);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

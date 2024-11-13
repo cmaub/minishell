@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 08:19:38 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/07 14:23:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 10:22:56 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ void	ft_putnbr_fd(int n, int fd);
 void	ft_putstr_fd(char *s, int fd);
 
 // conversion type
-int		ft_atoi(const char *nptr);
+long long		ft_atoi(const char *nptr);
 long	ft_atol(const char *str);
 // long	ft_atol(const char *str, _Bool *error);
 char	*ft_itoa(int n);

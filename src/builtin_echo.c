@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/12 15:59:13 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/13 10:47:10 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,10 @@ int	ft_echo(char **cmd)
 	{
 		i = 2;
 		while (cmd[i])
-		{
-			ft_putstr_fd(cmd[i], 1);
-			if (cmd[i + 1])
-				write(1, " ", 1);
-			i++;
-		}
+		ft_putstr_fd(cmd[i], 1);
+		if (cmd[i + 1])
+			write(1, " ", 1);
+		i++;
 	}
 	else
 	{

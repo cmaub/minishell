@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/12 15:49:17 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/13 11:45:28 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,15 +114,37 @@ char	*join_char(char c, char *tmp)
 	return (ft_strjoin(tmp, single_char));	
 }
 
-char	*process_unquoted(char *str, int *index)
+char	*process_unquoted(char *str, int *index, char **mini_env)
 {
 	char	*result;
+	char	*expand_expr;
+	char	*expand_result;
 
 	result = "";
 	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
 	{
-		result = join_char(str[*index], result);
-		(*index)++;
+		if (str[*index] == '$' && str[*index + 1] != 39)
+		{
+			if (str[(*index) + 1] && str[(*index) + 1] == '?')
+			{
+				expand_expr = ft_strdup("?");
+				expand_result = ft_strdup("0");
+				result = ft_strjoin(result, expand_result);
+			}
+			else
+			{
+				expand_expr = isolate_expand(str, *index + 1);
+				expand_result = return_var_from_env(expand_expr, mini_env);
+				if (expand_result != NULL)
+					result = ft_strjoin(result, expand_result);
+			}
+			*index += ft_strlen(expand_expr) +1;
+		}
+		else
+		{
+			result = join_char(str[*index], result);
+			(*index)++;
+		}
 	}
 	return (result);
 }
@@ -155,10 +177,19 @@ char	*process_double_quotes(char *str, int *index, char **mini_env)
 	{
 		if (str[*index] == '$' && str[*index + 1] != 39)
 		{
-			expand_expr = isolate_expand(str, *index +1);
-			expand_result = return_var_from_env(expand_expr, mini_env);
-			if (expand_result != NULL)
+			if (str[(*index) + 1] && str[(*index) + 1] == '?')
+			{
+				expand_expr = ft_strdup("?");
+				expand_result = ft_strdup("0");
 				result = ft_strjoin(result, expand_result);
+			}
+			else
+			{
+				expand_expr = isolate_expand(str, *index + 1);
+				expand_result = return_var_from_env(expand_expr, mini_env);
+				if (expand_result != NULL)
+					result = ft_strjoin(result, expand_result);
+			}
 			*index += ft_strlen(expand_expr) +1;
 		}
 		else
@@ -186,7 +217,7 @@ char	*withdraw_quotes(char *str, char **mini_env)
 		else if (str[start] == 39)
 			result = ft_strjoin(result, process_single_quotes(str, &start));
 		else
-			result = ft_strjoin(result, process_unquoted(str, &start));
+			result = ft_strjoin(result, process_unquoted(str, &start, mini_env));
 	}
 	return (result);
 }
@@ -348,7 +379,7 @@ int		main(int argc, char **argv, char **env)
 				create_nodes(tokens, nodes, mini_env);
 				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
 				print_nodes_list(nodes);
-				handle_input(nodes, mini_env, argc);
+				dprintf(2, "exit_code = %d\n", handle_input(nodes, mini_env, argc));
 					// break ;
 
 				free(tokens);
