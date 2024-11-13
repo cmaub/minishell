@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 11:45:57 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:33:58 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	ft_error(char *str)
 // an unsuccessful close will return (Bad file descriptor) in errno
 void	safe_close(int fd)
 {
-	static	int	i = 0;
+	// static	int	i = 0;
 	if (fd != -1)
 	{
 		if (close(fd) == -1)
@@ -32,7 +32,7 @@ void	safe_close(int fd)
 		}
 		fd = -1;
 	}
-	i++;
+	// i++;
 }
 int		ft_size_list(PARSER **nodes)
 {
@@ -89,6 +89,7 @@ void	ft_init_struct(t_pipex *p, int ac, char **env, PARSER *nodes)
 	p->pid = 0;
 	p->last_pid = 0;
 	p->exit = 0;
+	p->flag = 0;
 }
 
 int	is_str(char *str)
@@ -178,7 +179,7 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 	}
 }
 
-int    ft_wait(pid_t last_pid, PARSER **nodes)
+int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p)
 {
     int        status;
     int        exit_code;
@@ -198,12 +199,16 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 	dprintf(2, "waited_pid == %d\n", waited_pid);
 	if (waited_pid == last_pid)
 	{
-		if (WIFEXITED(status))
-		{}
-			exit_code = WEXITSTATUS(status);	
+		//exit_code peut etre attribue apres boucle ?
+		// if (WIFEXITED(status))
+		// 	exit_code = WEXITSTATUS(status);
+		if (p->exit_status != 0)
+			exit_code = WIFEXITED(status);
+				
 	}
     }
-    dprintf(2, "fin de ft_wait (%s, %d)\n", __FILE__, __LINE__);
+//     exit_code = WEXITSTATUS(status);
+    dprintf(2, "exit code dans wait = %d\n", exit_code);
     return (exit_code);
 }
 

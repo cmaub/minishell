@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 11:42:12 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 14:29:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,7 @@ typedef struct s_pipex
 	int			pipefd[2];
 	int			exit;
 	int			exit_status;
+	int			flag;
 	pid_t	        	pid;
 	pid_t	        	last_pid;
 }	t_pipex;
@@ -140,7 +141,7 @@ int	handle_input(PARSER **nodes, char **envp, int ac);
 int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
 int	execute(PARSER *current, t_pipex *p);
-int    ft_wait(pid_t last_pid, PARSER **nodes);
+int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p);
 
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
 void	print_nodes_list(PARSER **nodes);

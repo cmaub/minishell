@@ -6,7 +6,7 @@
 #    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/22 08:22:29 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/07 14:23:42 by anvander         ###   ########.fr        #
+#    Updated: 2024/11/13 15:13:10 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,7 @@ FILES = ft_atoi.c \
 		ft_isascii.c \
 		ft_isdigit.c \
 		ft_isprint.c \
+		ft_isspace.c \
 		ft_itoa.c \
 		ft_memchr.c \
 		ft_memcmp.c \
@@ -43,6 +44,7 @@ FILES = ft_atoi.c \
 		ft_strmapi.c \
 		ft_strncmp.c \
 		ft_strnstr.c \
+		ft_strtoll.c \
 		ft_strtrim.c \
 		ft_substr.c \
 		ft_tolower.c \

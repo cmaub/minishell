@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 11:43:42 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 16:01:36 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int	exec_builtin(PARSER *current, t_pipex *p)
 		return (ft_pwd(p->mini_env));
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
 		return (ft_env(current->command, p->mini_env));
-	if (ft_strncmp(current->command[0], "exit", 4) == 0)
+	if (p->flag == 1 && ft_strncmp(current->command[0], "exit", 4) == 0)
 		return (ft_exit(current->command, p));
 	return (FALSE);
 
@@ -63,6 +63,7 @@ int	execute(PARSER *current, t_pipex *p)
 
 	if (is_builtin(current) == 1)
 	{
+		exec_builtin(current, p);
 		free(current);
 		exit(EXIT_SUCCESS);
 	}
@@ -128,6 +129,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		handle_output_redirection(nodes, p, fd_in, fd_out);
 		(*nodes)->o++;
 	}	
+	// if builtin ?
 	if (execute((*nodes), p) == -1)
 		exit(EXIT_FAILURE);
 }
@@ -173,6 +175,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		handle_output_redirection(nodes, p, fd_in, fd_out);
 		(*nodes)->o++;
 	}
+	// if builtin ?
 	if (execute((*nodes), p) == -1)
 		exit(EXIT_FAILURE);
 }
@@ -215,6 +218,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		handle_output_redirection(nodes, p, fd_in, fd_out);
 		(*nodes)->o++;
 	}
+	// if builtin ?
 	if (execute((*nodes), p) == -1)
 		exit(EXIT_FAILURE);
 }
@@ -285,7 +289,10 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	{
 		free(current);
 		if (p->exit == 1)
+		{
+			dprintf(2, "exit_status = %d\n", p->exit_status);
 			exit (EXIT_FAILURE);
+		}
 	}
 }
 
@@ -301,8 +308,10 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 	ft_init_struct(p, ac, env, *nodes);
 	if (current->next == NULL && is_builtin(current))
 	{
+		p->flag = 1;
 		handle_simple_process(current, p);
-		return (0);
+		dprintf(2, "exit_status apres simple process = %d\n", p->exit_status);
+		return (p->exit_status);
 	}
 	while (p->i <= p->nb_cmd)
 	{
@@ -320,5 +329,5 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 		if (p->i == p->nb_cmd)
 			break;	
 	}
-	return (ft_wait(p->last_pid, nodes));
+	return (ft_wait(p->last_pid, nodes, p));
 }
