@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 16:01:36 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 18:46:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,6 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		handle_output_redirection(nodes, p, fd_in, fd_out);
 		(*nodes)->o++;
 	}
-	// if builtin ?
 	if (execute((*nodes), p) == -1)
 		exit(EXIT_FAILURE);
 }
@@ -218,7 +217,6 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		handle_output_redirection(nodes, p, fd_in, fd_out);
 		(*nodes)->o++;
 	}
-	// if builtin ?
 	if (execute((*nodes), p) == -1)
 		exit(EXIT_FAILURE);
 }
@@ -329,5 +327,6 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 		if (p->i == p->nb_cmd)
 			break;	
 	}
+	dprintf(2, "arrivee en bas de handle input\n");
 	return (ft_wait(p->last_pid, nodes, p));
 }

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 15:59:58 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 18:15:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,9 @@ int	ft_exit(char **cmd, t_pipex *p)
 	if (cmd[i])
 		return (too_many(p));
 	else
+	{
 		input_ok(p, cmd[1]);
+		exit(p->exit_status);
+	}
 	return (TRUE);
 }

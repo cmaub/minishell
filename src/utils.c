@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 14:33:58 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 18:47:15 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,12 +182,12 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p)
 {
     int        status;
-    int        exit_code;
+//     int        exit_code;
     PARSER	*current;
     pid_t    waited_pid;
 
 	current = *nodes;
-    exit_code = 0;
+//     exit_code = 0;
     waited_pid = wait(&status);
     while (waited_pid != -1)
     {
@@ -202,13 +202,12 @@ int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p)
 		//exit_code peut etre attribue apres boucle ?
 		// if (WIFEXITED(status))
 		// 	exit_code = WEXITSTATUS(status);
-		if (p->exit_status != 0)
-			exit_code = WIFEXITED(status);
+		if (p->exit_status == 0)
+			p->exit_status = WIFEXITED(status);
 				
 	}
     }
-//     exit_code = WEXITSTATUS(status);
-    dprintf(2, "exit code dans wait = %d\n", exit_code);
-    return (exit_code);
+dprintf(2, "exit code dans wait = %d\n", p->exit_status);
+return (p->exit_status);
 }
 

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/21 18:09:30 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 15:44:58 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/13 16:13:17 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,14 +35,14 @@ long long ft_strtoll(const char *str)
     {
         if (sign == 1 && (res > (LLONG_MAX - (str[i] - '0')) / 10))
         {
-            res = LLONG_MAX;
-            return (res);
+            return(LLONG_MAX);
+            // return (res);
         }
         else if (sign == -1 && (-res < (LLONG_MIN + (str[i] - '0')) / 10))
         {
             // res = LLONG_MIN;
-            res = -9223372036854775807;
-            return (res);
+            return(-9223372036854775807);
+            // return (res);
         }
         res = res * 10 + (str[i]- '0');
         i++;
