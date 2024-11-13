@@ -1,26 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_lstnew_bonus.c                                  :+:      :+:    :+:   */
+/*   try_malloc.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: tharchen < tharchen@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/30 17:41:31 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/06/03 15:37:16 by cmaubert         ###   ########.fr       */
+/*   Created: 2024/11/13 23:16:14 by tharchen          #+#    #+#             */
+/*   Updated: 2024/11/13 23:32:03 by tharchen         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-t_list	*ft_lstnew(void *content)
-{
-	t_list	*new;
+void* try_malloc(size_t size) {
+    void* p;
 
-	new =try_malloc(sizeof(t_list));
-	// new = malloc (sizeof(t_list));
-	// if (!new)
-	// 	return (NULL);
-	new->content = content;
-	new->next = NULL;
-	return (new);
+    p = malloc(size);
+    if (p == NULL) {
+        write(1, "fatal: out of memory\n", 21);
+        exit(-1);
+    }
+    ft_bzero(p, size);
+    return p;
 }

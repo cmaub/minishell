@@ -12,9 +12,15 @@
 
 #include "minishell.h"
 
-int	fill_list_of_tokens(LEXER *L_input, t_token **list)
+int parserHasReachEnd(LEXER* input) {
+	if (input->head != input->len)
+		return (FALSE);
+	return (TRUE);
+}
+
+int	fill_list_of_tokens(LEXER* L_input, t_token** list)
 {
-	if (!expr(L_input, list))
+	if (!expr(L_input, list) || !parserHasReachEnd(L_input))
 		return (FALSE);
 	return (TRUE);
 }
@@ -226,17 +232,17 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 {
 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC)
 	{
-		cur->next->value = withdraw_quotes(cur->next->value, mini_env);
+		cur->value = withdraw_quotes(cur->value, mini_env);
 		new_node->nb_infile++;
 		if (cur->type == HEREDOC)
 		{
-			cur->next->value = withdraw_quotes(cur->next->value, mini_env);
+			cur->value = withdraw_quotes(cur->value, mini_env);
 		}
 		new_node->nb_heredoc++;
 	}
 	if (cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 	{
-		cur->next->value = withdraw_quotes(cur->next->value, mini_env);
+		cur->value = withdraw_quotes(cur->value, mini_env);
 		new_node->nb_outfile++;
 	}
 	else if (cur->type == ARGUMENT)
@@ -290,18 +296,18 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 			return ;
 		while (current && current->type != PIPEX)
 		{
-			if (current->type == REDIRECT_IN && current->next->value != NULL)
+			if (current->type == REDIRECT_IN)
 			{
-				new_node->infile[i] = ft_strdup(current->next->value);
+				new_node->infile[i] = ft_strdup(current->value);
 				new_node->redir_type_in[i++] = current->type;
 				// i++;
 			}
-			else if (current->type == HEREDOC && current->next->value != NULL)
+			else if (current->type == HEREDOC)
 			{
 				name_heredoc[ft_strlen(name_heredoc)] = index_heredoc + '0';
 				name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
 				new_node->fd_heredoc[i] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-				new_node->delimiter[d] = ft_strdup(current->next->value);
+				new_node->delimiter[d] = ft_strdup(current->value);
 				get_lines(new_node, i, d);
 				new_node->infile[i] = ft_strdup(name_heredoc);
 				new_node->redir_type_in[i++] = current->type;
@@ -311,14 +317,13 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 				// i++;
 				d++;
 			}
-			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT) 
-					&& current->next->value != NULL)
+			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 			{
-					new_node->outfile[o] = ft_strdup(current->next->value);
-					new_node->redir_type_out[o++] = current->type;
+				new_node->outfile[o] = ft_strdup(current->value);
+				new_node->redir_type_out[o++] = current->type;
 			}
 			else if (current->type == ARGUMENT && current->value != NULL)
-					new_node->command[cmd++] = ft_strdup(current->value);
+				new_node->command[cmd++] = ft_strdup(current->value);
 			current = current->next;
 		}
 		if (i > 0)
@@ -340,8 +345,8 @@ int		main(int argc, char **argv, char **env)
 	(void)argv;
 	char		*str_input;
 	LEXER		*L_input = NULL;
-	t_token	**tokens = NULL;
-	PARSER		**nodes = NULL;
+	t_token		*tokens = NULL;
+	PARSER		*nodes = NULL;
 	char		**mini_env;
 
 	mini_env = copy_env(env);	
@@ -353,8 +358,8 @@ int		main(int argc, char **argv, char **env)
 			L_input->data = NULL;
 			L_input->len = 0;
 			L_input->head = 0;
-			tokens = ft_calloc(1, sizeof(t_token *));
-			nodes = ft_calloc(1, sizeof(PARSER *));
+			// tokens = ft_calloc(1, sizeof(t_token *));
+			// nodes = ft_calloc(1, sizeof(PARSER *));
 			str_input = readline("~$");
 			if (!str_input)
 				break ;
@@ -366,25 +371,25 @@ int		main(int argc, char **argv, char **env)
 				add_history(str_input);
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
-			if (!fill_list_of_tokens(L_input, tokens))
+			if (!fill_list_of_tokens(L_input, &tokens))
 			{
 				printf("input non valide\n");
-				free(tokens);
+				// free(tokens);
 				free(str_input);
-				free(nodes);
+				// free(nodes);
 				free(L_input);
 			}
 			else
 			{
-				create_nodes(tokens, nodes, mini_env);
-				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
-				print_nodes_list(nodes);
-				dprintf(2, "exit_code = %d\n", handle_input(nodes, mini_env, argc));
+				create_nodes(&tokens, &nodes, mini_env);
+				dprintf(2, "taille de list %d\n", ft_size_list(&nodes));
+				print_nodes_list(&nodes);
+				dprintf(2, "exit_code = %d\n", handle_input(&nodes, mini_env, argc));
 					// break ;
 
-				free(tokens);
+				// free(tokens);
 				free(str_input);
-				free(nodes);
+				// free(nodes);
 				free(L_input);
 			}
 		}

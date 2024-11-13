@@ -51,9 +51,10 @@ char	*ft_itoa(int n)
 
 	nbr = (long) n;
 	len = count_nbr(nbr);
-	result = (char *) malloc (sizeof(char) * (len + 1));
-	if (!result)
-		return (NULL);
+	result = (char *)try_malloc(sizeof(char) * (len + 1));
+	// result = (char *) malloc (sizeof(char) * (len + 1));
+	// if (!result)
+	// 	return (NULL);
 	result[len] = '\0';
 	if (nbr == 0)
 		result[0] = '0';

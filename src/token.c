@@ -65,16 +65,17 @@ void	add_new_token(t_token **list, t_token *new)
 		new->prev = current;
 	}
 }
-	
-t_token	*create_new_token(LEXER *input, int start, int end, int type)
+
+t_token* create_new_token(LEXER* input, int start, int end, int type)
 {
 	t_token	*new;
 	int		len;
 
 	len = end - start;
-	new = malloc(sizeof(t_token));
-	if (!new)
-		return (NULL);
+	new = try_malloc(sizeof(t_token));
+	// new = malloc(sizeof(t_token));
+	// if (!new)
+	// 	return (NULL);
 	new->value = ft_substr(input->data, start, len);
 	if (!new->value)
 	{

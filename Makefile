@@ -2,7 +2,7 @@ NAME = minishell
 
 # Compiler
 CC		= gcc
-CFLAGS	= -Wall -Wextra -Werror -fPIC -g3
+CFLAGS	= -Wall -Wextra -Werror -g3
 
 # Libft
 LIBFT_PATH	= libft/
@@ -40,27 +40,28 @@ LDFLAGS	= -L /opt/homebrew/opt/readline/lib -lreadline
 all: $(OBJ_PATH) $(LIBFT) $(NAME)
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@$(CC) $(CFLAGS) -c $< -o $@ $(INC)
+	@ $(CC) $(CFLAGS) -c $< -o $@ $(INC)
 
 $(OBJ_PATH):
-	@mkdir -p $(OBJ_PATH)
+	@ mkdir -p $(OBJ_PATH)
 
 $(LIBFT):
-	@echo "Making libft..."
-	@make -sC $(LIBFT_PATH)
+	@ echo "Making libft..."
+	@ make -sC $(LIBFT_PATH)
 
 $(NAME): $(OBJS)
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT) $(INC) $(LDFLAGS)
+	@ $(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT) $(INC) $(LDFLAGS)
 
 clean:
-	@echo "Removing .o object files..."
-	@rm -rf $(OBJ_PATH)
-	@make clean -C $(LIBFT_PATH)
+	@ echo "Removing .o object files..."
+	@ rm -rf $(OBJ_PATH)
+	@ make clean -C $(LIBFT_PATH)
 
 fclean: clean
-	@rm -f $(NAME)
-	@rm -f $(LIBFT_PATH)$(LIBFT_NAME)
+	@ rm -f $(NAME)
+	@ rm -f $(LIBFT_PATH)$(LIBFT_NAME)
 
-re: fclean all
+re: fclean
+	@ make -j
 
 .PHONY: all re clean fclean

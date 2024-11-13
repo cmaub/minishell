@@ -47,7 +47,9 @@ FILES = ft_atoi.c \
 		ft_substr.c \
 		ft_tolower.c \
 		ft_toupper.c \
-		get_next_line.c
+		try_malloc.c \
+		# get_next_line.c
+
 FILES_B = ft_lstadd_back_bonus.c \
 				ft_lstadd_front_bonus.c \
 				ft_lstclear_bonus.c \
@@ -66,20 +68,21 @@ CFLAGS = -Wall -Wextra -Werror
 all: $(NAME)
 
 %.o: %.c
-	cc $(CFLAGS) -c $< -o $@
+	@ cc $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OFILES)
-	ar rcs $(NAME) $(OFILES)
+	@ ar rcs $(NAME) $(OFILES)
 
 bonus : $(OFILES) $(OFILES_B)
-	ar rcs $(NAME) $(OFILES) $(OFILES_B)
+	@ ar rcs $(NAME) $(OFILES) $(OFILES_B)
 
 clean:
-	rm -f $(OFILES) $(OFILES_B)
+	@ rm -f $(OFILES) $(OFILES_B)
 
 fclean: clean
-	rm -f $(NAME)
+	@ rm -f $(NAME)
 
-re: fclean all
+re: fclean
+	@ make -j
 
 .PHONY: all clean fclean re bonus

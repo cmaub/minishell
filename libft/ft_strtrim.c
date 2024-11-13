@@ -30,9 +30,10 @@ char	*ft_strtrim(char const *s1, char const *set)
 		end--;
 	if (end < start)
 		return (ft_strdup(""));
-	trimmed_str = (char *)malloc(sizeof(char) * ((end - start) + 2));
-	if (!trimmed_str)
-		return (NULL);
+	trimmed_str = (char *)try_malloc(sizeof(char) * ((end - start) + 2));
+	// trimmed_str = (char *)malloc(sizeof(char) * ((end - start) + 2));
+	// if (!trimmed_str)
+	// 	return (NULL);
 	ft_strlcpy(trimmed_str, s1 + start, (end - start) + 2);
 	trimmed_str[end - start + 1] = '\0';
 	return (trimmed_str);

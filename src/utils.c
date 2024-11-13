@@ -98,7 +98,7 @@ int	is_str(char *str)
 	i = 0;
 	while (str[i] != '\0')
 	{
-		if (!isalpha(str[i]))
+		if (!ft_isalpha(str[i]))
 			return (0);
 		i++;
 	}

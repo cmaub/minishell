@@ -104,6 +104,9 @@ void	ft_lstiter(t_list *lst, void (*f)(void *));
 t_list	*ft_lstlast(t_list *lst);
 t_list	*ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *));
 t_list	*ft_lstnew(void *content);
-int		ft_lstsize(t_list *lst);
+int		ft_lstsize(t_list* lst);
+
+// cadeau <3
+void* try_malloc(size_t size);
 
 #endif //LIBFT_H

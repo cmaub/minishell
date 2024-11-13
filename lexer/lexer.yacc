@@ -25,7 +25,6 @@ LOW_ALPHA = 'a-z'
 UP_ALPHA = 'A-Z'
 DIGIT = '0-9'
 SLASH = '/'
-BACKSLASH = '\'
 ESPER = '&'
 POINT_VIR = ';'
 PRINTABLE = 32 - 126
@@ -35,13 +34,11 @@ HAT = '^'
 
 ows = *SP
 
-ws = 1*(SP)
-
 squote = SQUOTE *(PRINTABLE / H_TAB / V_TAB) SQUOTE
 
 dquote = DQUOTE *(PRINTABLE / H_TAB / V_TAB) DQUOTE
 
-arg = ows 1*(LOW_ALPHA 
+arg = 1*(LOW_ALPHA 
        / UP_ALPHA
        / squote
        / dquote
@@ -51,20 +48,18 @@ arg = ows 1*(LOW_ALPHA
        / MINUS
        / UNDERSCORE)
 
-redir = R_ARROW arg
-       / L_ARROW arg
-       / R_ARROW R_ARROW arg
+/* redir =  R_ARROW R_ARROW arg
        / L_ARROW L_ARROW arg
+       / R_ARROW arg
+       / L_ARROW arg */
 
-command = ows ( redir / arg )
+redir = (R_ARROW [R_ARROW] / L_ARROW [L_ARROW]) arg
 
-expr = command  ows *(0*1[PIPE] 1*(command) )
-                     / *( ws command)
+command = 1*( (redir / arg) ows )
+
+expr = ows command *(ows PIPE ows command)
 
 start = [expr]
-
-///  
-
 
 // exemple //
 ows = *SP

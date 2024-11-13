@@ -295,9 +295,10 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 	PARSER		*current;
 	
 	current = (*nodes); 
-	p = malloc(sizeof(*p));
-	if (!p)
-		return (free (*nodes), free(current), 0);
+	p = try_malloc(sizeof(*p));
+	// p = malloc(sizeof(*p));
+	// if (!p)
+	// 	return (free (*nodes), free(current), 0);
 	ft_init_struct(p, ac, env, *nodes);
 	if (current->next == NULL && is_builtin(current))
 	{

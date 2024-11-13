@@ -22,9 +22,10 @@ void	*ft_calloc(size_t count, size_t size)
 	i = 0;
 	if (count != 0 && (count * size) / count != size)
 		return (NULL);
-	ptr = (void *)malloc (count * size);
-	if (!ptr)
-		return (NULL);
+	ptr = (void *)try_malloc(count * size);
+	// ptr = (void *)malloc(count * size);
+	// if (!ptr)
+	// 	return (NULL);
 	while (i < (count * size))
 	{
 		ptr[i] = 0;

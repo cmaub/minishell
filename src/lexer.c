@@ -12,6 +12,12 @@
 
 #include "minishell.h"
 
+#define DEBUG_S debug(input, (char*)__FUNCTION__)
+
+void debug(LEXER* input, char* fname) {
+	printf("%-30s > \033[30;1m%.*s\033[42;30;1m%c\033[0m\033[30;1m%s\033[0m\n", fname, (int)input->head, input->data, input->data[input->head], input->data + input->head + 1);
+}
+
 /*
 eat est la seul fonction qui a le droit de lire notre chaine
 son but est de verifier si le char donné en param est bien le char pointé par notre tete de lecture
@@ -48,7 +54,7 @@ int	eatRange(LEXER *input, int start, int end)
 }
 
 int	PIPE(LEXER *input, t_token **list)
-{
+{DEBUG_S;
 	int	i;
 	int	start;
 	int	end;
@@ -248,17 +254,17 @@ int	squote(LEXER *input)
 	return (TRUE);
 }
 
-int	arg(LEXER *input, t_token **list)
+int	arg(LEXER *input)
 {
+	DEBUG_S;
 	int	i;
 	int	start;
-	int	end;
-	t_token	*new_node;
+	// int	end;
+	// t_token	*new_node;
 
 	i = 0;
 	start = input->head;
-	end = start;
-	ows(input);
+	// end = start;
 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input))
 		i++;
@@ -267,173 +273,90 @@ int	arg(LEXER *input, t_token **list)
 		input->head = start;
 		return (FALSE);
 	}
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, ARGUMENT);
-		add_new_token(list, new_node);
-	}
+	// end = input->head;
+	// if (end > start)
+	// {
+	// 	new_node = create_new_token(input, start, end, ARGUMENT);
+	// 	add_new_token(list, new_node);
+	// }
 	return (TRUE);
-}
-
-int handle_delimiter(LEXER *input, t_token **list, int start)
-{
-	t_token	*new_node;
-	int		end;
-
-	end = input->head;
-	if (!arg(input, list))
-		return (FALSE);
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, DELIMITER);
-		replace_prev_token(list, new_node);
-	}
-	return (TRUE);
-}
-
-int process_heredoc(LEXER *input, t_token **list, int start, int end)
-{
-	t_token *new_node;
-
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, HEREDOC);
-		add_new_token(list, new_node);
-	}
-	ows(input);
-	start = end;
-	end = input->head;
-	if (!handle_delimiter(input, list, end))
-	{
-		input->head = start;
-		return (FALSE);
-	}
-	return (TRUE);
-}
-
-int handle_filename(LEXER *input, t_token **list, int start)
-{
-	int end;
-	t_token *new_node;
-
-	end = input->head;
-	if (!arg(input, list))
-		return (FALSE);
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, FILENAME);
-		replace_prev_token(list, new_node);
-	}
-	return (TRUE);
-}
-
-int process_redirect(LEXER *input, t_token **list, int start, int end, int redirect_type)
-{
-	t_token *new_node;
-
-	end = input->head;
-	if (end > start)
-	{
-	new_node = create_new_token(input, start, end, redirect_type);
-	add_new_token(list, new_node);
-	}
-	ows(input);
-	start = end;
-	end = input->head;
-	if (!handle_filename(input, list, end))
-	{
-		input->head = start;
-		return (FALSE);
-	}
-	return (TRUE);
-}
-
-int handle_redirect_out(LEXER *input, t_token **list)
-{
-	int start;
-	int end;
-
-	start = input->head;
-	end = input->head;
-	if (R_ARROW(input))
-	{
-		if (R_ARROW(input)) // Double flèche (>>)
-			return (process_redirect(input, list, start, end, APPEND_OUT));
-		return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
-	}
-	return (FALSE);
-}
-
-int handle_redirect_in(LEXER *input, t_token **list)
-{
-	int start;
-	int end;
-
-	start = input->head;
-	end = input->head;
-	if (L_ARROW(input))
-	{
-		if (L_ARROW(input)) // Double flèche (<<)
-			return (process_heredoc(input, list, start, end)); // creer tous les heredoc a ce moment la ?
-		return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
-	}
-	return (FALSE);
 }
 
 int redir(LEXER *input, t_token **list)
 {
-	int start = input->head;
-	if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
-		return (TRUE);
-	input->head = start;
-	return (FALSE);
+	DEBUG_S;
+	int save;
+	int start;
+	int type;
+
+	save = input->head;
+	if (R_ARROW(input)) {
+		if (R_ARROW(input))
+			type = APPEND_OUT;
+		else
+			type = REDIRECT_OUT;
+	} else if (L_ARROW(input)) {
+		if (L_ARROW(input))
+			type = HEREDOC;
+		else
+			type = REDIRECT_IN;
+	} else
+		return (FALSE);
+	ows(input);
+	start = input->head;
+	if (!arg(input)) {
+		input->head = save;
+		return (FALSE);
+	}
+	add_new_token(list, create_new_token(input, start, input->head, type));
+	return (TRUE);
 }
+
 
 int command(LEXER *input, t_token **list)
 {
-	int start = input->head;
-	ows(input);
+	DEBUG_S;
+	int save;
+	int start;
+	int i;
 
-	if (!arg(input, list) && ows(input) && !redir(input, list))
-	{
-		input->head = start;
-		return (FALSE);
-	}
-	ows(input);
-	while (arg(input, list) || redir(input, list))
-	{
+	i = 0;
+	save = input->head;
+	while (TRUE) {
+		if (!redir(input, list))
+		{
+			start = input->head;
+			if (!arg(input))
+				break;
+			add_new_token(list, create_new_token(input, start, input->head, ARGUMENT));
+		}
 		ows(input);
+		i++;
+	}
+	if (i < 1) {
+		input->head = save;
+		return (FALSE);
 	}
 	return (TRUE);
 }
 
 int	expr(LEXER *input, t_token **list)
 {
-	int	save;
+	DEBUG_S;
 
-	save = input->head;
-	if (!command(input, list))
-		return (FALSE);
 	ows(input);
+	if (!command(input, list)) {
+		return (FALSE);
+	}
 	while (TRUE)
 	{
-		if (input->len == input->head)
+		ows(input);
+		if (!PIPE(input, list))
 			break;
-		if ((PIPE(input, list) && command(input, list)) == FALSE)
-		{
-			if ((ws(input) && command(input, list)) == FALSE)
-			{
-				printf("FALSE command at input->data[input->head] = %c\n", input->data[input->head]);
-				input->head = save;
-				return (FALSE);
-			}
-		}
+		ows(input);
+		if (!command(input, list))
+			return (FALSE);
 	}
-	printf("[expr OK]\n");
+	printf("[expr OK] %zu - %zu\n", input->head, input->len);
 	return (TRUE);
 }
-

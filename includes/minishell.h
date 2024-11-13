@@ -153,7 +153,8 @@ int	ft_env(char **cmd, char **mini_env);
 int	ft_exit(char **cmd, t_pipex *p);
 
 /* LEXER */
-int PIPE(LEXER *input, t_token **list);
+int	eat(LEXER* input, char c);
+int PIPE(LEXER* input, t_token** list);
 int R_ARROW(LEXER *input);
 int L_ARROW(LEXER *input);
 int SP(LEXER *input);
@@ -178,7 +179,7 @@ int HAT(LEXER *input);
 int ows(LEXER *input);
 int squote(LEXER *input);
 int dquote(LEXER *input);
-int arg(LEXER *input, t_token **list);
+int arg(LEXER *input);
 int redir(LEXER *input, t_token **list);
 int command(LEXER *input, t_token **list);
 int expr(LEXER *input, t_token **list);

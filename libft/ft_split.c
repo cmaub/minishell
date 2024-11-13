@@ -64,9 +64,10 @@ char	**ft_split(char const *s, char c)
 
 	if (!s || count_world((char *) s, c) == 0)
 		return (NULL);
-	arrays = (char **)malloc((count_world((char *) s, c) + 1) * sizeof(char *));
-	if (!arrays)
-		return (NULL);
+	arrays = (char **)try_malloc((count_world((char *) s, c) + 1) * sizeof(char *));
+	// arrays = (char **)malloc((count_world((char *) s, c) + 1) * sizeof(char *));
+	// if (!arrays)
+	// 	return (NULL);
 	i = 0;
 	j = 0;
 	while (s[j])

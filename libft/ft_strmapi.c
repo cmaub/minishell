@@ -21,9 +21,10 @@ char	*ft_strmapi(char const *s, char (*f)(unsigned int, char))
 	i = 0;
 	if (s == NULL)
 		return (NULL);
-	new = (char *) malloc (sizeof (char) * (ft_strlen(s) + 1));
-	if (!new)
-		return (NULL);
+	new = (char *)try_malloc(sizeof (char) * (ft_strlen(s) + 1));
+	// new = (char *) malloc (sizeof (char) * (ft_strlen(s) + 1));
+	// if (!new)
+	// 	return (NULL);
 	while (s[i])
 	{
 		new[i] = (*f)(i, s[i]);

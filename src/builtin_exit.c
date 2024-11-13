@@ -34,7 +34,7 @@ int	ft_exit(char **cmd, t_pipex *p)
 	{
 		while (cmd[i][j])
 		{
-			if (!isdigit(cmd[i][j]))
+			if (!ft_isdigit(cmd[i][j]))
 			{
 				ft_putstr_fd("exit\n", 2);
 				ft_putstr_fd("exit: not a numeric argument\n", 2);
