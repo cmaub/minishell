@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 18:45:42 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 12:08:15 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,9 @@ char	*return_var_from_env(char *str, char **mini_env)
 	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
 		mini_env++;
 	if (*mini_env == NULL)
-	{
 		return (NULL);
-	}
-	new_var = ft_strdup(*mini_env + (ft_strlen(str) + 1));
+	// dprintf(2, "mini_env dans return = %s\n", *mini_env);
+	new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
 	return (new_var);
 }
 
@@ -377,11 +376,9 @@ int		main(int argc, char **argv, char **env)
 			else
 			{
 				create_nodes(tokens, nodes, mini_env);
-				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
-				print_nodes_list(nodes);
-				dprintf(2, "exit_code = %d\n", handle_input(nodes, mini_env, argc));
-					// break ;
-
+				// dprintf(2, "taille de list %d\n", ft_size_list(nodes));
+				// print_nodes_list(nodes);
+				handle_input(nodes, mini_env, argc);
 				free(tokens);
 				free(str_input);
 				free(nodes);

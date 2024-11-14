@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 18:46:09 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 11:43:16 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ int	exec_builtin(PARSER *current, t_pipex *p)
 		return (ft_env(current->command, p->mini_env));
 	if (p->flag == 1 && ft_strncmp(current->command[0], "exit", 4) == 0)
 		return (ft_exit(current->command, p));
+	if (ft_strncmp(current->command[0], "cd", 2) == 0)
+		return (ft_cd(current->command, p));
 	return (FALSE);
 
 }
@@ -53,6 +55,8 @@ int	is_builtin(PARSER *current)
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
 		return (TRUE);
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
+		return (TRUE);
+	if (ft_strncmp(current->command[0], "cd", 2) == 0)
 		return (TRUE);
 	return (FALSE);
 }
@@ -308,7 +312,7 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 	{
 		p->flag = 1;
 		handle_simple_process(current, p);
-		dprintf(2, "exit_status apres simple process = %d\n", p->exit_status);
+		// dprintf(2, "exit_status apres simple process = %d\n", p->exit_status);
 		return (p->exit_status);
 	}
 	while (p->i <= p->nb_cmd)

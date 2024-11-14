@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 10:37:53 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 11:42:57 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,7 +431,7 @@ int    expr(LEXER *input, t_token **list)
 			}
 		}
 	}
-    printf("[expr OK]\n");
+//     printf("[expr OK]\n");
     return (TRUE);
 }
 

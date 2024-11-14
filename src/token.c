@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/12 11:49:32 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/14 10:33:27 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,6 @@ void	print_tokens_list(t_token **list)
 
 void	print_nodes_list(PARSER **nodes)
 {
-	dprintf(2, "LINE = %d, FILE = %s\n", __LINE__, __FILE__);
 	int	i = 0;
 	int	o = 0;
 	int	h = 0;

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 18:15:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 10:22:49 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,10 @@ int	ft_exit(char **cmd, t_pipex *p)
 		}
 		// ne suffit pas pour le LONG LONG MIN
 		if (is_arg_too_big(cmd[1]))
+		{
+			p->exit_status = 2;
 			return (not_a_num(p));
+		}
 		i++;
 	}
 	if (cmd[i])

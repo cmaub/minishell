@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 18:46:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 11:31:22 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,7 @@ int create_and_add_token(LEXER *input, int start, int end, t_token **list, int t
 /* MINISHELL */
 char	*get_path_and_check(char **split_cmd, char **env);
 char	**copy_env(char **envp);
+char	*return_var_from_env(char *str, char **mini_env);
 
 void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
@@ -152,6 +153,7 @@ int	ft_echo(char **cmd);
 int	ft_pwd(char **mini_env);
 int	ft_env(char **cmd, char **mini_env);
 int	ft_exit(char **cmd, t_pipex *p);
+int	ft_cd(char **cmd, t_pipex *p);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);
