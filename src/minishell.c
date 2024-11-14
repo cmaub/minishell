@@ -344,7 +344,7 @@ int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
 	char		*str_input;
-	LEXER		*L_input = NULL;
+	LEXER		L_input;
 	t_token		*tokens = NULL;
 	PARSER		*nodes = NULL;
 	char		**mini_env;
@@ -354,30 +354,33 @@ int		main(int argc, char **argv, char **env)
 	{
 		while (1)
 		{
-			L_input = ft_calloc(1, sizeof(L_input)); // faire une fonction pour initialiser a part
-			L_input->data = NULL;
-			L_input->len = 0;
-			L_input->head = 0;
+			// L_input = ft_calloc(1, sizeof(L_input)); // faire une fonction pour initialiser a part
+			L_input.data = NULL;
+			L_input.len = 0;
+			L_input.head = 0;
 			// tokens = ft_calloc(1, sizeof(t_token *));
 			// nodes = ft_calloc(1, sizeof(PARSER *));
-			str_input = readline("~$");
+			// str_input = readline("~$");
+			ft_putstr_fd("\033[36;1mminishell ➜ \033[0m", 1);
+			str_input = get_next_line(0);
 			if (!str_input)
-				break ;
+				break;
+			str_input[ft_strlen(str_input) - 1] = 0;
 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
 				break ; // quand on appuie sur entree OU quand quote pas fermee puis fermee
 			else
 				rl_on_new_line();
 			if (str_input)
 				add_history(str_input);
-			L_input->data = str_input;
-			L_input->len = ft_strlen(str_input);
-			if (!fill_list_of_tokens(L_input, &tokens))
+			L_input.data = str_input;
+			L_input.len = ft_strlen(str_input);
+			if (!fill_list_of_tokens(&L_input, &tokens))
 			{
 				printf("input non valide\n");
 				// free(tokens);
 				free(str_input);
 				// free(nodes);
-				free(L_input);
+				// free(L_input);
 			}
 			else
 			{
@@ -390,7 +393,7 @@ int		main(int argc, char **argv, char **env)
 				// free(tokens);
 				free(str_input);
 				// free(nodes);
-				free(L_input);
+				// free(L_input);
 			}
 		}
 	}
