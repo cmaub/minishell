@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 11:43:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 14:08:59 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,7 +315,7 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 		// dprintf(2, "exit_status apres simple process = %d\n", p->exit_status);
 		return (p->exit_status);
 	}
-	while (p->i <= p->nb_cmd)
+	while (p->i < p->nb_cmd)
 	{
 		if(p->i < p->nb_cmd)
 		{
@@ -323,14 +323,18 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 				ft_error("pipe");
 		}
 		p->pid = fork();
-		if (p->i == p->nb_cmd)
+		if (p->i == p->nb_cmd - 1)
+		{
+			dprintf(2, "\n");
+			dprintf(2, "last_pid\n");
+			dprintf(2, "\n");
 			p->last_pid = p->pid;
+		}
 		create_process(p, &current);
 		p->i++;
 		current = current->next;
 		if (p->i == p->nb_cmd)
 			break;	
 	}
-	dprintf(2, "arrivee en bas de handle input\n");
 	return (ft_wait(p->last_pid, nodes, p));
 }

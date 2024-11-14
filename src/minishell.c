@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 12:08:15 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 14:12:00 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ char	*process_unquoted(char *str, int *index, char **mini_env)
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
 				expand_expr = ft_strdup("?");
-				expand_result = ft_strdup("0");
+				expand_result = ft_strdup("12");
 				result = ft_strjoin(result, expand_result);
 			}
 			else
@@ -179,7 +179,7 @@ char	*process_double_quotes(char *str, int *index, char **mini_env)
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
 				expand_expr = ft_strdup("?");
-				expand_result = ft_strdup("0");
+				expand_result = ft_strdup("12");
 				result = ft_strjoin(result, expand_result);
 			}
 			else
