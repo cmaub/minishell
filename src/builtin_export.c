@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 22:56:02 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/14 19:43:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,24 @@
 // si elles existent deja, il est possible de changer la valeur de la variable d'env deja existante
 // si export sans arg on affiche les variables d'environnement dans l'ordre ascii
 // verifier la syntaxe des noms de variables + des valeurs possibles
+
+char	**expand_env(char **env, int old_size) // ne fonctionne pas
+{
+	char	**new_env;
+	int	i;
+
+	new_env = ft_calloc(old_size + 2, sizeof(char *));
+	i = 0;
+	if (!new_env)
+		return (NULL);
+	while (env[i] && i < old_size)
+	{
+		new_env[i] = env[i];
+		i++;
+	}
+	free(env);
+	return (new_env);
+}
 
 int		env_var_exists(char **env, char *var)
 {
@@ -33,7 +51,7 @@ int		env_var_exists(char **env, char *var)
 	return (-1);
 }
 
-void	tab_sort_alpha(char **env, int count)
+void	sort_tab_ascii(char **env, int count)
 {
 	int	i;
 	int	j;
@@ -48,7 +66,7 @@ void	tab_sort_alpha(char **env, int count)
 		j = i + 1;
 		while (j < count)
 		{
-			if (ft_strncmp(env[j], env[min_idx] < 0))//revoir
+			if (ft_strcmp(env[j], env[min_idx]) < 0)
 				min_idx = j;
 			j++;
 		}
@@ -58,20 +76,22 @@ void	tab_sort_alpha(char **env, int count)
 			env[i] = env[min_idx];
 			env[min_idx] = temp;
 		}
+		i++;
 	}
 }
 
 void	print_sorted_env(char **env)
 {
-	int	count;
-	int i;
-	char **sorted_env;
+	int		count;
+	int		i;
+	char	**sorted_env;
 
 	count = 0;
 	i = 0;
+	sorted_env = NULL;
 	while (env[count])
 		count++;
-	sorted_env = malloc(sizeof(char *) * (count + 1));
+	sorted_env = ft_calloc(count + 1, sizeof(char *));
 	if (!sorted_env)
 		return ; // revoir si valeur de retour
 	while (i < count)
@@ -80,9 +100,7 @@ void	print_sorted_env(char **env)
 		i++;
 	}
 	sorted_env[count] = NULL;
-
-	tab_sort_alpha(sorted_env, count);
-
+	sort_tab_ascii(sorted_env, count);
 	i = 0;
 	while (sorted_env[i])
 	{
@@ -93,17 +111,18 @@ void	print_sorted_env(char **env)
 	free(sorted_env);
 }
 
-int	is_valid_name(char *name)
+int	check_name(char *name)
 {
-	int i;
+	int	i;
 
 	i = 0;
-	if (!name || ft_isdigit(name[0]))
+	if (!name || !name[0] || ft_isdigit(name[0]))
 		return (FALSE);
-	while (name[i])
+	while (name[i] && name[i] != '=')
 	{
-		if (!ft_isalnum(name[i]))
+		if (!ft_isalnum(name[i]) && name[i] != '_')
 			return (FALSE);
+		i++;
 	}
 	return (TRUE);
 }
@@ -118,52 +137,84 @@ int	ft_export(char **cmd, char **env)
 	char	*value;
 
 	i = 1;
+	j = 0;
 	equal = NULL;
-	if (!cmd[1]) // si pas d'arg
+	if (!cmd[1]) // si pas d'arg afficher par ordre ascii
 	{
 		print_sorted_env(env);
 		return (TRUE);
 	}
-	while (cmd[i])
+	while (cmd[i] != NULL)
 	{
-		//on separe le nom et la valeur
+		// on separe le nom et la valeur (ex :  TEST=value --> "TEST" et "value")
 		equal = ft_strchr(cmd[i], '=');
+		// printf("%d - equal = %s\n", i, equal);
 		if (equal) // si initialisation d'une variable
 		{
-			equal = '\0';
+			equal[0] = '\0';
 			name = cmd[i];
 			value = equal + 1;
-			if (!is_valid_name(name))
-				return (FALSE); //message d'erreur ?
+			printf("value = %s\n", value);
+			printf("name = %s\n", name);
+			if (!check_name(name))
+			{
+				ft_putstr_fd("minishell: export: '", 2);
+				ft_putstr_fd(name, 2);
+				ft_putstr_fd("': not a valid identifier\n", 2);
+
+				i++;
+				continue;
+			} //message d'erreur ?
 			index = env_var_exists(env, name);
+			*equal = '=';
+			printf("env[%d] = %s\n", index, env[index]);
+			// printf("cmd[%d] = %s\n", i, cmd[i]);
 			if (index >= 0)
 			{
 				free(env[index]);
 				env[index] = ft_strdup(cmd[i]);
+				printf("env[%d] = %s\n", index, env[index]);
 			}
 			else
+			{
+				while (env[j])
+					j++;
+				// env = expand_env(env, j); // Agrandir env si besoin
+				// env[j] = ft_strdup(cmd[i]);
+				// env[j + 1] = NULL;
+				// printf("LINE = %d\n", __LINE__);
+				env[j] = ft_strdup(cmd[i]);
+				env[j + 1] = NULL;
+				printf("env[%d] = %s\n", j, env[j]);
+			}
+		}
+		else // ajouter variable sans valeur dans env
+		{
+			if (!check_name(cmd[i]))
+			{
+				printf("cmd[%d] = %s\n", i, cmd[i]);
+				printf("LINE = %d\n", __LINE__);
+				ft_putstr_fd("minishell: export: '", 2);
+				ft_putstr_fd(cmd[i], 2);
+				ft_putstr_fd("': not a valid identifier\n", 2);
+				i++;
+				continue;
+			}
+			index = env_var_exists(env, cmd[i]);
+			if (index < 0) // Si la variable n'existe pas, l'ajouter avec une valeur vide
 			{
 				j = 0;
 				while (env[j])
 					j++;
 				env[j] = ft_strdup(cmd[i]);
-				env[j + 1] = '\0';
+				env[j + 1] = NULL;
+				printf("env[%d] = %s\n", j, env[j]);
 			}
 		}
-		else // ajouter variable sans valeur dans env
-		{
-			if (!is_valid_name(name))
-				return (FALSE);
-			j = 0;
-			while (env[j])
-				j++;
-			if (!env[j])
-				return (FALSE);
-			env[j] = ft_strdup(name);
-			env[j + 1] = '\0';
-		}
 		i++;
+		// printf("LINE = %d\n", __LINE__);
 	}
+	printf("LINE = %d\n", __LINE__);
 	return (TRUE);
 }
 
