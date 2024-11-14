@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 10:22:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 14:52:08 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,29 +23,29 @@ Message d'erreur:
 - si plusieurs arguments et premier invalide => not a numeric argument
 */
 
+extern int	exit_code;
+
 void	input_ok(t_pipex *p, char *cmd)
 {
 	ft_putstr_fd("exit\n", 2);
 	p->exit = 1;
 	if (cmd)
-		p->exit_status = ft_strtoll(cmd) % 256;
+		exit_code = ft_strtoll(cmd) % 256;
 }
 
-int	too_many(t_pipex *p)
+void	too_many()
 {
 	ft_putstr_fd("exit\n", 2);
 	ft_putstr_fd("exit: too many arguments\n", 2);
-	p->exit_status = 1;
-	return (TRUE);
+	exit_code = 1;
 }
 
-int	not_a_num(t_pipex *p)
+void	not_a_num(t_pipex *p)
 {
 	ft_putstr_fd("exit\n", 2);
 	ft_putstr_fd("exit: not a numeric argument\n", 2);
 	p->exit = 1;
-	p->exit_status = 2;
-	return (TRUE);
+	exit_code = 2;
 }
 
 int	is_arg_too_big(char *cmd)
@@ -73,23 +73,28 @@ int	ft_exit(char **cmd, t_pipex *p)
 			if (cmd[i][0] == '-')
 				j++;
 			if (!isdigit(cmd[i][j]))
-				return (not_a_num(p));
+			{
+				not_a_num(p);
+				exit (exit_code);
+			}
 			j++;
 		}
 		// ne suffit pas pour le LONG LONG MIN
 		if (is_arg_too_big(cmd[1]))
 		{
-			p->exit_status = 2;
-			return (not_a_num(p));
+			not_a_num(p);
+			exit(exit_code);
 		}
 		i++;
 	}
 	if (cmd[i])
-		return (too_many(p));
+	{
+		too_many();
+	}
 	else
 	{
 		input_ok(p, cmd[1]);
-		exit(p->exit_status);
+		exit(exit_code);
 	}
 	return (TRUE);
 }

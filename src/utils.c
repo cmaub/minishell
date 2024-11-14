@@ -6,11 +6,13 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/14 14:11:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 15:09:37 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+extern int	exit_code;
 
 void	ft_error(char *str)
 {
@@ -79,10 +81,9 @@ char	**copy_env(char **envp)
 	return (mini_env);
 }
 
-void	ft_init_struct(t_pipex *p, int ac, char **env, PARSER *nodes)
+void	ft_init_struct(t_pipex *p, char **mini_env, PARSER *nodes)
 {
-	p->ac = ac;
-	p->mini_env = env;
+	p->mini_env = mini_env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
 	p->prev_fd = -1;
@@ -179,16 +180,15 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 	}
 }
 
-int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p)
+int    ft_wait(pid_t last_pid, PARSER **nodes)
 {
 	int        status;
-	int        exit_code;
-	// (void)p;
+	int        exit_status;
 	PARSER	*current;
 	pid_t    waited_pid;
 
 	current = *nodes;
-	exit_code = 0;
+	exit_status = 0;
 	waited_pid = wait(&status);
 	while (waited_pid != -1)
 	{
@@ -204,21 +204,22 @@ int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p)
 			if (WIFEXITED(status))
 			{
 				dprintf(2, "!! status = %d, ligne %d\n", status, __LINE__);
-				exit_code = WEXITSTATUS(status);
+				exit_status = WEXITSTATUS(status);
 			}
 					
 		}
 	}
 	if (WIFEXITED(status))
 	{
-		if (p->exit_status == 0)
+		if (exit_code == 0)
 		{
-			dprintf(2, "!! status = %d, p->exit_status = %d,  ligne %d\n", status, p->exit_status, __LINE__);
-			exit_code = WEXITSTATUS(status);
+			dprintf(2, "!! status = %d, exit_code = %d,  ligne %d\n", status, exit_code, __LINE__);
+			exit_status = WEXITSTATUS(status);
 		}
 		else
-			exit_code = p->exit_status;
+			exit_status = exit_code;
 	}
+	exit_code = exit_status;
 	dprintf(2, "!! exit_code = %d, ligne %d\n", exit_code, __LINE__);
 	return (exit_code);
 }

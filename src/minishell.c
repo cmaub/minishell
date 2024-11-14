@@ -6,11 +6,13 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 14:12:00 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 16:28:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+extern int	exit_code;
 
 int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 {
@@ -127,7 +129,8 @@ char	*process_unquoted(char *str, int *index, char **mini_env)
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
 				expand_expr = ft_strdup("?");
-				expand_result = ft_strdup("12");
+				expand_result = ft_strdup(ft_itoa(exit_code));
+				exit_code = 0;
 				result = ft_strjoin(result, expand_result);
 			}
 			else
@@ -179,7 +182,8 @@ char	*process_double_quotes(char *str, int *index, char **mini_env)
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
 				expand_expr = ft_strdup("?");
-				expand_result = ft_strdup("12");
+				expand_result = ft_strdup(ft_itoa(exit_code));
+				exit_code = 0;
 				result = ft_strjoin(result, expand_result);
 			}
 			else
@@ -334,6 +338,8 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 	}
 }
 
+int	exit_code = 0;
+
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
@@ -343,7 +349,7 @@ int		main(int argc, char **argv, char **env)
 	PARSER		**nodes = NULL;
 	char		**mini_env;
 
-	mini_env = copy_env(env);	
+	mini_env = copy_env(env);
 	if (argc >= 1)
 	{
 		while (1)
@@ -362,7 +368,9 @@ int		main(int argc, char **argv, char **env)
 			else
 				rl_on_new_line();
 			if (str_input)
+			{
 				add_history(str_input);
+			}
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
 			if (!fill_list_of_tokens(L_input, tokens))
@@ -378,7 +386,7 @@ int		main(int argc, char **argv, char **env)
 				create_nodes(tokens, nodes, mini_env);
 				// dprintf(2, "taille de list %d\n", ft_size_list(nodes));
 				// print_nodes_list(nodes);
-				handle_input(nodes, mini_env, argc);
+				handle_input(nodes, mini_env);
 				free(tokens);
 				free(str_input);
 				free(nodes);

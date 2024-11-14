@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 11:31:22 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 15:01:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,25 +42,6 @@
 
 # define FALSE 0
 # define TRUE 1
-
-// < file1 cat > file2 >> file3 
-
-// infile[0] = "file1"
-// outfile[0] = "file2"
-// outfile[1] = "file2"
-// command[0] = "cat"
-
-// redir_type_in[0] = REDIRECT_IN;
-// redir_type_out[0] = REDIRECT_OUT;
-// redir_type_out[1] = APPEND_OUT;
-
-// i = 0;
-
-// while (infile[j])
-// {
-// 	j++;
-// }
-// fonction_infile(infile[j], redir_type_in[j]);
 
 typedef struct PARSER
 {
@@ -105,7 +86,6 @@ typedef struct s_pipex
 	int		       prev_fd;
 	int			pipefd[2];
 	int			exit;
-	int			exit_status;
 	int			flag;
 	pid_t	        	pid;
 	pid_t	        	last_pid;
@@ -125,7 +105,7 @@ void	print_tokens_list(t_token **list);
 void	ft_free_tab(char **tab);
 void	ft_error(char *str);
 void	check_open(int fd);
-void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes);
+void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	safe_close(int fd);
 void	get_lines(PARSER *nodes, int i, int d);
 void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out);
@@ -138,11 +118,11 @@ int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
 int	no_envp(char **tab);
-int	handle_input(PARSER **nodes, char **envp, int ac);
+int	handle_input(PARSER **nodes, char **mini_env);
 int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
 int	execute(PARSER *current, t_pipex *p);
-int    ft_wait(pid_t last_pid, PARSER **nodes, t_pipex *p);
+int    ft_wait(pid_t last_pid, PARSER **nodes);
 
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
 void	print_nodes_list(PARSER **nodes);

@@ -6,11 +6,13 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 14:08:59 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/14 16:22:29 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+extern int	exit_code;
 
 void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out)
 {
@@ -291,14 +293,11 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	{
 		free(current);
 		if (p->exit == 1)
-		{
-			dprintf(2, "exit_status = %d\n", p->exit_status);
 			exit (EXIT_FAILURE);
-		}
 	}
 }
 
-int	handle_input(PARSER **nodes, char **env, int ac)
+int	handle_input(PARSER **nodes, char **mini_env)
 {
 	t_pipex	*p;
 	PARSER		*current;
@@ -307,13 +306,12 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 	p = malloc(sizeof(*p));
 	if (!p)
 		return (free (*nodes), free(current), 0);
-	ft_init_struct(p, ac, env, *nodes);
+	ft_init_struct(p, mini_env, *nodes);
 	if (current->next == NULL && is_builtin(current))
 	{
 		p->flag = 1;
 		handle_simple_process(current, p);
-		// dprintf(2, "exit_status apres simple process = %d\n", p->exit_status);
-		return (p->exit_status);
+		return (exit_code);
 	}
 	while (p->i < p->nb_cmd)
 	{
@@ -325,9 +323,6 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 		p->pid = fork();
 		if (p->i == p->nb_cmd - 1)
 		{
-			dprintf(2, "\n");
-			dprintf(2, "last_pid\n");
-			dprintf(2, "\n");
 			p->last_pid = p->pid;
 		}
 		create_process(p, &current);
@@ -336,5 +331,5 @@ int	handle_input(PARSER **nodes, char **env, int ac)
 		if (p->i == p->nb_cmd)
 			break;	
 	}
-	return (ft_wait(p->last_pid, nodes, p));
+	return (ft_wait(p->last_pid, nodes));
 }
