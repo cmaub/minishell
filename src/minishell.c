@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 16:28:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:12:48 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,6 +268,7 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env)
 	return (new_node);
 }
 
+// Tester l'input << stop > file1
 void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 {
 	t_token	*current;
@@ -297,7 +298,6 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 			{
 				new_node->infile[i] = ft_strdup(current->next->value);
 				new_node->redir_type_in[i++] = current->type;
-				// i++;
 			}
 			else if (current->type == HEREDOC && current->next->value != NULL)
 			{
@@ -311,7 +311,6 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 				free(name_heredoc);
 				name_heredoc = ft_strdup("heredoc");
 				index_heredoc++;
-				// i++;
 				d++;
 			}
 			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT) 

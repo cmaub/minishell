@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/14 15:09:37 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:07:14 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,15 @@ extern int	exit_code;
 void	ft_error(char *str)
 {
 	perror(str);
+	exit_code = 1;
 	exit(EXIT_FAILURE);
+}
+
+int	ft_error_int(char *str)
+{
+	perror(str);
+	exit_code = 1;
+	return (-1);
 }
 
 // if we try to close a fd that is already closed, it will return -1
@@ -175,6 +183,7 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 	    close(*fd);
     	close(p->pipefd[1]);
     	close(p->pipefd[0]);
+	exit_code = 1;
     	perror(str);
     	exit(EXIT_FAILURE);
 	}
@@ -193,7 +202,6 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 	while (waited_pid != -1)
 	{
 		waited_pid = wait(&status);
-		dprintf(2, "!! status = %d, ligne %d\n", status, __LINE__);
 		if (current->redir_type_in && current->redir_type_in[current->i] == 4)
 			unlink(current->infile[current->i]);
 		if (current->next)
@@ -202,25 +210,17 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 		if (waited_pid == last_pid)
 		{
 			if (WIFEXITED(status))
-			{
-				dprintf(2, "!! status = %d, ligne %d\n", status, __LINE__);
-				exit_status = WEXITSTATUS(status);
-			}
-					
+				exit_status = WEXITSTATUS(status);		
 		}
 	}
 	if (WIFEXITED(status))
 	{
 		if (exit_code == 0)
-		{
-			dprintf(2, "!! status = %d, exit_code = %d,  ligne %d\n", status, exit_code, __LINE__);
 			exit_status = WEXITSTATUS(status);
-		}
 		else
 			exit_status = exit_code;
 	}
 	exit_code = exit_status;
-	dprintf(2, "!! exit_code = %d, ligne %d\n", exit_code, __LINE__);
 	return (exit_code);
 }
 

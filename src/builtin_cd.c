@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 12:16:18 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:31:12 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,9 @@ char *getcwd( char *buffer, size_t size );
 permet de recuperer le chemin absolu du repertoire courant
 - buffer : le bloc de mémoire dans lequel le chemin de travail courant vous sera retourné.
 - size : la taille du bloc de mémoire passé en premier paramètre.
-
 */
+
+extern int	exit_code;
 
 int	ft_setenv(char *dest, char *src, char **mini_env)
 {	
@@ -59,13 +60,16 @@ int	ft_cd(char **cmd, t_pipex *p)
 	char	*new_pwd;
 
 	if (!cmd[1])
+	{
+		exit_code = 1;
 		return (ft_putstr_fd("cd: no directory specified\n", 2), -1);
+	}
 	if (cmd[2])
-		return (ft_putstr_fd("cd: too many arguments\n", 2), -1);
+		return (ft_error_int("cd"));
 	else
 	{
 		if (chdir(cmd[1]) == -1)
-			return (perror("cd"), -1);
+			return (ft_error_int("cd"));
 	}
 	old_pwd = ft_strdup(return_var_from_env("PWD", p->mini_env));
 	dprintf(2, "***OLDPWD est maintenant = %s\n", old_pwd);
@@ -74,10 +78,7 @@ int	ft_cd(char **cmd, t_pipex *p)
 	new_pwd = getcwd(NULL, 0);
 	dprintf(2, "***PWD est maintenant = %s\n", new_pwd);
 	if (new_pwd)
-	{
-		ft_setenv("PWD", new_pwd, p->mini_env);
-		return (TRUE);
-	}
+		return (ft_setenv("PWD", new_pwd, p->mini_env), TRUE);
 	else
-		return (perror("getcwd"), -1);
+		return (ft_error_int("getcwd"));
 }

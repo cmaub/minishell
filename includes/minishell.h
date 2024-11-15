@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 15:01:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/15 15:28:12 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,7 @@ void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
 void	ft_free_tab(char **tab);
 void	ft_error(char *str);
+int	ft_error_int(char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	safe_close(int fd);
