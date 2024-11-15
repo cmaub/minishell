@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 11:42:12 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/15 20:28:27 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,15 +35,15 @@
 # define PIPEX 5 /* | */
 # define COMMAND 6 // plus besoin ?
 # define OPTION 7 /* - + taile de 3 */
-# define ARGUMENT 8 
-# define FILENAME 9 
+# define ARGUMENT 8
+# define FILENAME 9
 # define TBD 10
 # define DELIMITER 11
 
 # define FALSE 0
 # define TRUE 1
 
-// < file1 cat > file2 >> file3 
+// < file1 cat > file2 >> file3
 
 // infile[0] = "file1"
 // outfile[0] = "file2"
@@ -84,7 +84,7 @@ typedef struct PARSER
 typedef struct _LEXER {
     char    *data;
     size_t  len;
-    size_t  head;  
+    size_t  head;
 } LEXER;
 
 typedef struct s_token
@@ -93,7 +93,7 @@ typedef struct s_token
     int             type;
     int             index;
     struct s_token  *prev;
-    struct s_token  *next;    
+    struct s_token  *next;
 }t_token;
 
 typedef struct s_pipex
@@ -151,6 +151,8 @@ int	ft_echo(char **cmd);
 int	ft_pwd(char **mini_env);
 int	ft_env(char **cmd, char **mini_env);
 int	ft_exit(char **cmd, t_pipex *p);
+int	ft_unset(char **cmd, char **env);
+int	ft_export(char **cmd, char **env);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);
