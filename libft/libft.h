@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 08:19:38 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 15:12:54 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/15 12:02:26 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void	ft_bzero(void *s, size_t len);
 // str
 char	**ft_split(char const *s, char c);
 char	*ft_strchr(const char *s, int c);
-int	ft_strchr_occur(const char *s, int c);
+int		ft_strchr_occur(const char *s, int c);
 char	*ft_strdup(const char *s);
 void	ft_striteri(char *s, void (*f)(unsigned int, char *));
 char	*ft_strjoin(char const *s1, char const *s2);
@@ -90,12 +90,9 @@ void	ft_putstr_fd(char *s, int fd);
 // conversion type
 int		ft_atoi(const char *nptr);
 long	ft_atol(const char *str);
-// long	ft_atol(const char *str, _Bool *error);
 char	*ft_itoa(int n);
-long long ft_strtoll(const char *str);
-
-// calloc
 void	*ft_calloc(size_t nmemb, size_t size);
+long long	ft_strtoll(const char *str);
 
 // t_list
 void	ft_lstadd_back(t_list **list, t_list *new);
