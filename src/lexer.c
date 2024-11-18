@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 22:25:24 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 11:31:35 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,11 @@ int	DIGIT(LEXER *input)
 	return (eatRange(input, 48, 57));
 }
 
+int	EQUAL(LEXER *input)
+{
+	return (eat(input, '='));
+}
+
 int	PRINTABLE_SQUOTE(LEXER *input)
 {
 	int	i;
@@ -262,7 +267,7 @@ int	arg(LEXER *input, t_token **list)
 	new_node = ft_calloc(1, sizeof(t_token));
 	ows(input);
 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
-		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input))
+		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input) || EQUAL(input))
 		i++;
 	if (i < 1)
 	{

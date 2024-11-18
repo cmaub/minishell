@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/15 14:31:15 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 14:07:39 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 // si elles existent deja, il est possible de changer la valeur de la variable d'env deja existante
 // si export sans arg on affiche les variables d'environnement dans l'ordre ascii
 // verifier la syntaxe des noms de variables + des valeurs possibles
-
+// gerer les guillemet et les "export" ecrits avant
 int		env_var_exists(char **env, char *var)
 {
 	int	i;
@@ -26,7 +26,7 @@ int		env_var_exists(char **env, char *var)
 	i = 0;
 	while (env[i])
 	{
-		if (ft_strncmp(env[i], var, strlen(var)) == 0 && env[i][strlen(var)] == '=')
+		if (ft_strncmp(env[i], var, strlen(var)) == 0/* && env[i][strlen(var)] == '='*/)
 			return (i);
 		i++;
 	}
@@ -44,12 +44,18 @@ void	sort_tab_ascii(char **env, int count)
 	temp = NULL;
 	while (i < count)
 	{
+		// dprintf(2, "i = %d, count = %d\n", i, count);
 		min_idx = i;
 		j = i + 1;
 		while (j < count)
 		{
+			// dprintf(2, "LINE = %d\n", __LINE__);
+			// dprintf(2, "env[%d] = %s, env[%d] = %s\n", j, env[j], min_idx, env[min_idx]);
 			if (ft_strcmp(env[j], env[min_idx]) < 0)
+			{
+				// dprintf(2, "LINE = %d\n", __LINE__);
 				min_idx = j;
+			}
 			j++;
 		}
 		if (min_idx != i)
@@ -73,16 +79,29 @@ void	print_sorted_env(char **env)
 	sorted_env = NULL;
 	while (env[count])
 		count++;
+	dprintf(2, "count = %d\n", count);
 	sorted_env = ft_calloc(count + 1, sizeof(char *));
 	if (!sorted_env)
 		return ; // revoir si valeur de retour
+	dprintf(2, "env[5] = %s\n", env[5]);
+	// while (env[i])
+	// {
+	// 	ft_putstr_fd(env[i], 1);
+	// 	write(1, "\n", 1);
+	// 	i++;
+	// }
 	while (i < count)
 	{
-		sorted_env[i] = env[i];
+		sorted_env[i] = ft_strdup(env[i]);
+		// ft_putstr_fd(sorted_env[i], 1);
+		// write(1, "\n", 1);
 		i++;
 	}
 	sorted_env[count] = NULL;
+	dprintf(2, "LINE = %d\n", __LINE__);
+	i = 0;
 	sort_tab_ascii(sorted_env, count);
+	dprintf(2, "LINE = %d\n", __LINE__);
 	i = 0;
 	while (sorted_env[i])
 	{
@@ -90,6 +109,7 @@ void	print_sorted_env(char **env)
 		write(1, "\n", 1);
 		i++;
 	}
+	dprintf(2, "LINE = %d\n", __LINE__);
 	free(sorted_env);
 }
 
@@ -114,13 +134,13 @@ void	handle_value(char *cmd, char **env)
 	int		index;
 	char	*equal;
 	char	*name;
-	char	*value;
+	// char	*value;
 	int		j;
 
 	equal = ft_strchr(cmd, '=');
 	*equal = '\0';
 	name = cmd;
-	value = equal + 1;
+	// value = equal + 1;
 	j = 0;
 	// printf("value = %s\n", value);
 	// printf("name = %s\n", name);

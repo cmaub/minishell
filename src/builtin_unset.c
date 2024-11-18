@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/15 14:31:31 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 14:59:26 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,19 +21,19 @@
 
 #include "minishell.h"
 
-void	print_env(char **env)
-{
-	int	i;
+// void	print_env(char **env)
+// {
+// 	int	i;
 
-	i = 0;
-	while (env[i])
-	{
-		printf("env = %s\n", env[i]);
-		// ft_putstr_fd(env[i], 1);
-		// write(1, "\n", 1);
-		i++;
-	}
-}
+// 	i = 0;
+// 	while (env[i])
+// 	{
+// 		printf("env = %s\n", env[i]);
+// 		// ft_putstr_fd(env[i], 1);
+// 		// write(1, "\n", 1);
+// 		i++;
+// 	}
+// }
 
 int		count_env_var(char **list)
 {
@@ -60,19 +60,20 @@ char	**suppress_var(char **env, int index)
 	{
 		if (i != index)
 		{
-			new_env[j] = env[i];
+			new_env[j] = ft_strdup(env[i]);
 			j++;
 		}
 		else
 			free(env[i]);
 		i++;
 	}
-	new_env[i] = NULL;
+	new_env[j] = NULL;
 	free(env);
+	
 	return (new_env);
 }
 
-int	ft_unset(char **cmd, char **env)
+char	**ft_unset(char **cmd, char **env)
 {
 	int		i;
 	int		index;
@@ -85,6 +86,7 @@ int	ft_unset(char **cmd, char **env)
 	while (cmd[i])
 	{
 		index = env_var_exists(env, cmd[i]);
+		dprintf(2, "index = %d\n", index);
 		if (index >= 0)
 		{
 			// printf("index = %d\n", index);
@@ -94,11 +96,12 @@ int	ft_unset(char **cmd, char **env)
 			// print_env(new_env);
 			env = new_env;
 			printf("after = count_env_var(env) = %d\n", count_env_var(env));
+			// print_sorted_env(new_env);
 			// print_env(env);
 		}
 		i++;
 	}
-	return (TRUE);
+	return (new_env);
 }
 
 // int		main(int argc, char **argv, char **env)

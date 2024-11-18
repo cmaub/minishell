@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/13 19:40:45 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 14:54:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,9 +80,11 @@ char	**copy_env(char **envp)
 	return (mini_env);
 }
 
-void	ft_init_struct(t_pipex *p, int ac, char **env, PARSER *nodes)
+void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 {
-	p->ac = ac;
+	(void)env;
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+
 	p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;

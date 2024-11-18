@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/15 20:28:27 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 14:59:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ void	print_tokens_list(t_token **list);
 void	ft_free_tab(char **tab);
 void	ft_error(char *str);
 void	check_open(int fd);
-void	ft_init_struct(t_pipex *p, int ac, char **envp, PARSER *nodes);
+void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	safe_close(int fd);
 void	get_lines(PARSER *nodes, int i, int d);
 void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out);
@@ -136,7 +136,8 @@ int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
 int	no_envp(char **tab);
-int	handle_input(PARSER **nodes, char **envp, int ac);
+int		env_var_exists(char **env, char *var);
+int	handle_input(PARSER **nodes, t_pipex *p);
 int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
 int	execute(PARSER *current, t_pipex *p);
@@ -151,8 +152,9 @@ int	ft_echo(char **cmd);
 int	ft_pwd(char **mini_env);
 int	ft_env(char **cmd, char **mini_env);
 int	ft_exit(char **cmd, t_pipex *p);
-int	ft_unset(char **cmd, char **env);
+char **ft_unset(char **cmd, char **env);
 int	ft_export(char **cmd, char **env);
+void	print_sorted_env(char **env);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);
@@ -176,6 +178,7 @@ int SEMI_COL(LEXER *input);
 int PRINTABLE_SQUOTE(LEXER *input);
 int PRINTABLE_DQUOTE(LEXER *input);
 int HAT(LEXER *input);
+int	EQUAL(LEXER *input);
 
 int ows(LEXER *input);
 int squote(LEXER *input);

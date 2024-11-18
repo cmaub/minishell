@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 11:43:42 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:00:23 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,27 @@ void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out
 
 int	exec_builtin(PARSER *current, t_pipex *p)
 {
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	if (ft_strncmp(current->command[0], "echo", 4) == 0)
 		return (ft_echo(current->command));
 	if (ft_strncmp(current->command[0], "pwd", 3) == 0)
 		return (ft_pwd(p->mini_env));
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
-		return (ft_env(current->command, p->mini_env));
+	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		ft_env(current->command, p->mini_env);
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		return (TRUE);
+	}
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
 		return (ft_exit(current->command, p));
+	if (ft_strncmp(current->command[0], "export", 6) == 0)
+		return (ft_export(current->command, p->mini_env));
+	if (ft_strncmp(current->command[0], "unset", 5) == 0)
+	{
+		p->mini_env = ft_unset(current->command, p->mini_env);
+		return (TRUE);
+	}
 	return (FALSE);
 
 }
@@ -53,6 +66,10 @@ int	is_builtin(PARSER *current)
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
 		return (TRUE);
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
+		return (TRUE);
+	if (ft_strncmp(current->command[0], "export", 6) == 0)
+		return (TRUE);
+	if (ft_strncmp(current->command[0], "unset", 5) == 0)
 		return (TRUE);
 	return (FALSE);
 }
@@ -283,25 +300,31 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	}
 	if (exec_builtin(current, p))
 	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		free(current);
 		if (p->exit == 1)
 			exit (EXIT_FAILURE);
 	}
 }
 
-int	handle_input(PARSER **nodes, char **env, int ac)
+int	handle_input(PARSER **nodes, t_pipex *p)
 {
-	t_pipex	*p;
+	// t_pipex	*p;
 	PARSER		*current;
 	
 	current = (*nodes); 
-	p = malloc(sizeof(*p));
-	if (!p)
-		return (free (*nodes), free(current), 0);
-	ft_init_struct(p, ac, env, *nodes);
+	// p = malloc(sizeof(*p));
+	// if (!p)
+	// 	return (free (*nodes), free(current), 0);
+	// ft_init_struct(p, ac, env, *nodes);
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	if (current->next == NULL && is_builtin(current))
 	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		handle_simple_process(current, p);
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		dprintf(2, "\n\napres handle simple process\n");
+		print_sorted_env(p->mini_env);
 		return (0);
 	}
 	while (p->i <= p->nb_cmd)

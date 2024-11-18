@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 00:07:12 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 14:55:18 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,10 +339,13 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 int	main(int argc, char **argv, char **env)
 {
 	(void)argv;
+	(void)argc;
 	char		*str_input;
 	LEXER		*L_input = NULL;
 	t_token		**tokens = NULL;
 	PARSER		**nodes = NULL;
+	t_pipex	*p = NULL;
+
 	char		**mini_env;
 
 	str_input = NULL;
@@ -359,15 +362,15 @@ int	main(int argc, char **argv, char **env)
 			nodes = ft_calloc(1, sizeof(PARSER *));
 
 			// Utilisation de get_next_line au lieu de readline
-			write(1, "~$ ", 3); // affiche le prompt
-			str_input = get_next_line(0); // lit l'entrée standard
-
+			// write(1, "~$ ", 3);
+			// str_input = get_next_line(0);
+			str_input = readline("~$");
 			if (!str_input)
 				break;
 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
 				break;
-			// if (str_input)
-			// 	add_history(str_input); // conserver l'historique si readline est activé
+			if (str_input)
+				add_history(str_input); // conserver l'historique si readline est activé
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
 
@@ -384,8 +387,15 @@ int	main(int argc, char **argv, char **env)
 				create_nodes(tokens, nodes, mini_env);
 				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
 				print_nodes_list(nodes);
-				dprintf(2, "exit_code = %d\n", handle_input(nodes, mini_env, argc));
-
+				p = ft_calloc(1, sizeof(*p));
+				if (!p)
+				{
+					free (nodes);
+					return (0);
+				}
+				ft_init_struct(p, mini_env, *nodes);
+				dprintf(2, "exit_code = %d\n", handle_input(nodes, p));
+				mini_env = p->mini_env;
 				free(tokens);
 				free(str_input);
 				free(nodes);
