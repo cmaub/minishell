@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/15 16:12:48 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:45:04 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void free_new_node(PARSER *new_node)
 char	*return_var_from_env(char *str, char **mini_env)
 {
 	char	*new_var;
-	
+
 	new_var = NULL;
 	str = ft_strjoin(str, "=");
 	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
@@ -70,7 +70,7 @@ char	*isolate_expand(char *str, int index)
 			break;
 		i++;
 	}
-	return (ft_substr(str, index, i));	
+	return (ft_substr(str, index, i));
 }
 
 void	calloc_tab_of_node(PARSER *new_node)
@@ -112,7 +112,7 @@ char	*join_char(char c, char *tmp)
 
 	single_char[0] = c;
 	single_char[1] = '\0';
-	return (ft_strjoin(tmp, single_char));	
+	return (ft_strjoin(tmp, single_char));
 }
 
 char	*process_unquoted(char *str, int *index, char **mini_env)
@@ -313,7 +313,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env)
 				index_heredoc++;
 				d++;
 			}
-			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT) 
+			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 					&& current->next->value != NULL)
 			{
 					new_node->outfile[o] = ft_strdup(current->next->value);
@@ -342,10 +342,13 @@ int	exit_code = 0;
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
+	(void)argc;
 	char		*str_input;
 	LEXER		*L_input = NULL;
-	t_token	**tokens = NULL;
+	t_token		**tokens = NULL;
 	PARSER		**nodes = NULL;
+	t_pipex	*p = NULL;
+
 	char		**mini_env;
 
 	mini_env = copy_env(env);
@@ -353,25 +356,28 @@ int		main(int argc, char **argv, char **env)
 	{
 		while (1)
 		{
-			L_input = ft_calloc(1, sizeof(L_input)); // faire une fonction pour initialiser a part
+			L_input = ft_calloc(10, sizeof(L_input)); // faire une fonction pour initialiser a part
 			L_input->data = NULL;
 			L_input->len = 0;
 			L_input->head = 0;
 			tokens = ft_calloc(1, sizeof(t_token *));
 			nodes = ft_calloc(1, sizeof(PARSER *));
+
+			// Utilisation de get_next_line au lieu de readline
+			// write(1, "~$ ", 3);
+			// str_input = get_next_line(0);
 			str_input = readline("~$");
 			if (!str_input)
-				break ;
+				break;
 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
-				break ; // quand on appuie sur entree OU quand quote pas fermee puis fermee
-			else
-				rl_on_new_line();
+				break;
 			if (str_input)
 			{
 				add_history(str_input);
 			}
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
+
 			if (!fill_list_of_tokens(L_input, tokens))
 			{
 				printf("input non valide\n");
@@ -383,9 +389,17 @@ int		main(int argc, char **argv, char **env)
 			else
 			{
 				create_nodes(tokens, nodes, mini_env);
-				// dprintf(2, "taille de list %d\n", ft_size_list(nodes));
-				// print_nodes_list(nodes);
-				handle_input(nodes, mini_env);
+				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
+				print_nodes_list(nodes);
+				p = ft_calloc(1, sizeof(*p));
+				if (!p)
+				{
+					free (nodes);
+					return (0);
+				}
+				ft_init_struct(p, mini_env, *nodes);
+				dprintf(2, "exit_code = %d\n", handle_input(nodes, p));
+				mini_env = p->mini_env;
 				free(tokens);
 				free(str_input);
 				free(nodes);
@@ -395,3 +409,62 @@ int		main(int argc, char **argv, char **env)
 	}
 	return (0);
 }
+
+
+// int		main(int argc, char **argv, char **env)
+// {
+// 	(void)argv;
+// 	char		*str_input;
+// 	LEXER		*L_input = NULL;
+// 	t_token	**tokens = NULL;
+// 	PARSER		**nodes = NULL;
+// 	char		**mini_env;
+
+// 	str_input = NULL;
+// 	mini_env = copy_env(env);
+// 	if (argc >= 1)
+// 	{
+// 		while (1)
+// 		{
+// 			L_input = ft_calloc(1, sizeof(L_input)); // faire une fonction pour initialiser a part
+// 			L_input->data = NULL;
+// 			L_input->len = 0;
+// 			L_input->head = 0;
+// 			tokens = ft_calloc(1, sizeof(t_token *));
+// 			nodes = ft_calloc(1, sizeof(PARSER *));
+// 			str_input = readline("~$");
+// 			if (!str_input)
+// 				break ;
+// 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
+// 				break ; // quand on appuie sur entree OU quand quote pas fermee puis fermee
+// 			else
+// 				rl_on_new_line();
+// 			if (str_input)
+// 				add_history(str_input);
+// 			L_input->data = str_input;
+// 			L_input->len = ft_strlen(str_input);
+// 			if (!fill_list_of_tokens(L_input, tokens))
+// 			{
+// 				printf("input non valide\n");
+// 				free(tokens);
+// 				free(str_input);
+// 				free(nodes);
+// 				free(L_input);
+// 			}
+// 			else
+// 			{
+// 				create_nodes(tokens, nodes, mini_env);
+// 				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
+// 				print_nodes_list(nodes);
+// 				dprintf(2, "exit_code = %d\n", handle_input(nodes, mini_env, argc));
+// 					// break ;
+
+// 				free(tokens);
+// 				free(str_input);
+// 				free(nodes);
+// 				free(L_input);
+// 			}
+// 		}
+// 	}
+// 	return (0);
+// }

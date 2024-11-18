@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/15 15:28:12 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:49:40 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,8 @@
 # define PIPEX 5 /* | */
 # define COMMAND 6 // plus besoin ?
 # define OPTION 7 /* - + taile de 3 */
-# define ARGUMENT 8 
-# define FILENAME 9 
+# define ARGUMENT 8
+# define FILENAME 9
 # define TBD 10
 # define DELIMITER 11
 
@@ -65,7 +65,7 @@ typedef struct PARSER
 typedef struct _LEXER {
     char    *data;
     size_t  len;
-    size_t  head;  
+    size_t  head;
 } LEXER;
 
 typedef struct s_token
@@ -74,7 +74,7 @@ typedef struct s_token
     int             type;
     int             index;
     struct s_token  *prev;
-    struct s_token  *next;    
+    struct s_token  *next;
 }t_token;
 
 typedef struct s_pipex
@@ -119,7 +119,8 @@ int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
 int	no_envp(char **tab);
-int	handle_input(PARSER **nodes, char **mini_env);
+int		env_var_exists(char **env, char *var);
+int	handle_input(PARSER **nodes, t_pipex *p);
 int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
 int	execute(PARSER *current, t_pipex *p);
@@ -135,6 +136,9 @@ int	ft_pwd(char **mini_env);
 int	ft_env(char **cmd, char **mini_env);
 int	ft_exit(char **cmd, t_pipex *p);
 int	ft_cd(char **cmd, t_pipex *p);
+char **ft_unset(char **cmd, char **env);
+int	ft_export(char **cmd, char **env);
+void	print_sorted_env(char **env);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);
@@ -158,6 +162,7 @@ int SEMI_COL(LEXER *input);
 int PRINTABLE_SQUOTE(LEXER *input);
 int PRINTABLE_DQUOTE(LEXER *input);
 int HAT(LEXER *input);
+int	EQUAL(LEXER *input);
 
 int ows(LEXER *input);
 int squote(LEXER *input);

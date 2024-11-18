@@ -1,31 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin_env.c                                      :+:      :+:    :+:   */
+/*   ft_strcmp.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 13:44:14 by cmaubert         ###   ########.fr       */
+/*   Created: 2024/11/18 10:42:34 by cmaubert          #+#    #+#             */
+/*   Updated: 2024/11/18 11:55:20 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "libft.h"
 
-int	ft_env(char **cmd, char **mini_env)
+int	ft_strcmp(const char *s1, const char *s2)
 {
-	if (cmd[1])
+	size_t	i;
+
+	i = 0;
+	while ((s1[i] || s2[i]))
 	{
-		ft_putstr_fd("Too many arguments\n", 2);
-		exit (EXIT_FAILURE);
+		if (s1[i] != s2[i])
+			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
+		i++;
 	}
-	dprintf(2, "entree dans la fonction\n");
-	while (*mini_env)
-	{
-		dprintf(2, "*mini_env = %s\n", *mini_env);
-		ft_putstr_fd(*mini_env, 1);
-		write(1, "\n", 1);
-		mini_env++;
-	}
-	return (TRUE);
+	return (-1);
 }

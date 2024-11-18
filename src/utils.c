@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/15 16:07:14 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:51:49 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ void	safe_close(int fd)
 	}
 	// i++;
 }
+
 int		ft_size_list(PARSER **nodes)
 {
 	PARSER	*current;
@@ -89,9 +90,12 @@ char	**copy_env(char **envp)
 	return (mini_env);
 }
 
-void	ft_init_struct(t_pipex *p, char **mini_env, PARSER *nodes)
+void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 {
-	p->mini_env = mini_env;
+	(void)env;
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+
+	p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
 	p->prev_fd = -1;

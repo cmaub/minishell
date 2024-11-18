@@ -3,22 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/14 10:33:27 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:51:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /*
-Cette fonction permet de changer la nature du token identifie en supprimant celui qui vient d'etre ajoute s'il peut etre precise 
+Cette fonction permet de changer la nature du token identifie en supprimant celui qui vient d'etre ajoute s'il peut etre precise
 */
 void	replace_prev_token(t_token **list, t_token *new)
 {
 	t_token	*current;
-	
+
 	if (!list || !new)
 		return ;
 	if (*list == NULL)
@@ -45,7 +45,7 @@ void	replace_prev_token(t_token **list, t_token *new)
 void	add_new_token(t_token **list, t_token *new)
 {
 	t_token	*current;
-	
+
 	if (!list || !new)
 		return ;
 	if (*list == NULL)
@@ -60,19 +60,19 @@ void	add_new_token(t_token **list, t_token *new)
 		{
 			current = current->next;
 		}
-		
+
 		current->next = new;
 		new->prev = current;
 	}
 }
-	
+
 t_token	*create_new_token(LEXER *input, int start, int end, int type)
 {
 	t_token	*new;
 	int		len;
 
 	len = end - start;
-	new = malloc(sizeof(t_token));
+	new = ft_calloc(1, sizeof(t_token));
 	if (!new)
 		return (NULL);
 	new->value = ft_substr(input->data, start, len);
@@ -123,7 +123,7 @@ void	print_nodes_list(PARSER **nodes)
 	int	d = 0;
 	int	index = 0;
 	PARSER	*tmp;
-	
+
 	tmp = (*nodes);
 	if (!(*nodes))
 		return ;
@@ -164,7 +164,7 @@ void	print_nodes_list(PARSER **nodes)
 void	add_new_node(PARSER **nodes, PARSER *new_node)
 {
 	PARSER	*current;
-	
+
 	if (!nodes || !new_node)
 	{
 		return ;
@@ -181,6 +181,6 @@ void	add_new_node(PARSER **nodes, PARSER *new_node)
 			current = current->next;
 		current->next = new_node;
 	}
-	
+
 }
 
