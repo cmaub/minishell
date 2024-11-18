@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 17:49:01 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 18:24:33 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ int	execute(PARSER *current, t_pipex *p)
 		dprintf(2, "p->flag dans execute = %d\n", p->flag);
 		exec_builtin(current, p);
 		dprintf(2, "exit_code dans current = %d\n", current->exit_code);
-		free(current);
+		// free(current);
 		exit(EXIT_SUCCESS);
 	}
 	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
@@ -330,12 +330,13 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 		p->pid = fork();
 		if (p->i == p->nb_cmd - 1)
 		{
+			dprintf(2, "arrivee dans last pid\n");
 			p->last_pid = p->pid;
 		}
 		create_process(p, &current);
 		p->i++;
 		if (current)
-			dprintf(2, "current->exit_code dans handle_input = %d\n", current->exit_code);
+			dprintf(2, "current = %s, current->exit_code dans handle_input = %d\n", current->command[0], current->exit_code);
 		current = current->next;
 		if (p->i == p->nb_cmd)
 			break;	
