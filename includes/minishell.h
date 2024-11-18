@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 15:49:40 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:02:32 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ typedef struct PARSER
 	int	nb_command;
 	int	nb_heredoc;
 	struct PARSER	*next;
+	int			exit_code;
 } PARSER ;
 
 typedef struct _LEXER {
@@ -104,7 +105,7 @@ void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
 void	ft_free_tab(char **tab);
 void	ft_error(char *str);
-int	ft_error_int(char *str);
+int	ft_error_int(char *str, PARSER *node);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	safe_close(int fd);
@@ -134,8 +135,8 @@ void	add_new_node(PARSER **nodes, PARSER *new_node);
 int	ft_echo(char **cmd);
 int	ft_pwd(char **mini_env);
 int	ft_env(char **cmd, char **mini_env);
-int	ft_exit(char **cmd, t_pipex *p);
-int	ft_cd(char **cmd, t_pipex *p);
+int	ft_exit(char **cmd, t_pipex *p, PARSER *node);
+int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
 char **ft_unset(char **cmd, char **env);
 int	ft_export(char **cmd, char **env);
 void	print_sorted_env(char **env);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/15 15:31:12 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:01:05 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	ft_setenv(char *dest, char *src, char **mini_env)
 	return (0);
 }
 
-int	ft_cd(char **cmd, t_pipex *p)
+int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 {
 	char	*old_pwd;
 	char	*new_pwd;
@@ -65,11 +65,11 @@ int	ft_cd(char **cmd, t_pipex *p)
 		return (ft_putstr_fd("cd: no directory specified\n", 2), -1);
 	}
 	if (cmd[2])
-		return (ft_error_int("cd"));
+		return (ft_error_int("cd", node));
 	else
 	{
 		if (chdir(cmd[1]) == -1)
-			return (ft_error_int("cd"));
+			return (ft_error_int("cd", node));
 	}
 	old_pwd = ft_strdup(return_var_from_env("PWD", p->mini_env));
 	dprintf(2, "***OLDPWD est maintenant = %s\n", old_pwd);
@@ -80,5 +80,5 @@ int	ft_cd(char **cmd, t_pipex *p)
 	if (new_pwd)
 		return (ft_setenv("PWD", new_pwd, p->mini_env), TRUE);
 	else
-		return (ft_error_int("getcwd"));
+		return (ft_error_int("getcwd", node));
 }

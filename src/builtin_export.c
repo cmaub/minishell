@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 14:07:39 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:08:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,29 +79,17 @@ void	print_sorted_env(char **env)
 	sorted_env = NULL;
 	while (env[count])
 		count++;
-	dprintf(2, "count = %d\n", count);
 	sorted_env = ft_calloc(count + 1, sizeof(char *));
 	if (!sorted_env)
 		return ; // revoir si valeur de retour
-	dprintf(2, "env[5] = %s\n", env[5]);
-	// while (env[i])
-	// {
-	// 	ft_putstr_fd(env[i], 1);
-	// 	write(1, "\n", 1);
-	// 	i++;
-	// }
 	while (i < count)
 	{
 		sorted_env[i] = ft_strdup(env[i]);
-		// ft_putstr_fd(sorted_env[i], 1);
-		// write(1, "\n", 1);
 		i++;
 	}
 	sorted_env[count] = NULL;
-	dprintf(2, "LINE = %d\n", __LINE__);
 	i = 0;
 	sort_tab_ascii(sorted_env, count);
-	dprintf(2, "LINE = %d\n", __LINE__);
 	i = 0;
 	while (sorted_env[i])
 	{
@@ -194,7 +182,6 @@ void	handle_variable_without_value(char *cmd, char **env)
 			j++;
 		env[j] = ft_strdup(cmd);
 		env[j + 1] = NULL;
-		printf("env[%d] = %s\n", j, env[j]);
 		// add_to_env(&env, cmd);
 	}
 }

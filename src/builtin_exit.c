@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 15:36:48 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:30:52 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,29 +23,38 @@ Message d'erreur:
 - si plusieurs arguments et premier invalide => not a numeric argument
 */
 
-extern int	exit_code;
+// extern int	exit_code;
 
-void	input_ok(t_pipex *p, char *cmd)
+void	input_ok(t_pipex *p, char *cmd, PARSER *node)
 {
-	ft_putstr_fd("exit\n", 2);
-	p->exit = 1;
+	if (p->flag == 1)
+	{
+		ft_putstr_fd("exit\n", 2);
+		p->exit = 1;
+	}
 	if (cmd)
-		exit_code = ft_strtoll(cmd) % 256;
+		node->exit_code = ft_strtoll(cmd) % 256;
 }
 
-void	too_many()
+void	too_many(t_pipex *p, PARSER *node)
 {
-	ft_putstr_fd("exit\n", 2);
-	ft_putstr_fd("exit: too many arguments\n", 2);
-	exit_code = 1;
+	if (p->flag == 1)
+	{
+		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit: too many arguments\n", 2);
+	}
+	node->exit_code = 1;
 }
 
-void	not_a_num(t_pipex *p)
+void	not_a_num(t_pipex *p, PARSER *node)
 {
-	ft_putstr_fd("exit\n", 2);
-	ft_putstr_fd("exit: not a numeric argument\n", 2);
-	p->exit = 1;
-	exit_code = 2;
+	if (p->flag == 1)
+	{
+		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit: not a numeric argument\n", 2);
+		p->exit = 1;
+	}
+	node->exit_code = 2;
 }
 
 int	is_arg_too_big(char *cmd)
@@ -59,7 +68,7 @@ int	is_arg_too_big(char *cmd)
 		return (0);
 }
 
-int	ft_exit(char **cmd, t_pipex *p)
+int	ft_exit(char **cmd, t_pipex *p, PARSER *node)
 {
 	int	i;
 	int	j;
@@ -74,27 +83,30 @@ int	ft_exit(char **cmd, t_pipex *p)
 				j++;
 			if (!isdigit(cmd[i][j]))
 			{
-				not_a_num(p);
-				exit (exit_code);
+				not_a_num(p, node);
+				if (p->flag == 1)
+					exit (node->exit_code);
 			}
 			j++;
 		}
 		// ne suffit pas pour le LONG LONG MIN
 		if (is_arg_too_big(cmd[1]))
 		{
-			not_a_num(p);
-			exit(exit_code);
+			not_a_num(p, node);
+			if (p->flag == 1)
+				exit(node->exit_code);
 		}
 		i++;
 	}
 	if (cmd[i])
 	{
-		too_many();
+		too_many(p, node);
 	}
 	else
 	{
-		input_ok(p, cmd[1]);
-		exit(exit_code);
+		input_ok(p, cmd[1], node);
+		if (p->flag == 1)
+			exit(node->exit_code);
 	}
 	return (TRUE);
 }

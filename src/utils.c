@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/18 15:51:49 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/18 17:46:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ void	ft_error(char *str)
 	exit(EXIT_FAILURE);
 }
 
-int	ft_error_int(char *str)
+int	ft_error_int(char *str, PARSER *node)
 {
 	perror(str);
-	exit_code = 1;
+	node->exit_code = 1;
 	return (-1);
 }
 
@@ -93,7 +93,6 @@ char	**copy_env(char **envp)
 void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 {
 	(void)env;
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 
 	p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
@@ -103,6 +102,7 @@ void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 	p->last_pid = 0;
 	p->exit = 0;
 	p->flag = 0;
+	// p->exit_code = 0;
 }
 
 int	is_str(char *str)
@@ -187,7 +187,7 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 	    close(*fd);
     	close(p->pipefd[1]);
     	close(p->pipefd[0]);
-	exit_code = 1;
+		exit_code = 1;
     	perror(str);
     	exit(EXIT_FAILURE);
 	}
@@ -217,14 +217,16 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 				exit_status = WEXITSTATUS(status);		
 		}
 	}
+	if ((*nodes)->exit_code)
+		dprintf(2, "nodes->exit_code dans ft_wait = %d\n", (*nodes)->exit_code);
 	if (WIFEXITED(status))
 	{
-		if (exit_code == 0)
+		if ((*nodes)->exit_code == 0)
 			exit_status = WEXITSTATUS(status);
 		else
-			exit_status = exit_code;
+			exit_status = (*nodes)->exit_code;
 	}
-	exit_code = exit_status;
-	return (exit_code);
+	(*nodes)->exit_code = exit_status;
+	return ((*nodes)->exit_code);
 }
 
