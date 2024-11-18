@@ -3,23 +3,23 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 14:52:08 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/18 15:36:48 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 /*
-exit ferme le terminal si:
+exit ferme le shell si:
 - il est la seule commande a executer
 - s'il a un seul argument meme invalide (si invalide il enverra un msg d'erreur)
 
 Message d'erreur:
 - si 1 seul argument > long long max ou < long long min => not a numeric argument
-- si plusieurs arguments et que le premier est valide => too many arguments
+- si plusieurs arguments et que le premier est valide => too many arguments et n'ext pas
 - si plusieurs arguments et premier invalide => not a numeric argument
 */
 
