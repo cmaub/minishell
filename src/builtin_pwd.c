@@ -6,31 +6,31 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 15:32:31 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:19:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	ft_pwd(char **mini_env)
+int	ft_pwd(PARSER *current)
 {
-	(void)mini_env;
 	char	*new_var;
 	
 	new_var = NULL;
+	if (current->command[1][0] == '-')
+	{
+		ft_putstr_fd("pwd:", 2);
+		ft_putstr_fd(current->command[1], 2);
+		ft_putendl_fd(": invalid option", 2);
+		current->exit_code = 2;
+		return (FALSE);
+	}
 	new_var = getcwd(NULL, 0);
 	if (!new_var)
 	{
 		perror("pwd");
 		return (FALSE);
 	}
-	// while (*mini_env && ft_strnstr(*mini_env, "PWD=", 4) == NULL)
-	// 	mini_env++;
-	// if (*mini_env == NULL)
-	// {
-	// 	return (-1);
-	// }
-	// new_var = ft_strdup(*mini_env + 4);
 	ft_putstr_fd(new_var, 1);
 	write(1, "\n", 1);
 	return (TRUE);

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/18 17:46:41 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:47:46 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,7 +202,7 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 
 	current = *nodes;
 	exit_status = 0;
-	waited_pid = wait(&status);
+	waited_pid = 0;
 	while (waited_pid != -1)
 	{
 		waited_pid = wait(&status);
@@ -210,15 +210,17 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 			unlink(current->infile[current->i]);
 		if (current->next)
 			current = current->next;
-		dprintf(2, "waited_pid == %d\n", waited_pid);
+		dprintf(2, "waited_pid == %d, status = %d\n", waited_pid, status);
 		if (waited_pid == last_pid)
 		{
+			dprintf(2, "last pid de ft_wait, WIFEXITED_STATUS = %d\n", WIFEXITED(status));
 			if (WIFEXITED(status))
-				exit_status = WEXITSTATUS(status);		
+			{
+				exit_status = WEXITSTATUS(status);
+				dprintf(2, "exit_status = %d\n", exit_status);
+			}		
 		}
 	}
-	if ((*nodes)->exit_code)
-		dprintf(2, "nodes->exit_code dans ft_wait = %d\n", (*nodes)->exit_code);
 	if (WIFEXITED(status))
 	{
 		if ((*nodes)->exit_code == 0)
@@ -228,5 +230,5 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 	}
 	(*nodes)->exit_code = exit_status;
 	return ((*nodes)->exit_code);
-}
+} 
 

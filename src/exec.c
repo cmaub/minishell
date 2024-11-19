@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 18:24:33 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/19 19:11:35 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-extern int	exit_code;
+// extern int	exit_code;
 
 void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out)
 {
@@ -37,18 +37,18 @@ int	exec_builtin(PARSER *current, t_pipex *p)
 	if (ft_strncmp(current->command[0], "echo", 4) == 0)
 		return (ft_echo(current->command));
 	if (ft_strncmp(current->command[0], "pwd", 3) == 0)
-		return (ft_pwd(p->mini_env));
+		return (ft_pwd(current));
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
-		return (ft_env(current->command, p->mini_env));
+		return (ft_env(current, p->mini_env));
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
 		return (ft_exit(current->command, p, current));
 	if (ft_strncmp(current->command[0], "cd", 2) == 0)
 		return (ft_cd(current->command, p, current));
 	if (ft_strncmp(current->command[0], "export", 6) == 0)
-		return (ft_export(current->command, p->mini_env));
+		return (ft_export(current, p->mini_env));
 	if (ft_strncmp(current->command[0], "unset", 5) == 0)
 	{
-		p->mini_env = ft_unset(current->command, p->mini_env);
+		p->mini_env = ft_unset(current, p->mini_env);
 		return (TRUE);
 	}
 	return (FALSE);
@@ -66,6 +66,7 @@ int	is_builtin(PARSER *current)
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
 		return (TRUE);
 	if (ft_strncmp(current->command[0], "cd", 2) == 0) //TRUE ?
+		return (TRUE);
 	if (ft_strncmp(current->command[0], "export", 6) == 0)
 		return (TRUE);
 	if (ft_strncmp(current->command[0], "unset", 5) == 0)
@@ -79,33 +80,35 @@ int	execute(PARSER *current, t_pipex *p)
 
 	if (is_builtin(current) == 1)
 	{
-		dprintf(2, "p->flag dans execute = %d\n", p->flag);
 		exec_builtin(current, p);
-		dprintf(2, "exit_code dans current = %d\n", current->exit_code);
-		// free(current);
+		free(current);
 		exit(EXIT_SUCCESS);
 	}
 	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
 	{
 		if (access(current->command[0], F_OK | R_OK) == -1)
-		{
-			free(current);
-			perror("access");
-			return (-1);
-		}
+			return (free(current), perror("access"), -1);
 		execve(current->command[0], current->command, NULL);
 	}
 	else if (!ft_strchr(current->command[0], '/') && !no_envp(p->mini_env))
 	{		
 		path = get_path_and_check(&current->command[0], p->mini_env);
+		if(!path)
+			return (-1);
 		dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, current->command[0], current->command[1], current->command[2], current->command[3]);
+		path[0] = 'D';
 		if (execve(path, current->command, p->mini_env) == -1)
 		{
+			// tester execve sur bash pour gerer l'exit code
+			// trouver la liste des codes derreur de bash
+			// current->exit_code = 1;
+			// perror("execve");
+			ft_putstr_fd("execve fail\n", 2);
 			free(current);
 			free(path);
+			return (-1); // modifier exit code
 		}
 	}
-	perror("exec");
 	return (-1);
 }
 
@@ -149,7 +152,9 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	}	
 	// if builtin ?
 	if (execute((*nodes), p) == -1)
+	{
 		exit(EXIT_FAILURE);
+	}
 }
 
 void	inter_child(t_pipex *p, PARSER **nodes)
@@ -250,9 +255,7 @@ void	create_process(t_pipex *p, PARSER **nodes)
 		else if (p->i < p->nb_cmd - 1)
 			inter_child(p, nodes);
 		else if (p->i == p->nb_cmd - 1)
-		{
 			last_child(p, nodes);
-		}
 	}
 	else 
 	{
@@ -330,17 +333,13 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 		p->pid = fork();
 		if (p->i == p->nb_cmd - 1)
 		{
-			dprintf(2, "arrivee dans last pid\n");
 			p->last_pid = p->pid;
 		}
 		create_process(p, &current);
 		p->i++;
-		if (current)
-			dprintf(2, "current = %s, current->exit_code dans handle_input = %d\n", current->command[0], current->exit_code);
 		current = current->next;
 		if (p->i == p->nb_cmd)
 			break;	
 	}
-	// (*nodes)->exit_code = current->exit_code;
 	return (ft_wait(p->last_pid, nodes));
 }

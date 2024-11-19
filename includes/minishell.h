@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 17:02:32 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/19 18:42:23 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,7 +83,7 @@ typedef struct s_pipex
 	int	         	ac;
 	char			**mini_env;
 	int		 	nb_cmd;
-	int		       i;
+	int		       i; // ceci est un compteur qui compte les pid
 	int		       prev_fd;
 	int			pipefd[2];
 	int			exit;
@@ -133,12 +133,12 @@ void	add_new_node(PARSER **nodes, PARSER *new_node);
 
 /* BUILTINS */
 int	ft_echo(char **cmd);
-int	ft_pwd(char **mini_env);
-int	ft_env(char **cmd, char **mini_env);
+int	ft_pwd(PARSER *current);
+int	ft_env(PARSER *current, char **mini_env);
 int	ft_exit(char **cmd, t_pipex *p, PARSER *node);
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
-char **ft_unset(char **cmd, char **env);
-int	ft_export(char **cmd, char **env);
+char **ft_unset(PARSER *current, char **env);
+int	ft_export(PARSER *current, char **env);
 void	print_sorted_env(char **env);
 
 /* LEXER */

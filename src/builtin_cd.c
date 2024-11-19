@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 17:01:05 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/19 17:03:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,6 @@ int	ft_setenv(char *dest, char *src, char **mini_env)
 	}
 	else if (*mini_env)
 		*mini_env = ft_strjoin(dest, ft_strdup(src));
-	dprintf(2, "Dans mini_env = %s\n", *mini_env);
-	dprintf(2, "\n");
 	return (0);
 }
 
@@ -72,11 +70,9 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 			return (ft_error_int("cd", node));
 	}
 	old_pwd = ft_strdup(return_var_from_env("PWD", p->mini_env));
-	dprintf(2, "***OLDPWD est maintenant = %s\n", old_pwd);
 	if (old_pwd)
 		ft_setenv("OLDPWD", old_pwd, p->mini_env);
 	new_pwd = getcwd(NULL, 0);
-	dprintf(2, "***PWD est maintenant = %s\n", new_pwd);
 	if (new_pwd)
 		return (ft_setenv("PWD", new_pwd, p->mini_env), TRUE);
 	else

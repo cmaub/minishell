@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/07 12:39:27 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/19 13:37:53 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,9 @@ char	*get_path_and_check(char **split_cmd, char **env)
 	new_path = get_path(split_cmd[0], env);
 	if (!new_path)
 	{
-		dprintf(2, "new_path n'existe pas\n");
+		ft_putstr_fd(split_cmd[0], 2);
+		ft_putendl_fd(": command not found", 2);
 		ft_free_tab(split_cmd);
-		exit(EXIT_FAILURE);
 	}
 	return (new_path);
 }

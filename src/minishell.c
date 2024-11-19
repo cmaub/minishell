@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/18 17:45:34 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/19 18:38:20 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ char	*return_var_from_env(char *str, char **mini_env)
 		mini_env++;
 	if (*mini_env == NULL)
 		return (NULL);
-	// dprintf(2, "mini_env dans return = %s\n", *mini_env);
 	new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
 	return (new_var);
 }
@@ -114,7 +113,7 @@ char	*join_char(char c, char *tmp)
 	single_char[1] = '\0';
 	return (ft_strjoin(tmp, single_char));
 }
-
+// GERER LE DOLLAR SEUL !!!!!!
 char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 {
 	char	*result;
@@ -130,7 +129,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 			{
 				expand_expr = ft_strdup("?");
 				expand_result = ft_strdup(ft_itoa(new_node->exit_code));
-				// new_node->exit_code = 0;
+				new_node->exit_code = 0;
 				result = ft_strjoin(result, expand_result);
 			}
 			else
@@ -183,7 +182,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 			{
 				expand_expr = ft_strdup("?");
 				expand_result = ft_strdup(ft_itoa(new_node->exit_code));
-				// new_node->exit_code = 0;
+				new_node->exit_code = 0;
 				result = ft_strjoin(result, expand_result);
 			}
 			else
@@ -256,11 +255,7 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 
 	cur = current;
 	new_node = ft_calloc(1, sizeof(PARSER));
-	// new_node->exit_code = (int)malloc(sizeof(int));
 	new_node->exit_code = exit_code;
-	if (new_node->exit_code)
-		dprintf(2, "new_node->exit_code = %d\n", new_node->exit_code);
-
 	if (!new_node)
 		return (NULL);
 	while (cur && cur->type != PIPEX)
@@ -395,7 +390,7 @@ int		main(int argc, char **argv, char **env)
 			{
 				// nodes->exit_code = exit_code;
 				create_nodes(tokens, nodes, mini_env, exit_code);
-				dprintf(2, "taille de list %d\n", ft_size_list(nodes));
+				dprintf(2, "taille de list %d\n\n", ft_size_list(nodes));
 				print_nodes_list(nodes);
 				p = ft_calloc(1, sizeof(*p));
 				if (!p)
@@ -404,12 +399,9 @@ int		main(int argc, char **argv, char **env)
 					return (0);
 				}
 				ft_init_struct(p, mini_env, *nodes);
-				// (*nodes)->exit_code = exit_code;
-				dprintf(2, "nodes->exit_code = %d, exit_code = %d, line = %d\n", (*nodes)->exit_code, exit_code, __LINE__);
 				handle_input(nodes, p);
 				mini_env = p->mini_env;
 				exit_code = (*nodes)->exit_code;
-				dprintf(2, "nodes->exit_code = %d, exit_code = %d, line = %d\n", (*nodes)->exit_code, exit_code, __LINE__);
 				free(tokens);
 				free(str_input);
 				free(nodes);
