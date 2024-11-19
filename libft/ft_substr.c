@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 10:44:34 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/06/05 16:00:28 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/19 19:48:49 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 		return (ft_strdup(""));
 	if (len > n_len - start)
 		len = n_len - start;
-	new = ft_calloc (len + 1, sizeof(char));
+	new = try_malloc(len + 1);
 	if (!new)
 		return (NULL);
 	i = 0;

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
+#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/22 08:22:29 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/07 14:23:42 by anvander         ###   ########.fr        #
+#    Updated: 2024/11/19 19:49:33 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -82,7 +82,6 @@ clean:
 fclean: clean
 	@ rm -f $(NAME)
 
-re: fclean
-	@ make -j
+re: fclean all
 
 .PHONY: all clean fclean re bonus

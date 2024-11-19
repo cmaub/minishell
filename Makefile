@@ -61,7 +61,6 @@ fclean: clean
 	@ rm -f $(NAME)
 	@ rm -f $(LIBFT_PATH)$(LIBFT_NAME)
 
-re: fclean
-	@ make -j
+re: fclean all
 
 .PHONY: all re clean fclean

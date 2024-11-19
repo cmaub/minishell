@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/13 11:45:28 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/19 20:01:15 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,16 +352,17 @@ int		main(int argc, char **argv, char **env)
 	mini_env = copy_env(env);	
 	if (argc >= 1)
 	{
+		printf("TOTO\n");
 		while (1)
 		{
 			// L_input = ft_calloc(1, sizeof(L_input)); // faire une fonction pour initialiser a part
 			L_input.data = NULL;
 			L_input.len = 0;
 			L_input.head = 0;
-			// tokens = ft_calloc(1, sizeof(t_token *));
-			// nodes = ft_calloc(1, sizeof(PARSER *));
+			tokens = NULL; // IL FAUT FREE stp
+			nodes = NULL; // IL FAUT FREE stp
 			// str_input = readline("~$");
-			ft_putstr_fd("\033[36;1mminishell ➜ \033[0m", 1);
+			ft_putstr_fd("\033[35;1mminishell ➜ \033[0m", 1);
 			str_input = get_next_line(0);
 			if (!str_input)
 				break;
