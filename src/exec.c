@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 17:40:31 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/20 18:32:54 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,13 +90,13 @@ int	execute(PARSER *current, t_pipex *p)
 		{
 			if (access(current->command[0], R_OK) == -1)
 			{
-				perror("access");
+				perror("access"); // modification message derreur ?
 				exit(126);
 			}
 		}
 		else
 		{
-			perror("access");
+			perror("access"); // modification message derreur ?
 			exit(127);
 		}
 		execve(current->command[0], current->command, NULL);
@@ -104,8 +104,6 @@ int	execute(PARSER *current, t_pipex *p)
 	else if (!ft_strchr(current->command[0], '/') && !no_envp(p->mini_env))
 	{		
 		path = get_path_and_check(&current->command[0], p->mini_env);
-		if(!path)
-			exit (127);
 		dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, current->command[0], current->command[1], current->command[2], current->command[3]);
 		if (execve(path, current->command, p->mini_env) == -1)
 		{
@@ -136,6 +134,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY | 0644);
 		if (fd_in == -1)
 		{	
+			/////////////////// ici PB close AC que losrqu'une seule commandesi input invalide
 			safe_close(p->pipefd[1]);
 			safe_close(p->pipefd[0]);
 			ft_error("FIRST open in");
@@ -178,7 +177,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		close(p->pipefd[0]);
 		close(p->prev_fd);
 		close(p->pipefd[1]);
-		ft_error("LAST dup2 pipein");
+		ft_error("INTER dup2 pipein");
 	}
 	while ((*nodes)->infile && (*nodes)->infile[(*nodes)->i] != NULL)
 	{
@@ -190,10 +189,10 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		{
 			safe_close(p->pipefd[1]);
 			safe_close(p->pipefd[0]);
-			ft_error("FIRST open in");
+			ft_error("INTER open in");
 		}
 		if (dup2(fd_in, STDIN_FILENO) == -1)
-			ft_close_error(&fd_in, p, "FIRST dup2 in");
+			ft_close_error(&fd_in, p, "INTER dup2 in");
 		safe_close(fd_in);
 		(*nodes)->i++;
 	}
@@ -235,10 +234,10 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		{
 			safe_close(p->pipefd[1]);
 			safe_close(p->pipefd[0]);
-			ft_error("FIRST open in");
+			ft_error("LAST open in");
 		}
 		if (dup2(fd_in, STDIN_FILENO) == -1)
-			ft_close_error(&fd_in, p, "FIRST dup2 in");
+			ft_close_error(&fd_in, p, "LAST dup2 in");
 		safe_close(fd_in);
 		(*nodes)->i++;
 	}
@@ -319,6 +318,8 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 			exit (EXIT_FAILURE);
 	}
 }
+
+// gerer louverture des fichiers dapres ce qu'q dis Alan (si < input < input > output < input : ouvrir output en 3eme et en 4me le dernier input)
 
 int	handle_input(PARSER **nodes, t_pipex *p)
 {

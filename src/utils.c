@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/20 16:39:39 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/20 18:15:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ int	ft_error_int(char *str, PARSER *node)
 // an unsuccessful close will return (Bad file descriptor) in errno
 void	safe_close(int fd)
 {
-	// static	int	i = 0;
 	if (fd != -1)
 	{
 		if (close(fd) == -1)
@@ -39,7 +38,6 @@ void	safe_close(int fd)
 		}
 		fd = -1;
 	}
-	// i++;
 }
 
 int		ft_size_list(PARSER **nodes)
@@ -97,6 +95,8 @@ void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 	p->last_pid = 0;
 	p->exit = 0;
 	p->flag = 0;
+	p->pipefd[0] = -1;
+	p->pipefd[1] = -1;
 }
 
 int	is_str(char *str)

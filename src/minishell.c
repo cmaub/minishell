@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 16:38:15 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/20 18:26:34 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,6 +275,39 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 	return (new_node);
 }
 
+
+void	create_heredoc(PARSER *new_node, t_token *current, int *i, int *d)
+{
+	int		index_heredoc;
+	char	*name_heredoc;
+
+	name_heredoc = ft_strdup("heredoc");
+	index_heredoc = 0;
+	name_heredoc[ft_strlen(name_heredoc)] = index_heredoc + '0';
+	name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
+	new_node->fd_heredoc[*i] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	new_node->delimiter[*d] = ft_strdup(current->next->value);
+	get_lines(new_node, *i, *d);
+	new_node->infile[*i] = ft_strdup(name_heredoc);
+	new_node->redir_type_in[*i++] = current->type;
+	free(name_heredoc);
+	name_heredoc = ft_strdup("heredoc");
+	index_heredoc++;
+	d++;
+}
+
+void	add_null_to_tab(PARSER *new_node, int i, int d, int o, int cmd)
+{
+	if (i > 0)
+		new_node->infile[i] = NULL;
+	if (d > 0)
+		new_node->delimiter[d] = NULL;
+	if (o > 0)
+		new_node->outfile[o] = NULL;
+	if (cmd > 0)
+		new_node->command[cmd] = NULL;
+}
+
 // Tester l'input << stop > file1
 void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
 {
@@ -284,11 +317,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 	int		o;
 	int		cmd;
 	int		d;
-	int		index_heredoc;
-	char		*name_heredoc;
 
-	name_heredoc = ft_strdup("heredoc");
-	index_heredoc = 0;
 	current = *tokens;
 	while (current)
 	{
@@ -307,19 +336,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 				new_node->redir_type_in[i++] = current->type;
 			}
 			else if (current->type == HEREDOC && current->next->value != NULL)
-			{
-				name_heredoc[ft_strlen(name_heredoc)] = index_heredoc + '0';
-				name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
-				new_node->fd_heredoc[i] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-				new_node->delimiter[d] = ft_strdup(current->next->value);
-				get_lines(new_node, i, d);
-				new_node->infile[i] = ft_strdup(name_heredoc);
-				new_node->redir_type_in[i++] = current->type;
-				free(name_heredoc);
-				name_heredoc = ft_strdup("heredoc");
-				index_heredoc++;
-				d++;
-			}
+				create_heredoc(new_node, current, &i, &d);
 			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 					&& current->next->value != NULL)
 			{
@@ -330,14 +347,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 					new_node->command[cmd++] = ft_strdup(current->value);
 			current = current->next;
 		}
-		if (i > 0)
-			new_node->infile[i] = NULL;
-		if (d > 0)
-			new_node->delimiter[d] = NULL;
-		if (o > 0)
-			new_node->outfile[o] = NULL;
-		if (cmd > 0)
-			new_node->command[cmd] = NULL;
+		add_null_to_tab(new_node, i, d, o, cmd);
 		add_new_node(nodes, new_node);
 		if (current && current->type == PIPEX)
 			current = current->next;
