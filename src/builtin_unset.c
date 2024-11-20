@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 17:22:02 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:23:08 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ char	**suppress_var(char **env, int index)
 	int		j;
 
 	new_size = count_env_var(env) - 1;
-	new_env = ft_calloc(new_size, sizeof(char *));
+	new_env = try_malloc(new_size * sizeof(char *));
 
 	i = 0;
 	j = 0;

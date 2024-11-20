@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/11 11:35:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/10/28 14:36:01 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:25:23 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,7 @@ char	*ft_remain_buffer(char *static_buf)
 		i++;
 	if (static_buf[i] == '\0')
 		return (free (static_buf), NULL);
-	rest = ft_calloc(ft_strlen(static_buf) - i + 1, sizeof(char));
-	if (!rest)
-		return (free(static_buf), NULL);
+	rest = try_malloc((ft_strlen(static_buf) - i + 1) * sizeof(char));
 	i++;
 	j = 0;
 	while (static_buf[i])
@@ -49,9 +47,7 @@ char	*ft_extract_line(char *static_buf)
 		return (NULL);
 	while (static_buf[i] != '\0' && static_buf[i] != '\n')
 		i++;
-	res = ft_calloc(i + 2, sizeof(char));
-	if (!res)
-		return (free(static_buf), NULL);
+	res = try_malloc((i + 2) * sizeof(char));
 	i = 0;
 	while (static_buf[i] != '\0' && static_buf[i] != '\n')
 	{
@@ -108,9 +104,7 @@ char	*get_next_line(int fd)
 	static char	*static_buf;
 	t_line		buf;
 
-	buf.read_buf = ft_calloc (BUFFER_SIZE + 1, sizeof(char));
-	if (!buf.read_buf)
-		return (NULL);
+	buf.read_buf = try_malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (BUFFER_SIZE <= 0 || fd < 0 || read(fd, 0, 0) < 0)
 	{
 		if (static_buf)

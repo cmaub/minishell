@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/18 15:45:42 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:26:03 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	PIPE(LEXER *input, t_token **list)
 	int	end;
 	t_token	*new_node;
 
-	new_node = ft_calloc(1, sizeof(t_token));
+	new_node = try_malloc(sizeof(t_token));
 	i = 0;
 	start = input->head;
 	end = start;
@@ -264,7 +264,7 @@ int	arg(LEXER *input, t_token **list)
 	i = 0;
 	start = input->head;
 	end = start;
-	new_node = ft_calloc(1, sizeof(t_token));
+	new_node = try_malloc(sizeof(t_token));
 	ows(input);
 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input) || EQUAL(input))
@@ -288,7 +288,7 @@ int handle_delimiter(LEXER *input, t_token **list, int start)
 	t_token	*new_node;
 	int		end;
 
-	new_node = ft_calloc(1, sizeof(t_token));
+	new_node = try_malloc(sizeof(t_token));
 	end = input->head;
 	if (!arg(input, list))
 		return (FALSE);

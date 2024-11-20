@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 19:11:35 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 17:40:31 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,23 +86,29 @@ int	execute(PARSER *current, t_pipex *p)
 	}
 	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
 	{
-		if (access(current->command[0], F_OK | R_OK) == -1)
-			return (free(current), perror("access"), -1);
+		if (access(current->command[0], F_OK) == 0)
+		{
+			if (access(current->command[0], R_OK) == -1)
+			{
+				perror("access");
+				exit(126);
+			}
+		}
+		else
+		{
+			perror("access");
+			exit(127);
+		}
 		execve(current->command[0], current->command, NULL);
 	}
 	else if (!ft_strchr(current->command[0], '/') && !no_envp(p->mini_env))
 	{		
 		path = get_path_and_check(&current->command[0], p->mini_env);
 		if(!path)
-			return (-1);
+			exit (127);
 		dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, current->command[0], current->command[1], current->command[2], current->command[3]);
-		path[0] = 'D';
 		if (execve(path, current->command, p->mini_env) == -1)
 		{
-			// tester execve sur bash pour gerer l'exit code
-			// trouver la liste des codes derreur de bash
-			// current->exit_code = 1;
-			// perror("execve");
 			ft_putstr_fd("execve fail\n", 2);
 			free(current);
 			free(path);
@@ -153,7 +159,8 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	// if builtin ?
 	if (execute((*nodes), p) == -1)
 	{
-		exit(EXIT_FAILURE);
+		// (*nodes)->exit_code = 127;
+		exit(127);
 	}
 }
 
@@ -199,7 +206,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		(*nodes)->o++;
 	}
 	if (execute((*nodes), p) == -1)
-		exit(EXIT_FAILURE);
+		exit(127);
 }
 
 void	last_child(t_pipex *p, PARSER **nodes)
@@ -241,7 +248,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		(*nodes)->o++;
 	}
 	if (execute((*nodes), p) == -1)
-		exit(EXIT_FAILURE);
+		exit(127);
 }
 
 void	create_process(t_pipex *p, PARSER **nodes)
@@ -319,10 +326,7 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 	
 	current = (*nodes); 
 	if (current->next == NULL && is_builtin(current))
-	{
-		handle_simple_process(current, p);
-		return (0);
-	}
+		return (handle_simple_process(current, p), 0);
 	while (p->i < p->nb_cmd)
 	{
 		if(p->i < p->nb_cmd)

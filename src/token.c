@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/18 15:51:38 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:44:52 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,7 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 	int		len;
 
 	len = end - start;
-	new = ft_calloc(1, sizeof(t_token));
-	if (!new)
-		return (NULL);
+	new = try_malloc(sizeof(t_token));
 	new->value = ft_substr(input->data, start, len);
 	if (!new->value)
 	{

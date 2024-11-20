@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/19 13:37:53 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 17:23:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,10 @@ char	*get_path(char *cmd, char **env)
 		tmp_filename = create_tmp_filename(path[i], cmd);
 		if (!tmp_filename)
 			return (ft_free_tab(path), NULL);
-		if (access(tmp_filename, F_OK | R_OK) == 0)
+		if (access(tmp_filename, F_OK) == 0)
 		{
+			if (access(tmp_filename, R_OK) == -1)
+				exit (126);
 			filename = tmp_filename;
 			break ;
 		}

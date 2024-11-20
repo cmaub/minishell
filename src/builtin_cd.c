@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 17:03:21 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:36:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,6 @@ permet de recuperer le chemin absolu du repertoire courant
 - size : la taille du bloc de mémoire passé en premier paramètre.
 */
 
-extern int	exit_code;
 
 int	ft_setenv(char *dest, char *src, char **mini_env)
 {	
@@ -39,9 +38,7 @@ int	ft_setenv(char *dest, char *src, char **mini_env)
 	{
 		if (ft_strncmp(dest, "OLDPWD=", 6) == 0)
 		{
-			*mini_env = ft_calloc(1, sizeof(char *));
-			if (!(*mini_env))
-				return (-1);
+			*mini_env = try_malloc(sizeof(char *));
 			*mini_env = ft_strjoin(dest, ft_strdup(src));
 		}
 		else
@@ -59,7 +56,7 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 
 	if (!cmd[1])
 	{
-		exit_code = 1;
+		node->exit_code = 1;
 		return (ft_putstr_fd("cd: no directory specified\n", 2), -1);
 	}
 	if (cmd[2])

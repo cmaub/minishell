@@ -3,21 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/19 17:47:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 16:39:39 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-extern int	exit_code;
-
 void	ft_error(char *str)
 {
 	perror(str);
-	exit_code = 1;
 	exit(EXIT_FAILURE);
 }
 
@@ -68,7 +65,7 @@ char	**copy_env(char **envp)
 	i = 0;
 	while (envp[i])
 		i++;
-	mini_env = ft_calloc(i + 1, sizeof(char *));
+	mini_env = try_malloc((i + 1) * sizeof(char *));
 	if (!mini_env)
 		return (NULL);
 	i = 0;
@@ -92,8 +89,6 @@ char	**copy_env(char **envp)
 
 void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 {
-	(void)env;
-
 	p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
@@ -102,7 +97,6 @@ void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 	p->last_pid = 0;
 	p->exit = 0;
 	p->flag = 0;
-	// p->exit_code = 0;
 }
 
 int	is_str(char *str)
@@ -112,7 +106,7 @@ int	is_str(char *str)
 	i = 0;
 	while (str[i] != '\0')
 	{
-		if (!isalpha(str[i]))
+		if (!ft_isalpha(str[i]))
 			return (0);
 		i++;
 	}
@@ -187,7 +181,6 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 	    close(*fd);
     	close(p->pipefd[1]);
     	close(p->pipefd[0]);
-		exit_code = 1;
     	perror(str);
     	exit(EXIT_FAILURE);
 	}
@@ -213,7 +206,6 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 		dprintf(2, "waited_pid == %d, status = %d\n", waited_pid, status);
 		if (waited_pid == last_pid)
 		{
-			dprintf(2, "last pid de ft_wait, WIFEXITED_STATUS = %d\n", WIFEXITED(status));
 			if (WIFEXITED(status))
 			{
 				exit_status = WEXITSTATUS(status);

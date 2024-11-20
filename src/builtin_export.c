@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 17:01:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 12:22:50 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,7 @@ void	copy_and_sort_env(char **env)
 	sorted_env = NULL;
 	while (env[count])
 		count++;
-	sorted_env = ft_calloc(count + 1, sizeof(char *));
-	if (!sorted_env)
-		return ; // revoir si valeur de retour
+	sorted_env = try_malloc((count + 1) * sizeof(char *));
 	while (i < count)
 	{
 		sorted_env[i] = ft_strdup(env[i]);

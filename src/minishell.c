@@ -3,20 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 18:38:20 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/20 16:38:15 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// extern int	exit_code;
+int parserHasReachEnd(LEXER *input) 
+{
+	if (input->head != input->len)
+		return (FALSE);
+	return (TRUE);
+}
 
 int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 {
-	if (!expr(L_input, list))
+	if (!expr(L_input, list) || !parserHasReachEnd(L_input))
 		return (FALSE);
 	return (TRUE);
 }
@@ -75,19 +80,19 @@ char	*isolate_expand(char *str, int index)
 void	calloc_tab_of_node(PARSER *new_node)
 {
 	if (new_node->nb_infile > 0)
-		new_node->infile = ft_calloc(new_node->nb_infile + 1, sizeof(char *));
+		new_node->infile = try_malloc((new_node->nb_infile + 1) * sizeof(char *));
 	if (new_node->nb_outfile > 0)
-		new_node->outfile = ft_calloc(new_node->nb_outfile + 1, sizeof(char *));
+		new_node->outfile = try_malloc((new_node->nb_outfile + 1) * sizeof(char *));
 	if (new_node->nb_command > 0)
-		new_node->command = ft_calloc(new_node->nb_command + 3, sizeof(char *));
+		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
 	if (new_node->nb_heredoc > 0)
-		new_node->delimiter = ft_calloc(new_node->nb_heredoc + 1, sizeof(char *));
+		new_node->delimiter = try_malloc((new_node->nb_heredoc + 1) * sizeof(char *));
 	if (new_node->nb_infile > 0)
-		new_node->redir_type_in = ft_calloc(new_node->nb_infile, sizeof(int));
+		new_node->redir_type_in = try_malloc((new_node->nb_infile) * sizeof(int));
 	if (new_node->nb_outfile > 0)
-		new_node->redir_type_out = ft_calloc(new_node->nb_outfile, sizeof(int));
+		new_node->redir_type_out = try_malloc((new_node->nb_outfile) * sizeof(int));
 	if (new_node->nb_heredoc > 0)
-		new_node->fd_heredoc = ft_calloc(new_node->nb_heredoc, sizeof(int));
+		new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
 }
 
 int	search_closing_quote(char *str, char c)
@@ -113,37 +118,53 @@ char	*join_char(char c, char *tmp)
 	single_char[1] = '\0';
 	return (ft_strjoin(tmp, single_char));
 }
-// GERER LE DOLLAR SEUL !!!!!!
+
+char	*print_exit_code(char *result, PARSER *new_node, int *index)
+{
+	char	*expand_result;
+
+	expand_result = ft_strdup(ft_itoa(new_node->exit_code));
+	new_node->exit_code = 0;
+	*index += 2;
+	return (ft_strjoin(result, expand_result));
+}
+
+char	*print_expand(char *str, int *index, char **mini_env)
+{
+	char	*expand_expr;
+	char	*expand_result;
+
+	expand_expr = isolate_expand(str, *index + 1);
+	expand_result = return_var_from_env(expand_expr, mini_env);
+	*index += ft_strlen(expand_expr) + 1;
+	free(expand_expr);
+	if (expand_result != NULL)
+		return (ft_strdup(expand_result));
+	return (ft_strdup(""));
+}
+
 char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 {
 	char	*result;
-	char	*expand_expr;
-	char	*expand_result;
 
 	result = "";
 	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
 	{
-		if (str[*index] == '$' && str[*index + 1] != 39)
+		if (str[*index] == '$' 
+			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?' 
+			|| ((str[(*index) + 1]) == 39 && (str[(*index) + 2] == 39))))
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-			{
-				expand_expr = ft_strdup("?");
-				expand_result = ft_strdup(ft_itoa(new_node->exit_code));
-				new_node->exit_code = 0;
-				result = ft_strjoin(result, expand_result);
-			}
+				result = ft_strjoin(result, print_exit_code(result, new_node, index));
 			else
-			{
-				expand_expr = isolate_expand(str, *index + 1);
-				expand_result = return_var_from_env(expand_expr, mini_env);
-				if (expand_result != NULL)
-					result = ft_strjoin(result, expand_result);
-			}
-			*index += ft_strlen(expand_expr) +1;
+				result = ft_strjoin(result, print_expand(str, &(*index), mini_env));
 		}
 		else
 		{
+			
 			result = join_char(str[*index], result);
+			if (result[ft_strlen(result) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
+				result[ft_strlen(result) - 1] = '\0';
 			(*index)++;
 		}
 	}
@@ -169,30 +190,18 @@ char	*process_single_quotes(char *str, int *index)
 char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini_env)
 {
 	char	*result;
-	char	*expand_expr;
-	char	*expand_result;
 
 	result = "";
 	(*index)++; // Passer quote ouvrante
 	while (str[*index] != 34 && str[*index] != '\0')
 	{
-		if (str[*index] == '$' && str[*index + 1] != 39)
+		if (str[*index] == '$' 
+			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?'))
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-			{
-				expand_expr = ft_strdup("?");
-				expand_result = ft_strdup(ft_itoa(new_node->exit_code));
-				new_node->exit_code = 0;
-				result = ft_strjoin(result, expand_result);
-			}
+				result = ft_strjoin(result, print_exit_code(result, new_node, index));
 			else
-			{
-				expand_expr = isolate_expand(str, *index + 1);
-				expand_result = return_var_from_env(expand_expr, mini_env);
-				if (expand_result != NULL)
-					result = ft_strjoin(result, expand_result);
-			}
-			*index += ft_strlen(expand_expr) +1;
+				result = ft_strjoin(result, print_expand(str, &(*index), mini_env));
 		}
 		else
 		{
@@ -254,10 +263,8 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 	PARSER		*new_node;
 
 	cur = current;
-	new_node = ft_calloc(1, sizeof(PARSER));
+	new_node = try_malloc(sizeof(PARSER));
 	new_node->exit_code = exit_code;
-	if (!new_node)
-		return (NULL);
 	while (cur && cur->type != PIPEX)
 	{
 		calculate_size_of_tab(cur, new_node, mini_env);
@@ -337,36 +344,38 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 	}
 }
 
-int	exit_code = 0;
-
+LEXER	*ft_init_lexer_input()
+{
+	LEXER	*new_input;
+	
+	new_input = try_malloc(sizeof(new_input)); // faire une fonction pour initialiser a part
+	new_input->data = NULL;
+	new_input->len = 0;
+	new_input->head = 0;
+	return (new_input);
+}
+	
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
 	(void)argc;
 	char		*str_input;
 	LEXER		*L_input = NULL;
-	t_token		**tokens = NULL;
-	PARSER		**nodes = NULL;
+	t_token		*tokens = NULL;
+	PARSER		*nodes = NULL;
 	t_pipex	*p = NULL;
 	char		**mini_env;
-	// int			exit_code = 0;
+	int			exit_code = 0;
 
-	
 	mini_env = copy_env(env);
 	if (argc >= 1)
 	{
 		while (1)
 		{
-			L_input = ft_calloc(10, sizeof(L_input)); // faire une fonction pour initialiser a part
-			L_input->data = NULL;
-			L_input->len = 0;
-			L_input->head = 0;
-			tokens = ft_calloc(1, sizeof(t_token *));
-			nodes = ft_calloc(1, sizeof(PARSER *));
-			// Utilisation de get_next_line au lieu de readline
-			// write(1, "~$ ", 3);
-			// str_input = get_next_line(0);
-			str_input = readline("~$");
+			L_input = ft_init_lexer_input();
+			tokens = NULL;
+			nodes = NULL;
+			str_input = readline("\033[36;1mminishell ➜ \033[0m");
 			if (!str_input)
 				break;
 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
@@ -378,7 +387,7 @@ int		main(int argc, char **argv, char **env)
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
 
-			if (!fill_list_of_tokens(L_input, tokens))
+			if (!fill_list_of_tokens(L_input, &tokens))
 			{
 				printf("input non valide\n");
 				free(tokens);
@@ -388,23 +397,18 @@ int		main(int argc, char **argv, char **env)
 			}
 			else
 			{
-				// nodes->exit_code = exit_code;
-				create_nodes(tokens, nodes, mini_env, exit_code);
-				dprintf(2, "taille de list %d\n\n", ft_size_list(nodes));
-				print_nodes_list(nodes);
-				p = ft_calloc(1, sizeof(*p));
-				if (!p)
-				{
-					free (nodes);
-					return (0);
-				}
-				ft_init_struct(p, mini_env, *nodes);
-				handle_input(nodes, p);
+				create_nodes(&tokens, &nodes, mini_env, exit_code);
+				dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
+				print_nodes_list(&nodes);
+				p = try_malloc(sizeof(*p));
+				ft_init_struct(p, mini_env, nodes);
+				handle_input(&nodes, p);
 				mini_env = p->mini_env;
-				exit_code = (*nodes)->exit_code;
-				free(tokens);
+				exit_code = nodes->exit_code;
+				// free(tokens);
 				free(str_input);
-				free(nodes);
+				free(p);
+				// free(nodes);
 				free(L_input);
 			}
 		}
