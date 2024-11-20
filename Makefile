@@ -1,8 +1,8 @@
 NAME = minishell
 
 # Compiler
-CC		= gcc
-CFLAGS	= -Wall -Wextra -Werror -g3
+CC		= cc
+CFLAGS	= -Wall -Wextra -Werror
 
 # Libft
 LIBFT_PATH	= libft/
