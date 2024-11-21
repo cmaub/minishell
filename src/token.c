@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/20 12:44:52 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/21 13:06:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,8 +115,8 @@ void	print_tokens_list(t_token **list)
 
 void	print_nodes_list(PARSER **nodes)
 {
-	int	i = 0;
-	int	o = 0;
+	int	f = 0;
+	// int	o = 0;
 	int	h = 0;
 	int	d = 0;
 	int	index = 0;
@@ -127,24 +127,24 @@ void	print_nodes_list(PARSER **nodes)
 		return ;
 	while (index <= ft_size_list(nodes))
 	{
-		i = 0;
-		o = 0;
+		f = 0;
+		// o = 0;
 		h = 0;
-		while (i < 30 && tmp->infile && tmp->infile[i] != NULL)
+		while (f < 30 && tmp->file && tmp->file[f] != NULL)
 		{
-			printf("tmp->infile[%d] = %s, type = %d\n", i, tmp->infile[i], tmp->redir_type_in[i]);
+			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir_type[f]);
 			if (tmp->delimiter && tmp->delimiter[d] != NULL)
 			{
 				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
 				d++;
 			}
-			i++;
+			f++;
 		}
-		while (o < 30 && tmp->outfile && tmp->outfile[o] != NULL)
-		{
-			printf("tmp->outfile[%d] = %s, type = %d\n", o, tmp->outfile[o], tmp->redir_type_out[o]);
-			o++;
-		}
+		// while (o < 30 && tmp->outfile && tmp->outfile[o] != NULL)
+		// {
+		// 	printf("tmp->outfile[%d] = %s, type = %d\n", o, tmp->outfile[o], tmp->redir_type_out[o]);
+		// 	o++;
+		// }
 		while (h < 30 && tmp->command && tmp->command[h] != NULL)
 		{
 			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);

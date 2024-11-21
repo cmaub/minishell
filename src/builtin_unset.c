@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 12:23:08 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/21 16:30:11 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ char	**ft_unset(PARSER *current, char **env)
 
 	i = 1;
 	new_env = NULL;
-	if (current->command[1][0] == '-')
+	if (current->command[1] && current->command[1][0] == '-')
 	{
 		ft_putstr_fd("unset:", 2);
 		ft_putstr_fd(current->command[1], 2);

@@ -6,30 +6,28 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 11:37:01 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 17:43:48 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// extern int	exit_code;
-
-void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out)
+void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out)
 {
-	if ((*nodes)->redir_type_out[(*nodes)->o] == REDIRECT_OUT)
-		fd_out = open((*nodes)->outfile[(*nodes)->o], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else if ((*nodes)->redir_type_out[(*nodes)->o] == APPEND_OUT)
-		fd_out = open((*nodes)->outfile[(*nodes)->o], O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT)
+		fd_out = open((*nodes)->file[(*nodes)->f], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if ((*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+		fd_out = open((*nodes)->file[(*nodes)->f], O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1)
 	{
-		ft_close_error(&fd_in, p, "FIRST dup2 out");
-		ft_error("FIRST open out");
+		dprintf(2, " p->pipefd[0] = %d, p->pipefd[1] = %d\n", p->pipefd[0], p->pipefd[1]);
+		safe_close(p->pipefd[1]);
+		safe_close(p->pipefd[0]);
+		ft_error((*nodes)->file[(*nodes)->f]);
+		// ft_close_error(&fd_in, p, "FIRST open out");
 	}
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
-	{
-		safe_close(fd_out);
-		ft_close_error(&fd_in, p, "FIRST dup2 out");
-	}
+		ft_close_error(&fd_out, p, (*nodes)->file[(*nodes)->f]);
 }
 
 int	exec_builtin(PARSER *current, t_pipex *p)
@@ -80,7 +78,6 @@ int	is_builtin(PARSER *current)
 int	execute(PARSER *current, t_pipex *p)
 {
 	char	*path;
-	dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 	
 	if (is_builtin(current) == 1)
 	{
@@ -103,7 +100,6 @@ int	execute(PARSER *current, t_pipex *p)
 			perror("access"); // modification message derreur ?
 			exit(127);
 		}
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 		execve(current->command[0], current->command, NULL);
 	}
 	else if (!ft_strchr(current->command[0], '/') && !no_envp(p->mini_env))
@@ -118,7 +114,6 @@ int	execute(PARSER *current, t_pipex *p)
 			return (-1); // modifier exit code
 		}
 	}
-	dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 	return (-1);
 }
 
@@ -129,41 +124,39 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	
 	fd_in = -1;
 	fd_out = -1;
-	(*nodes)->i = 0;
-	(*nodes)->o = 0;
+	(*nodes)->f = 0;
 	safe_close(p->pipefd[0]);
-	dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
-	while ((*nodes)->infile && (*nodes)->infile[(*nodes)->i] != NULL)
+	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		if ((*nodes)->redir_type_in[(*nodes)->i] == REDIRECT_IN)
-			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY | 0644);
-		if ((*nodes)->redir_type_in[(*nodes)->i] == HEREDOC)
-			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY | 0644);
-		if (fd_in == -1)
+		dprintf(2, "(*nodes)->file[(*nodes)->f] = %s\n", (*nodes)->file[(*nodes)->f]);
+		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+		if (fd_in == -1 && ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN || (*nodes)->redir_type[(*nodes)->f] == HEREDOC))
 		{	
 			safe_close(p->pipefd[1]);
-			ft_error("FIRST open in");
+			ft_error((*nodes)->file[(*nodes)->f]);
 		}
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
-		if (dup2(fd_in, STDIN_FILENO) == -1)
-			ft_close_error(&fd_in, p, "FIRST dup2 in");
-		safe_close(fd_in);
-		(*nodes)->i++;
+		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC || (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		{
+			if (dup2(fd_in, STDIN_FILENO) == -1)
+				ft_close_error(&fd_in, p, (*nodes)->file[(*nodes)->f]);
+			safe_close(fd_in);
+		}
+		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+			handle_output_redirection(nodes, p, fd_out);
+		
+		(*nodes)->f++;
 		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 
 	}
 	if ((*nodes)->next)
 	{
 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
-			ft_close_error(&fd_in, p, "FIRST dup2 out");
+			ft_close_error(&fd_in, p, (*nodes)->file[(*nodes)->f]);
 		safe_close(p->pipefd[1]);
 	}
-	while ((*nodes)->outfile && (*nodes)->outfile[(*nodes)->o] != NULL)
-	{
-		handle_output_redirection(nodes, p, fd_in, fd_out);
-		(*nodes)->o++;
-	}	
-	// if builtin ?
 	if (execute((*nodes), p) == -1)
 		exit(127);
 }
@@ -175,40 +168,40 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 
 	fd_in = -1;
 	fd_out = -1;
-	(*nodes)->i = 0;
-	(*nodes)->o = 0;
+	(*nodes)->f = 0;
 	if (dup2(p->prev_fd, STDIN_FILENO) == -1)
 	{
 		close(p->pipefd[0]);
 		close(p->prev_fd);
 		close(p->pipefd[1]);
-		ft_error("INTER dup2 pipein");
+		ft_error("pipe");
 	}
-	while ((*nodes)->infile && (*nodes)->infile[(*nodes)->i] != NULL)
+	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		if ((*nodes)->redir_type_in[(*nodes)->i] == REDIRECT_IN)
-			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY | 0644);
-		if ((*nodes)->redir_type_in[(*nodes)->i] == HEREDOC)
-			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY  | 0644); // revenir sur e nom du fichier temp ?
-		if (fd_in == -1)
+		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+		
+		if (fd_in == -1 && ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN || (*nodes)->redir_type[(*nodes)->f] == HEREDOC))
 		{
 			safe_close(p->pipefd[1]);
 			safe_close(p->pipefd[0]);
-			ft_error("INTER open in");
+			ft_error((*nodes)->file[(*nodes)->f]);
 		}
-		if (dup2(fd_in, STDIN_FILENO) == -1)
-			ft_close_error(&fd_in, p, "INTER dup2 in");
-		safe_close(fd_in);
-		(*nodes)->i++;
+		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC || (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		{
+			if (dup2(fd_in, STDIN_FILENO) == -1)
+				ft_close_error(&fd_in, p, (*nodes)->file[(*nodes)->f]);
+			safe_close(fd_in);
+		}
+		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+			handle_output_redirection(nodes, p, fd_out);
+		(*nodes)->f++;
 	}
 	if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
-		ft_close_error(&fd_in, p, "INTER dup2 pipeout");
+		ft_close_error(&fd_in, p, "pipe");
 	safe_close(p->pipefd[1]);
-	while ((*nodes)->outfile && (*nodes)->outfile[(*nodes)->o] != NULL)
-	{
-		handle_output_redirection(nodes, p, fd_in, fd_out);
-		(*nodes)->o++;
-	}
 	if (execute((*nodes), p) == -1)
 		exit(127);
 }
@@ -220,36 +213,35 @@ void	last_child(t_pipex *p, PARSER **nodes)
 
 	fd_in = -1;
 	fd_out = -1;
-	(*nodes)->i = 0;
-	(*nodes)->o = 0;
+	(*nodes)->f = 0;
 	if (dup2(p->prev_fd, STDIN_FILENO) == -1)
 	{
 		close(p->pipefd[0]);
 		close(p->prev_fd);
 		close(p->pipefd[1]);
-		ft_error("LAST dup2 pipein");
+		ft_error("pipe");
 	}
-	while ((*nodes)->infile && (*nodes)->infile[(*nodes)->i] != NULL)
+	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		if ((*nodes)->redir_type_in[(*nodes)->i] == REDIRECT_IN )
-			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY | 0644);
-		if ((*nodes)->redir_type_in[(*nodes)->i] == HEREDOC)
-			fd_in = open((*nodes)->infile[(*nodes)->i], O_RDONLY  | 0644); // revenir sur e nom du fichier temp ?
-		if (fd_in == -1)
+		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+		if (fd_in == -1 && ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN || (*nodes)->redir_type[(*nodes)->f] == HEREDOC))
 		{
 			safe_close(p->pipefd[1]);
 			safe_close(p->pipefd[0]);
-			ft_error("LAST open in");
+			ft_error((*nodes)->file[(*nodes)->f]);
 		}
-		if (dup2(fd_in, STDIN_FILENO) == -1)
-			ft_close_error(&fd_in, p, "LAST dup2 in");
-		safe_close(fd_in);
-		(*nodes)->i++;
-	}
-	while ((*nodes)->outfile && (*nodes)->outfile[(*nodes)->o] != NULL)
-	{
-		handle_output_redirection(nodes, p, fd_in, fd_out);
-		(*nodes)->o++;
+		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC || (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		{
+			if (dup2(fd_in, STDIN_FILENO) == -1)
+				ft_close_error(&fd_in, p, (*nodes)->file[(*nodes)->f]);
+			safe_close(fd_in);
+		}
+		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+			handle_output_redirection(nodes, p, fd_out);
+		(*nodes)->f++;
 	}
 	if (execute((*nodes), p) == -1)
 		exit(127);
@@ -286,61 +278,59 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 {
 	int	fd_in;
 	int	fd_out;
-
+	int	cpy_stdin;
+	int	cpy_stdout;
+	
+	cpy_stdin = dup(STDIN_FILENO);
+	cpy_stdout = dup(STDOUT_FILENO);
 	fd_in = -1;
 	fd_out = -1;
-	current->i = 0;
-	current->o = 0;
+	current->f = 0;
 	p->flag = 1;
-	while (current->infile && current->infile[current->i] != NULL)
+	while (current->file && current->file[current->f] != NULL)
 	{
-		if (current->redir_type_in[current->i] == REDIRECT_IN )
-			fd_in = open(current->infile[current->i], O_RDONLY | 0644);
-		if (current->redir_type_in[current->i] == HEREDOC)
-			fd_in = open(current->infile[current->i], O_RDONLY  | 0644); // revenir sur e nom du fichier temp ?
-		if (fd_in == -1)
+		if (current->redir_type[current->f] == REDIRECT_IN )
+			fd_in = open(current->file[current->f], O_RDONLY | 0644);
+		if (current->redir_type[current->f] == HEREDOC)
+			fd_in = open(current->file[current->f], O_RDONLY  | 0644); // revenir sur e nom du fichier temp ?
+		if (fd_in == -1 && (current->redir_type[current->f] == REDIRECT_IN || current->redir_type[current->f] == HEREDOC))
+			ft_error(current->file[current->f]);
+		if (current->redir_type[current->f] == HEREDOC || current->redir_type[current->f] == REDIRECT_IN)
 		{
-			ft_error("FIRST open in");
-		}
-		if (dup2(fd_in, STDIN_FILENO) == -1)
-		{
+			if (dup2(fd_in, STDIN_FILENO) == -1)
+			{
+				safe_close(fd_in);
+				perror(current->file[current->f]);
+			}
 			safe_close(fd_in);
-			perror("dup2");
 		}
-		safe_close(fd_in);
-		current->i++;
-	}
-	while (current->outfile && current->outfile[current->o] != NULL)
-	{
-		handle_output_redirection(&current, p, fd_in, fd_out);
-		current->o++;
+		if (current->redir_type[current->f] == REDIRECT_OUT || current->redir_type[current->f] == APPEND_OUT)
+				handle_output_redirection(&current, p, fd_out);
+		current->f++;
 	}
 	if (exec_builtin(current, p))
 	{
 		free(current);
-		exit(EXIT_FAILURE);
-		// if (p->exit == 1)
-			// exit (EXIT_FAILURE);
+		if (dup2(cpy_stdout, STDOUT_FILENO) == -1)
+			perror("STDOUT");
+		if (dup2(cpy_stdin, STDIN_FILENO) == -1)
+			perror("STDIN");
+		if (p->exit == 1)
+			exit (EXIT_SUCCESS);
 	}
 }
-
-// gerer louverture des fichiers dapres ce qu'a dis Alan (si < input < input > output < input : ouvrir output en 3eme et en 4me le dernier input)
 
 int	handle_input(PARSER **nodes, t_pipex *p)
 {
 	PARSER		*current;
 	
 	current = (*nodes);
-	dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 	if (current->next == NULL && is_builtin(current))
 		return (handle_simple_process(current, p), 0);
-	dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 	//fonction qui va checker tous les noeuds pour ouvrir les infile & outfile (creer une struct pour stocker les fd ?)
 	while (p->i < p->nb_cmd)
 	{
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
-		dprintf(2, "p->i = %d p_nb_cmd = %d\n", p->i, p->nb_cmd);
-		if(p->i < p->nb_cmd)
+		if(p->nb_cmd > 1 && p->i < p->nb_cmd)
 		{
 			if (pipe(p->pipefd) == -1)
 				ft_error("pipe");
@@ -350,15 +340,11 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 		{
 			p->last_pid = p->pid;
 		}
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 		create_process(p, &current);
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 		p->i++;
 		current = current->next;
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 		if (p->i == p->nb_cmd)
 			break;	
 	}
-	dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 	return (ft_wait(p->last_pid, nodes));
 }

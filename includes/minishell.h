@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 18:42:23 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 17:41:06 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <stdio.h>
 # include <string.h>
 # include <unistd.h>
+# include <signal.h>
 
 # define true 1
 # define false 0
@@ -45,19 +46,15 @@
 
 typedef struct PARSER
 {
-	char	**infile; // ne dup que le dernier
-	char	**outfile; // ne dup que le dernier
+	char **file;
 	char	**command; // n'exec que la premiere
 	char	**delimiter;
-	int		*redir_type_in;
-	int		*redir_type_out;
+	int		*redir_type;
 	int		*fd_heredoc;
 	int		cmd;
-	int		i;
-	int		o;
-	int	nb_infile;
-	int	nb_outfile;
+	int		f;
 	int	nb_command;
+	int	nb_file;
 	int	nb_heredoc;
 	struct PARSER	*next;
 	int			exit_code;
@@ -110,7 +107,7 @@ void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	safe_close(int fd);
 void	get_lines(PARSER *nodes, int i, int d);
-void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_in, int fd_out);
+void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
 void   ft_close_error(int *fd, t_pipex *p, char *str);
 void	replace_prev_token(t_token **list, t_token *new);
 

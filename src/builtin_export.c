@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 12:22:50 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/21 16:25:07 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,7 +209,7 @@ int	ft_export(PARSER *current, char **env)
 		return (copy_and_sort_env(env), TRUE);
 	while (current->command[i])
 	{
-		if (current->command[i][0] == '-')
+		if (current->command[i] && current->command[i][0] == '-')
 		{
 			ft_putstr_fd("export:", 2);
 			ft_putstr_fd(current->command[i], 2);

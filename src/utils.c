@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/21 10:50:00 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 16:37:27 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ void	safe_close(int fd)
 		}
 		fd = -1;
 	}
+	else
+		return ;
 }
 
 int		ft_size_list(PARSER **nodes)
@@ -199,8 +201,8 @@ int    ft_wait(pid_t last_pid, PARSER **nodes)
 	while (waited_pid != -1)
 	{
 		waited_pid = wait(&status);
-		if (current->redir_type_in && current->redir_type_in[current->i] == 4)
-			unlink(current->infile[current->i]);
+		if (current->redir_type && current->redir_type[current->f] == 4)
+			unlink(current->file[current->f]);
 		if (current->next)
 			current = current->next;
 		dprintf(2, "waited_pid == %d, status = %d\n", waited_pid, status);

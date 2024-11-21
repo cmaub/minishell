@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/19 17:19:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 15:55:16 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	ft_pwd(PARSER *current)
 	char	*new_var;
 	
 	new_var = NULL;
-	if (current->command[1][0] == '-')
+	if (current->command[1] && current->command[1][0] == '-')
 	{
 		ft_putstr_fd("pwd:", 2);
 		ft_putstr_fd(current->command[1], 2);

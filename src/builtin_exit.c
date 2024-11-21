@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 10:56:26 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 17:18:28 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p)
 		if (!isdigit(cmd[j]))
 		{
 			not_a_num(p, node);
-			exit (node->exit_code);
+			exit (2);
 		}
 		j++;
 	}
@@ -95,7 +95,7 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node)
 		if (is_arg_too_big(cmd[1]))
 		{
 			not_a_num(p, node);
-			exit(node->exit_code);
+			exit(2);
 		}
 		i++;
 	}

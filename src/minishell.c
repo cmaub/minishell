@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 12:21:53 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 15:34:34 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,20 +30,20 @@ void free_new_node(PARSER *new_node)
 {
 	if (!new_node)
        	return;
-	if ((!new_node->infile && new_node->nb_infile > 0) ||
-        (!new_node->outfile && new_node->nb_outfile > 0) ||
+	if ((!new_node->file && new_node->nb_file > 0) ||
+        // (!new_node->outfile && new_node->nb_outfile > 0) ||
         (!new_node->command && new_node->nb_command > 0) ||
         (!new_node->delimiter && new_node->nb_heredoc > 0) ||
-        (!new_node->redir_type_in && new_node->nb_infile > 0) ||
-        (!new_node->redir_type_out && new_node->nb_outfile > 0) ||
+        (!new_node->redir_type && new_node->nb_file > 0) ||
+        // (!new_node->redir_type_out && new_node->nb_outfile > 0) ||
         (!new_node->fd_heredoc && new_node->nb_heredoc > 0))
 	{
-    		free(new_node->infile);
-    		free(new_node->outfile);
+    		free(new_node->file);
+    		// free(new_node->outfile);
     		free(new_node->command);
     		free(new_node->delimiter);
-    		free(new_node->redir_type_in);
-    		free(new_node->redir_type_out);
+    		free(new_node->redir_type);
+    		// free(new_node->redir_type_out);
     		free(new_node->fd_heredoc);
     		free(new_node);
 	}
@@ -79,20 +79,26 @@ char	*isolate_expand(char *str, int index)
 
 void	calloc_tab_of_node(PARSER *new_node)
 {
-	if (new_node->nb_infile > 0)
-		new_node->infile = try_malloc((new_node->nb_infile + 1) * sizeof(char *));
-	if (new_node->nb_outfile > 0)
-		new_node->outfile = try_malloc((new_node->nb_outfile + 1) * sizeof(char *));
+	if (new_node->nb_file > 0)
+	{
+		new_node->file = try_malloc((new_node->nb_file + 1) * sizeof(char *));
+		new_node->redir_type = try_malloc((new_node->nb_file) * sizeof(int));
+	}
+	// if (new_node->nb_outfile > 0)
+	// 	new_node->outfile = try_malloc((new_node->nb_outfile + 1) * sizeof(char *));
 	if (new_node->nb_command > 0)
 		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
 	if (new_node->nb_heredoc > 0)
+	{
 		new_node->delimiter = try_malloc((new_node->nb_heredoc + 1) * sizeof(char *));
-	if (new_node->nb_infile > 0)
-		new_node->redir_type_in = try_malloc((new_node->nb_infile) * sizeof(int));
-	if (new_node->nb_outfile > 0)
-		new_node->redir_type_out = try_malloc((new_node->nb_outfile) * sizeof(int));
-	if (new_node->nb_heredoc > 0)
 		new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
+	}
+	// if (new_node->nb_file > 0)
+	// 	new_node->redir_type = try_malloc((new_node->nb_infile) * sizeof(int));
+	// if (new_node->nb_outfile > 0)
+	// 	new_node->redir_type_out = try_malloc((new_node->nb_outfile) * sizeof(int));
+	// if (new_node->nb_heredoc > 0)
+	// 	new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
 }
 
 int	search_closing_quote(char *str, char c)
@@ -235,20 +241,13 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 
 void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 {
-	if (cur->type == REDIRECT_IN || cur->type == HEREDOC)
+	if (cur->type == REDIRECT_IN || cur->type == HEREDOC 
+		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 	{
-		cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
-		new_node->nb_infile++;
 		if (cur->type == HEREDOC)
-		{
-			cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
-		}
-		new_node->nb_heredoc++;
-	}
-	if (cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
-	{
+			new_node->nb_heredoc++;
 		cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
-		new_node->nb_outfile++;
+		new_node->nb_file++;
 	}
 	else if (cur->type == ARGUMENT)
 	{
@@ -276,7 +275,7 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 }
 
 
-void	create_heredoc(PARSER *new_node, t_token *current, int *i, int *d)
+void	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 {
 	int		index_heredoc;
 	int		random;
@@ -293,27 +292,27 @@ void	create_heredoc(PARSER *new_node, t_token *current, int *i, int *d)
 		name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
 		random++;	
 	}
-	new_node->fd_heredoc[*i] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-	if (new_node->fd_heredoc[*i] == -1)
+	new_node->fd_heredoc[*f] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (new_node->fd_heredoc[*f] == -1)
 		perror("open"); //verifier la marche a suivre -> OK
 	new_node->delimiter[*d] = ft_strdup(current->next->value);
-	get_lines(new_node, *i, *d);
-	new_node->infile[*i] = ft_strdup(name_heredoc);
-	new_node->redir_type_in[*i++] = current->type;
+	get_lines(new_node, *f, *d);
+	new_node->file[*f] = ft_strdup(name_heredoc);
+	new_node->redir_type[*f++] = current->type;
 	free(name_heredoc);
 	name_heredoc = ft_strdup("heredoc");
 	index_heredoc++;
 	d++;
 }
 
-void	add_null_to_tab(PARSER *new_node, int i, int d, int o, int cmd)
+void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
 {
-	if (i > 0)
-		new_node->infile[i] = NULL;
+	if (f > 0)
+		new_node->file[f] = NULL;
 	if (d > 0)
 		new_node->delimiter[d] = NULL;
-	if (o > 0)
-		new_node->outfile[o] = NULL;
+	// if (o > 0)
+	// 	new_node->outfile[o] = NULL;
 	if (cmd > 0)
 		new_node->command[cmd] = NULL;
 }
@@ -322,18 +321,20 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 {
 	t_token	*current;
 	PARSER		*new_node;
-	int		i;
-	int		o;
+	// int		i;
+	// int		o;
 	int		cmd;
 	int		d;
+	int		f;
 
 	current = *tokens;
 	while (current)
 	{
-		i = 0;
-		o = 0;
+		// i = 0;
+		// o = 0;
 		cmd = 0;
 		d = 0;
+		f = 0;
 		new_node = alloc_new_node(current, mini_env, exit_code);
 		if (!new_node)
 			return ;
@@ -341,22 +342,22 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 		{
 			if (current->type == REDIRECT_IN && current->next->value != NULL)
 			{
-				new_node->infile[i] = ft_strdup(current->next->value);
-				new_node->redir_type_in[i++] = current->type;
+				new_node->file[f] = ft_strdup(current->next->value);
+				new_node->redir_type[f++] = current->type;
 			}
 			else if (current->type == HEREDOC && current->next->value != NULL)
-				create_heredoc(new_node, current, &i, &d);
+				create_heredoc(new_node, current, &f, &d);
 			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 					&& current->next->value != NULL)
 			{
-					new_node->outfile[o] = ft_strdup(current->next->value);
-					new_node->redir_type_out[o++] = current->type;
+					new_node->file[f] = ft_strdup(current->next->value);
+					new_node->redir_type[f++] = current->type;
 			}
 			else if (current->type == ARGUMENT && current->value != NULL)
 					new_node->command[cmd++] = ft_strdup(current->value);
 			current = current->next;
 		}
-		add_null_to_tab(new_node, i, d, o, cmd);
+		add_null_to_tab(new_node, f, d, cmd);
 		add_new_node(nodes, new_node);
 		if (current && current->type == PIPEX)
 			current = current->next;
@@ -395,6 +396,7 @@ int		main(int argc, char **argv, char **env)
 			tokens = NULL;
 			nodes = NULL;
 			str_input = readline("\033[36;1mminishell ➜ \033[0m");
+			dprintf(2, "LINE = %d, FILE = %s\n", __LINE__, __FILE__);
 			if (!str_input)
 				break;
 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
@@ -403,7 +405,6 @@ int		main(int argc, char **argv, char **env)
 				add_history(str_input);
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
-
 			if (!fill_list_of_tokens(L_input, &tokens))
 			{
 				printf("input non valide\n");
