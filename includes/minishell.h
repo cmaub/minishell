@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 17:41:06 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 18:52:46 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,6 @@ char	*return_var_from_env(char *str, char **mini_env);
 
 void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
-void	ft_free_tab(char **tab);
 void	ft_error(char *str);
 int	ft_error_int(char *str, PARSER *node);
 void	check_open(int fd);
@@ -137,6 +136,10 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
 char **ft_unset(PARSER *current, char **env);
 int	ft_export(PARSER *current, char **env);
 void	print_sorted_env(char **env);
+
+/* ALLOC AND FREE */
+void	ft_free_tab(char **tab);
+void	free_new_node(PARSER *new_node);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

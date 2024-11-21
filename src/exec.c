@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 17:43:48 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 18:53:55 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -292,7 +292,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		if (current->redir_type[current->f] == REDIRECT_IN )
 			fd_in = open(current->file[current->f], O_RDONLY | 0644);
 		if (current->redir_type[current->f] == HEREDOC)
-			fd_in = open(current->file[current->f], O_RDONLY  | 0644); // revenir sur e nom du fichier temp ?
+			fd_in = open(current->file[current->f], O_RDONLY  | 0644);
 		if (fd_in == -1 && (current->redir_type[current->f] == REDIRECT_IN || current->redir_type[current->f] == HEREDOC))
 			ft_error(current->file[current->f]);
 		if (current->redir_type[current->f] == HEREDOC || current->redir_type[current->f] == REDIRECT_IN)
@@ -327,7 +327,6 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 	current = (*nodes);
 	if (current->next == NULL && is_builtin(current))
 		return (handle_simple_process(current, p), 0);
-	//fonction qui va checker tous les noeuds pour ouvrir les infile & outfile (creer une struct pour stocker les fd ?)
 	while (p->i < p->nb_cmd)
 	{
 		if(p->nb_cmd > 1 && p->i < p->nb_cmd)

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 15:34:34 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 18:51:26 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,26 +26,56 @@ int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 	return (TRUE);
 }
 
-void free_new_node(PARSER *new_node)
+void check_and_free_new_node(PARSER *new_node)
 {
 	if (!new_node)
        	return;
 	if ((!new_node->file && new_node->nb_file > 0) ||
-        // (!new_node->outfile && new_node->nb_outfile > 0) ||
         (!new_node->command && new_node->nb_command > 0) ||
         (!new_node->delimiter && new_node->nb_heredoc > 0) ||
         (!new_node->redir_type && new_node->nb_file > 0) ||
-        // (!new_node->redir_type_out && new_node->nb_outfile > 0) ||
         (!new_node->fd_heredoc && new_node->nb_heredoc > 0))
 	{
     		free(new_node->file);
-    		// free(new_node->outfile);
     		free(new_node->command);
     		free(new_node->delimiter);
     		free(new_node->redir_type);
-    		// free(new_node->redir_type_out);
     		free(new_node->fd_heredoc);
     		free(new_node);
+	}
+}
+
+void	free_new_node(PARSER *new_node)
+{
+	if (new_node)
+    {
+		if ((new_node->file && new_node->nb_file > 0))
+			free(new_node->file);
+		if (new_node->command && new_node->nb_command > 0)
+			free(new_node->command);
+		if (new_node->delimiter && new_node->nb_heredoc > 0)
+			free(new_node->delimiter);
+		if (new_node->redir_type && new_node->nb_file > 0)
+			free(new_node->redir_type);
+		if (new_node->fd_heredoc && new_node->nb_heredoc > 0)
+			free(new_node->fd_heredoc);
+		free(new_node);
+	}
+}
+
+void	calloc_tab_of_node(PARSER *new_node)
+{
+	if (new_node->nb_file > 0)
+	{
+		new_node->file = try_malloc((new_node->nb_file + 1) * sizeof(char *));
+		new_node->redir_type = try_malloc((new_node->nb_file) * sizeof(int));
+	}
+	if (new_node->nb_command > 0)
+		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
+	if (new_node->nb_heredoc > 0)
+	{
+		new_node->delimiter = try_malloc((new_node->nb_heredoc + 1) * sizeof(char *));
+		new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
 	}
 }
 
@@ -77,29 +107,7 @@ char	*isolate_expand(char *str, int index)
 	return (ft_substr(str, index, i));
 }
 
-void	calloc_tab_of_node(PARSER *new_node)
-{
-	if (new_node->nb_file > 0)
-	{
-		new_node->file = try_malloc((new_node->nb_file + 1) * sizeof(char *));
-		new_node->redir_type = try_malloc((new_node->nb_file) * sizeof(int));
-	}
-	// if (new_node->nb_outfile > 0)
-	// 	new_node->outfile = try_malloc((new_node->nb_outfile + 1) * sizeof(char *));
-	if (new_node->nb_command > 0)
-		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
-	if (new_node->nb_heredoc > 0)
-	{
-		new_node->delimiter = try_malloc((new_node->nb_heredoc + 1) * sizeof(char *));
-		new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
-	}
-	// if (new_node->nb_file > 0)
-	// 	new_node->redir_type = try_malloc((new_node->nb_infile) * sizeof(int));
-	// if (new_node->nb_outfile > 0)
-	// 	new_node->redir_type_out = try_malloc((new_node->nb_outfile) * sizeof(int));
-	// if (new_node->nb_heredoc > 0)
-	// 	new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
-}
+
 
 int	search_closing_quote(char *str, char c)
 {
@@ -270,7 +278,7 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 		cur = cur->next;
 	}
 	calloc_tab_of_node(new_node);
-	free_new_node(new_node);
+	check_and_free_new_node(new_node);
 	return (new_node);
 }
 
@@ -294,7 +302,7 @@ void	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	}
 	new_node->fd_heredoc[*f] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (new_node->fd_heredoc[*f] == -1)
-		perror("open"); //verifier la marche a suivre -> OK
+		perror("open");
 	new_node->delimiter[*d] = ft_strdup(current->next->value);
 	get_lines(new_node, *f, *d);
 	new_node->file[*f] = ft_strdup(name_heredoc);
@@ -311,8 +319,6 @@ void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
 		new_node->file[f] = NULL;
 	if (d > 0)
 		new_node->delimiter[d] = NULL;
-	// if (o > 0)
-	// 	new_node->outfile[o] = NULL;
 	if (cmd > 0)
 		new_node->command[cmd] = NULL;
 }
@@ -321,8 +327,6 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 {
 	t_token	*current;
 	PARSER		*new_node;
-	// int		i;
-	// int		o;
 	int		cmd;
 	int		d;
 	int		f;
@@ -330,8 +334,6 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 	current = *tokens;
 	while (current)
 	{
-		// i = 0;
-		// o = 0;
 		cmd = 0;
 		d = 0;
 		f = 0;
@@ -368,7 +370,7 @@ LEXER	*ft_init_lexer_input()
 {
 	LEXER	*new_input;
 	
-	new_input = try_malloc(sizeof(new_input)); // faire une fonction pour initialiser a part
+	new_input = try_malloc(sizeof(LEXER)); //correction car invalid write 
 	new_input->data = NULL;
 	new_input->len = 0;
 	new_input->head = 0;

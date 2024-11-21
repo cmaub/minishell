@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/21 13:06:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 18:50:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,6 @@ void	print_tokens_list(t_token **list)
 void	print_nodes_list(PARSER **nodes)
 {
 	int	f = 0;
-	// int	o = 0;
 	int	h = 0;
 	int	d = 0;
 	int	index = 0;
@@ -128,7 +127,6 @@ void	print_nodes_list(PARSER **nodes)
 	while (index <= ft_size_list(nodes))
 	{
 		f = 0;
-		// o = 0;
 		h = 0;
 		while (f < 30 && tmp->file && tmp->file[f] != NULL)
 		{
@@ -140,11 +138,6 @@ void	print_nodes_list(PARSER **nodes)
 			}
 			f++;
 		}
-		// while (o < 30 && tmp->outfile && tmp->outfile[o] != NULL)
-		// {
-		// 	printf("tmp->outfile[%d] = %s, type = %d\n", o, tmp->outfile[o], tmp->redir_type_out[o]);
-		// 	o++;
-		// }
 		while (h < 30 && tmp->command && tmp->command[h] != NULL)
 		{
 			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
