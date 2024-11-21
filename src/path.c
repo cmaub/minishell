@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/20 17:55:35 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 10:47:05 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ char	*get_path_and_check(char **split_cmd, char **env)
 		ft_putstr_fd(split_cmd[0], 2);
 		ft_putendl_fd(": command not found", 2);
 		ft_free_tab(split_cmd); //peut-etre pas besoin de free
-		exit (127); ///
+		exit (127); //
 	}
 	return (new_path);
 }

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/20 18:15:38 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 10:50:00 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 	p->prev_fd = -1;
 	p->pid = 0;
 	p->last_pid = 0;
-	p->exit = 0;
+	p->exit = 0; //supprimer ?
 	p->flag = 0;
 	p->pipefd[0] = -1;
 	p->pipefd[1] = -1;

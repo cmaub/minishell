@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
+#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/22 08:22:29 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/20 12:17:50 by anvander         ###   ########.fr        #
+#    Updated: 2024/11/21 11:09:39 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,8 +50,9 @@ FILES = ft_atoi.c \
 		ft_substr.c \
 		ft_tolower.c \
 		ft_toupper.c \
-		get_next_line.c \
-		try_malloc.c
+		try_malloc.c\
+		#get_next_line.c 
+		
 FILES_B = ft_lstadd_back_bonus.c \
 				ft_lstadd_front_bonus.c \
 				ft_lstclear_bonus.c \

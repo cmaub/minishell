@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 18:26:34 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/21 12:21:53 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,13 +279,23 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 void	create_heredoc(PARSER *new_node, t_token *current, int *i, int *d)
 {
 	int		index_heredoc;
+	int		random;
 	char	*name_heredoc;
 
 	name_heredoc = ft_strdup("heredoc");
 	index_heredoc = 0;
+	random = 1;
 	name_heredoc[ft_strlen(name_heredoc)] = index_heredoc + '0';
 	name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
+	while (access(name_heredoc, F_OK) == 0)
+	{
+		name_heredoc[ft_strlen(name_heredoc)] = (index_heredoc + random) + '0';
+		name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
+		random++;	
+	}
 	new_node->fd_heredoc[*i] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (new_node->fd_heredoc[*i] == -1)
+		perror("open"); //verifier la marche a suivre -> OK
 	new_node->delimiter[*d] = ft_strdup(current->next->value);
 	get_lines(new_node, *i, *d);
 	new_node->infile[*i] = ft_strdup(name_heredoc);
@@ -308,7 +318,6 @@ void	add_null_to_tab(PARSER *new_node, int i, int d, int o, int cmd)
 		new_node->command[cmd] = NULL;
 }
 
-// Tester l'input << stop > file1
 void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
 {
 	t_token	*current;
@@ -391,9 +400,7 @@ int		main(int argc, char **argv, char **env)
 			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
 				break;
 			if (str_input)
-			{
 				add_history(str_input);
-			}
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
 
