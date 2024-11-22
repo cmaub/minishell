@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 18:53:55 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:32:09 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -128,7 +128,6 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	safe_close(p->pipefd[0]);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		dprintf(2, "(*nodes)->file[(*nodes)->f] = %s\n", (*nodes)->file[(*nodes)->f]);
 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
 		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
@@ -148,7 +147,6 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			handle_output_redirection(nodes, p, fd_out);
 		
 		(*nodes)->f++;
-		dprintf(2, "LINE = %d FILE = %s\n", __LINE__, __FILE__);
 
 	}
 	if ((*nodes)->next)
@@ -247,12 +245,22 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		exit(127);
 }
 
+void handle_c_signal_child(int signum)
+{
+    (void)signum;
+	exit_status = 0;
+	exit(0);
+}
+
 void	create_process(t_pipex *p, PARSER **nodes)
 {
 	if (p->pid == -1)
 		ft_error("fork");
 	else if (p->pid == 0)
 	{
+		exit_status = 0;
+		signal(SIGINT, handle_c_signal_child);
+		signal(SIGQUIT, SIG_IGN);
 		if (p->i == 0)
 			first_child(p, nodes);
 		else if (p->i < p->nb_cmd - 1)

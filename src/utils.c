@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/21 16:37:27 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:23:13 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,41 +188,86 @@ void    ft_close_error(int *fd, t_pipex *p, char *str)
 	}
 }
 
-int    ft_wait(pid_t last_pid, PARSER **nodes)
+int ft_wait(pid_t last_pid, PARSER **nodes)
 {
-	int        status;
-	int        exit_status;
-	PARSER	*current;
-	pid_t    waited_pid;
+    int   status;
+    int   status_code = 0;
+    pid_t waited_pid;
+    PARSER *current = *nodes;
 
-	current = *nodes;
-	exit_status = 0;
-	waited_pid = 0;
-	while (waited_pid != -1)
-	{
-		waited_pid = wait(&status);
-		if (current->redir_type && current->redir_type[current->f] == 4)
-			unlink(current->file[current->f]);
-		if (current->next)
-			current = current->next;
-		dprintf(2, "waited_pid == %d, status = %d\n", waited_pid, status);
-		if (waited_pid == last_pid)
-		{
-			if (WIFEXITED(status))
-			{
-				exit_status = WEXITSTATUS(status);
-				dprintf(2, "exit_status = %d\n", exit_status);
-			}		
-		}
-	}
-	if (WIFEXITED(status))
-	{
-		if ((*nodes)->exit_code == 0)
-			exit_status = WEXITSTATUS(status);
-		else
-			exit_status = (*nodes)->exit_code;
-	}
-	(*nodes)->exit_code = exit_status;
-	return ((*nodes)->exit_code);
-} 
+    while ((waited_pid = wait(&status)) != -1)
+    {
+        // Nettoyage conditionnel des fichiers temporaires
+        if (current->redir_type && current->redir_type[current->f] == 4)
+        {
+            unlink(current->file[current->f]);
+            current->f++; // Passe au fichier suivant dans le nœud si applicable
+        }
+
+        // Avancer dans la liste des nœuds ou recommencer depuis le début
+        if (current->next)
+            current = current->next;
+        else
+            current = *nodes;
+
+        // Gestion du dernier processus exécuté
+        if (waited_pid == last_pid)
+        {
+            if (WIFEXITED(status))
+                status_code = WEXITSTATUS(status);
+            else if (WIFSIGNALED(status))
+                status_code = 128 + WTERMSIG(status);
+        }
+    }
+
+    // Finalisation : Priorité au dernier processus ou à exit_code du nœud
+    if ((*nodes)->exit_code != 0)
+        status_code = (*nodes)->exit_code;
+
+    // Mise à jour de l'exit_code global
+    (*nodes)->exit_code = status_code;
+
+    return (status_code);
+}
+
+
+// int    ft_wait(pid_t last_pid, PARSER **nodes)
+// {
+// 	int        status;
+// 	int        status_code;
+// 	PARSER	*current;
+// 	pid_t    waited_pid;
+
+// 	current = *nodes;
+// 	status_code = 0;
+// 	waited_pid = 0;
+// 	while (waited_pid != -1)
+// 	{
+// 		waited_pid = wait(&status);
+// 		if (current->redir_type && current->redir_type[current->f] == 4)
+// 			unlink(current->file[current->f]);
+// 		if (current->next)
+// 			current = current->next;
+// 		dprintf(2, "waited_pid == %d, status = %d\n", waited_pid, status);
+// 		if (waited_pid == last_pid)
+// 		{
+// 			if (WIFEXITED(status))
+// 			{
+// 				status_code = WEXITSTATUS(status);
+// 				dprintf(2, "status_code = %d\n", status_code);
+// 			}		
+// 		}
+// 	}
+// 	if (WIFEXITED(status))
+// 	{
+// 		if ((*nodes)->exit_code == 0)
+// 			status_code = WEXITSTATUS(status);
+// 		else
+// 			status_code = (*nodes)->exit_code;
+// 	}
+// 	else if (WIFSIGNALED(status))
+// 		status_code = 128 + WTERMSIG(status);
+// 	(*nodes)->exit_code = status_code;
+// 	return ((*nodes)->exit_code);
+// } 
 

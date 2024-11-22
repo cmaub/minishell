@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 18:52:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/22 16:49:40 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,13 @@ typedef struct s_pipex
 	pid_t	        	last_pid;
 }	t_pipex;
 
+typedef struct s_sig
+{
+	int	sigint;
+	int	sigquit;
+	pid_t	pid;
+	
+}t_sig;
 
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 
@@ -174,4 +181,5 @@ int command(LEXER *input, t_token **list);
 int expr(LEXER *input, t_token **list);
 int start(LEXER *input);
 
+extern int	exit_status;
 #endif

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/21 18:50:12 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/22 11:35:56 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,10 @@ int create_and_add_token(LEXER *input, int start, int end, t_token **list, int t
 void	print_tokens_list(t_token **list)
 {
 	if (!*list)
+	{
+		// dprintf(2, "la liste tokens est nulle\n");
 		return ;
+	}
 	while ((*list)->next)
 	{
 		if ((*list)->value)

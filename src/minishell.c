@@ -6,11 +6,13 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 18:51:26 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/22 17:37:28 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+int	exit_status = 0;
 
 int parserHasReachEnd(LEXER *input) 
 {
@@ -137,8 +139,15 @@ char	*print_exit_code(char *result, PARSER *new_node, int *index)
 {
 	char	*expand_result;
 
-	expand_result = ft_strdup(ft_itoa(new_node->exit_code));
-	new_node->exit_code = 0;
+	dprintf(2, "exit_status = %d\n", exit_status);
+	if (exit_status != 130)
+		expand_result = ft_strdup(ft_itoa(new_node->exit_code));
+	else
+	{
+		expand_result = ft_strdup(ft_itoa(130));
+		exit_status = 0;
+	}
+	// new_node->exit_code = 0;
 	*index += 2;
 	return (ft_strjoin(result, expand_result));
 }
@@ -150,6 +159,8 @@ char	*print_expand(char *str, int *index, char **mini_env)
 
 	expand_expr = isolate_expand(str, *index + 1);
 	expand_result = return_var_from_env(expand_expr, mini_env);
+	// if (!expand_expr)
+	// 	return (NULL);
 	*index += ft_strlen(expand_expr) + 1;
 	free(expand_expr);
 	if (expand_result != NULL)
@@ -323,6 +334,23 @@ void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
 		new_node->command[cmd] = NULL;
 }
 
+void	free_tokens(t_token *tokens)
+{
+	while (tokens)
+	{
+		dprintf(2, "token->value before free = %s\n", (tokens)->value);
+		free((tokens)->value);
+		tokens->value = NULL;
+		free(tokens);
+		// *tokens = NULL;
+		// dprintf(2, "token->value after free = %s\n", (*tokens)->value);
+		if ((tokens)->next)
+			tokens = (tokens)->next;
+		else
+			break;
+	}
+}
+
 void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
 {
 	t_token	*current;
@@ -364,23 +392,49 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 		if (current && current->type == PIPEX)
 			current = current->next;
 	}
+	free_tokens(*tokens);
 }
 
 LEXER	*ft_init_lexer_input()
 {
 	LEXER	*new_input;
 	
-	new_input = try_malloc(sizeof(LEXER)); //correction car invalid write 
+	new_input = try_malloc(sizeof(LEXER)); 
 	new_input->data = NULL;
 	new_input->len = 0;
 	new_input->head = 0;
 	return (new_input);
 }
-	
+
+// void	handle_sigint(int sig)
+// {
+// 	if (sig == SIGINT)
+// 	{
+// 		// Indique que la ligne doit être recalculée
+//     	rl_on_new_line();
+// 		// Réinitialise l'affichage de la ligne d'entrée
+//     	rl_replace_line("", 0);
+//     	// Affiche une nouvelle ligne et le prompt
+//     	rl_redisplay();
+// 	}
+// }
+
+void handle_c_signal(int signum)
+{
+    (void)signum;
+	ft_putstr_fd("\n", 1);
+	 // // Réinitialise l'affichage de la ligne d'entrée
+    rl_replace_line("", 0);
+    // Indique que la ligne doit être recalculée
+    rl_on_new_line();
+    // // Affiche une nouvelle ligne et le prompt
+    rl_redisplay();	
+	exit_status = 130;
+}
+
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
-	(void)argc;
 	char		*str_input;
 	LEXER		*L_input = NULL;
 	t_token		*tokens = NULL;
@@ -394,15 +448,18 @@ int		main(int argc, char **argv, char **env)
 	{
 		while (1)
 		{
+			// signal(SIGQUIT, SIG_IGN);	
 			L_input = ft_init_lexer_input();
 			tokens = NULL;
 			nodes = NULL;
+			signal(SIGINT, handle_c_signal);
+			signal(SIGQUIT, SIG_IGN);
 			str_input = readline("\033[36;1mminishell ➜ \033[0m");
-			dprintf(2, "LINE = %d, FILE = %s\n", __LINE__, __FILE__);
 			if (!str_input)
+			{
+				ft_putstr_fd("exit\n", 1);
 				break;
-			if (ft_strnstr(str_input, "quit", ft_strlen(str_input)))
-				break;
+			}
 			if (str_input)
 				add_history(str_input);
 			L_input->data = str_input;
@@ -418,12 +475,15 @@ int		main(int argc, char **argv, char **env)
 			else
 			{
 				create_nodes(&tokens, &nodes, mini_env, exit_code);
+				// print_tokens_list(&tokens);
 				dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 				print_nodes_list(&nodes);
 				p = try_malloc(sizeof(*p));
 				ft_init_struct(p, mini_env, nodes);
 				handle_input(&nodes, p);
+				dprintf(2, "\b\b\n");
 				mini_env = p->mini_env;
+				exit_status = nodes->exit_code;
 				exit_code = nodes->exit_code;
 				// free(tokens);
 				free(str_input);
