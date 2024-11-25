@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/16 15:53:14 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/22 17:23:13 by cmaubert         ###   ########.fr       */
-/*                                                                            */
+/*																			*/
+/*														:::	  ::::::::   */
+/*   utils.c											:+:	  :+:	:+:   */
+/*													+:+ +:+		 +:+	 */
+/*   By: anvander < anvander@student.42.fr >		+#+  +:+	   +#+		*/
+/*												+#+#+#+#+#+   +#+		   */
+/*   Created: 2024/10/16 15:53:14 by anvander		  #+#	#+#			 */
+/*   Updated: 2024/11/25 11:38:55 by anvander		 ###   ########.fr	   */
+/*																			*/
 /* ************************************************************************** */
 
 #include "minishell.h"
@@ -176,67 +176,83 @@ void	get_lines(PARSER *nodes, int i, int d)
 	safe_close(nodes->fd_heredoc[i]);
 }
 
-void    ft_close_error(int *fd, t_pipex *p, char *str)
+void	ft_close_error(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
 	{
-	    close(*fd);
-    	close(p->pipefd[1]);
-    	close(p->pipefd[0]);
-    	perror(str);
-    	exit(EXIT_FAILURE);
+		close(*fd);
+		close(p->pipefd[1]);
+		close(p->pipefd[0]);
+		perror(str);
+		exit(EXIT_FAILURE);
 	}
 }
 
+// void check_signal_handler()
+// {
+//     struct sigaction sa;
+//     sigaction(SIGINT, NULL, &sa);
+//     if (sa.sa_handler == handle_c_signal)
+//         dprintf(2, "Gestionnaire actif : Parent\n");
+//     else if (sa.sa_handler == handle_c_signal_child)
+//         dprintf(2, "Gestionnaire actif : Enfant\n");
+//     else if (sa.sa_handler == SIG_IGN)
+//         dprintf(2, "Gestionnaire actif : SIG_IGN\n");
+//     else if (sa.sa_handler == SIG_DFL)
+//         dprintf(2, "Gestionnaire actif : SIG_DFL\n");
+//     else
+//         dprintf(2, "Gestionnaire actif : Autre\n");
+// }
+
+
 int ft_wait(pid_t last_pid, PARSER **nodes)
 {
-    int   status;
-    int   status_code = 0;
-    pid_t waited_pid;
-    PARSER *current = *nodes;
-
-    while ((waited_pid = wait(&status)) != -1)
-    {
-        // Nettoyage conditionnel des fichiers temporaires
-        if (current->redir_type && current->redir_type[current->f] == 4)
-        {
-            unlink(current->file[current->f]);
-            current->f++; // Passe au fichier suivant dans le nœud si applicable
-        }
-
-        // Avancer dans la liste des nœuds ou recommencer depuis le début
-        if (current->next)
-            current = current->next;
-        else
-            current = *nodes;
-
-        // Gestion du dernier processus exécuté
-        if (waited_pid == last_pid)
-        {
-            if (WIFEXITED(status))
-                status_code = WEXITSTATUS(status);
-            else if (WIFSIGNALED(status))
-                status_code = 128 + WTERMSIG(status);
-        }
-    }
-
-    // Finalisation : Priorité au dernier processus ou à exit_code du nœud
-    if ((*nodes)->exit_code != 0)
-        status_code = (*nodes)->exit_code;
-
-    // Mise à jour de l'exit_code global
-    (*nodes)->exit_code = status_code;
-
-    return (status_code);
+	int   status;
+	int   status_code = 0;
+	pid_t waited_pid;
+	PARSER *current = *nodes;	
+	while ((waited_pid = wait(&status)) != -1)
+	{
+		// Nettoyage conditionnel des fichiers temporaires
+		if (current->redir_type && current->redir_type[current->f] == 4)
+		{
+			unlink(current->file[current->f]);
+			current->f++; // Passe au fichier suivant dans le nœud si applicable
+		}	
+		// Avancer dans la liste des nœuds ou recommencer depuis le début
+		if (current->next)
+			current = current->next;
+		else
+			current = *nodes;	
+		// Gestion du dernier processus exécuté
+		if (waited_pid == last_pid)
+		{
+			if (WIFEXITED(status))
+				status_code = WEXITSTATUS(status);
+			else if (WIFSIGNALED(status))
+		 	{
+				dprintf(2, "wait donne le status code\n");
+				status_code = 128 + WTERMSIG(status);
+		 	}
+		}
+	}	
+	// Finalisation : Priorité au dernier processus ou à exit_code du nœud
+	if ((*nodes)->exit_code != 0)
+		status_code = (*nodes)->exit_code;	
+	// Mise à jour de l'exit_code global
+	(*nodes)->exit_code = status_code;
+	// dprintf(2, "fin de ft_wait status_code = %d\n", (*nodes)->exit_code);
+	signal(SIGINT, handle_c_signal);
+	return ((*nodes)->exit_code);
 }
 
 
-// int    ft_wait(pid_t last_pid, PARSER **nodes)
+// int	ft_wait(pid_t last_pid, PARSER **nodes)
 // {
-// 	int        status;
-// 	int        status_code;
+// 	int		status;
+// 	int		status_code;
 // 	PARSER	*current;
-// 	pid_t    waited_pid;
+// 	pid_t	waited_pid;
 
 // 	current = *nodes;
 // 	status_code = 0;

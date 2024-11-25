@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/22 16:49:40 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/25 15:49:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,11 @@ void	get_lines(PARSER *nodes, int i, int d);
 void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
 void   ft_close_error(int *fd, t_pipex *p, char *str);
 void	replace_prev_token(t_token **list, t_token *new);
+void	handle_c_signal(int signum);
+void	handle_c_signal_child(int signum);
+void	check_signal_handler();
+
+
 
 int	give_type_to_token(t_token *token);
 // int	list_size(t_token *list);
@@ -147,6 +152,7 @@ void	print_sorted_env(char **env);
 /* ALLOC AND FREE */
 void	ft_free_tab(char **tab);
 void	free_new_node(PARSER *new_node);
+void	reset_node(PARSER **node);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
+#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/22 17:11:49 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/11/25 15:20:59 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,7 +41,8 @@ SRC_FILES			=	minishell.c \
 							builtin_exit.c \
 							builtin_cd.c \
 							builtin_unset.c \
-							builtin_export.c
+							builtin_export.c \
+							ft_free.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects

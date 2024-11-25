@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/22 11:35:56 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/25 17:03:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,12 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 	t_token	*new;
 	int		len;
 
+	if (!input || !input->data || start < 0 || end < 0 || start > end)
+       	return NULL;
 	len = end - start;
 	new = try_malloc(sizeof(t_token));
 	new->value = ft_substr(input->data, start, len);
+	dprintf(2, "new_value = %s, len = %d\n", new->value, len);
 	if (!new->value)
 	{
 		free(new);
@@ -92,7 +95,6 @@ int create_and_add_token(LEXER *input, int start, int end, t_token **list, int t
     new_node = create_new_token(input, start, end, type);
     if (!new_node)
         return (FALSE);
-
     add_new_token(list, new_node);
     return (TRUE);
 }

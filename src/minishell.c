@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/22 17:37:28 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/25 18:10:00 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,11 @@ int parserHasReachEnd(LEXER *input)
 int	fill_list_of_tokens(LEXER *L_input, t_token **list)
 {
 	if (!expr(L_input, list) || !parserHasReachEnd(L_input))
+	{
+		free(L_input);
 		return (FALSE);
+	}
+	free(L_input);
 	return (TRUE);
 }
 
@@ -171,8 +175,10 @@ char	*print_expand(char *str, int *index, char **mini_env)
 char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 {
 	char	*result;
+	char	*tmp;
 
-	result = "";
+	result = ft_strdup("");
+	tmp = NULL;
 	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
 	{
 		if (str[*index] == '$' 
@@ -180,14 +186,18 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 			|| ((str[(*index) + 1]) == 39 && (str[(*index) + 2] == 39))))
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-				result = ft_strjoin(result, print_exit_code(result, new_node, index));
+				tmp = print_exit_code(result, new_node, index);
 			else
-				result = ft_strjoin(result, print_expand(str, &(*index), mini_env));
+				tmp = print_expand(str, &(*index), mini_env);
+			result = ft_strjoin(result, tmp);
+			free(tmp);
 		}
 		else
 		{
 			
-			result = join_char(str[*index], result);
+			tmp = join_char(str[*index], result);
+			free(result);
+			result = tmp;
 			if (result[ft_strlen(result) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
 				result[ft_strlen(result) - 1] = '\0';
 			(*index)++;
@@ -199,12 +209,16 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 char	*process_single_quotes(char *str, int *index)
 {
 	char	*result;
+	char	*tmp;
 
-	result = "";
+	result = ft_strdup("");
+	tmp = NULL;
 	(*index)++; // passer quote ouvrante
 	while (str[*index] != 39 && str[*index] != '\0')
 	{
-		result = join_char(str[*index], result);
+		tmp = join_char(str[*index], result);
+		free(result);
+		result = tmp;
 		(*index)++;
 	}
 	if (str[*index] == 39)
@@ -215,8 +229,10 @@ char	*process_single_quotes(char *str, int *index)
 char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini_env)
 {
 	char	*result;
+	char	*tmp;
 
-	result = "";
+	result = ft_strdup("");
+	tmp = NULL;
 	(*index)++; // Passer quote ouvrante
 	while (str[*index] != 34 && str[*index] != '\0')
 	{
@@ -224,13 +240,17 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?'))
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-				result = ft_strjoin(result, print_exit_code(result, new_node, index));
+				tmp = print_exit_code(result, new_node, index);
 			else
-				result = ft_strjoin(result, print_expand(str, &(*index), mini_env));
+				tmp = print_expand(str, &(*index), mini_env);
+			result = ft_strjoin(result, tmp);
+			free(tmp);
 		}
 		else
 		{
-			result = join_char(str[*index], result);
+			tmp = join_char(str[*index], result);
+			free(result);
+			result = tmp;
 			(*index)++;
 		}
 	}
@@ -243,17 +263,20 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 {
 	int	start;
 	char	*result;
+	char	*tmp;
 
 	start = 0;
 	result = "";
 	while (str[start] != '\0')
 	{
 		if (str[start] == 34)
-			result = ft_strjoin(result, process_double_quotes(new_node, str, &start, mini_env));
+			tmp = process_double_quotes(new_node, str, &start, mini_env);
 		else if (str[start] == 39)
-			result = ft_strjoin(result, process_single_quotes(str, &start));
+			tmp = process_single_quotes(str, &start);
 		else
-			result = ft_strjoin(result, process_unquoted(new_node, str, &start, mini_env));
+			tmp = process_unquoted(new_node, str, &start, mini_env);
+		result = ft_strjoin(result, tmp);
+		free (tmp);
 	}
 	return (result);
 }
@@ -265,7 +288,8 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 	{
 		if (cur->type == HEREDOC)
 			new_node->nb_heredoc++;
-		cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
+		if (cur->next != NULL)
+			cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
 		new_node->nb_file++;
 	}
 	else if (cur->type == ARGUMENT)
@@ -334,20 +358,46 @@ void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
 		new_node->command[cmd] = NULL;
 }
 
+
+// void	free_tokens(t_token **tokens)
+// {
+// 	t_token	*next_token;
+// 	t_token	*current;
+	
+// 	current = *tokens;
+// 	while (current)
+// 	{
+// 		if ((current)->next)
+// 			next_token = current->next;
+// 		dprintf(2, "token->value before free = %s\n", (current)->value);
+// 		free((current)->value);
+// 		current->value = NULL;
+// 		free(current);
+// 		// *current = NULL;
+// 		// dprintf(2, "token->value after free = %s\n", (*current)->value);
+// 		if ((current)->next)
+// 			current = next_token;// current = next_token;
+// 		else
+// 			break;
+// 	}
+// 	*tokens = NULL;
+// }
+
 void	free_tokens(t_token *tokens)
 {
+	t_token	*next;
+	
 	while (tokens)
 	{
+		next = tokens->next;
 		dprintf(2, "token->value before free = %s\n", (tokens)->value);
-		free((tokens)->value);
-		tokens->value = NULL;
+		if (tokens->value)
+		{
+			free((tokens)->value);
+			tokens->value = NULL;
+		}
 		free(tokens);
-		// *tokens = NULL;
-		// dprintf(2, "token->value after free = %s\n", (*tokens)->value);
-		if ((tokens)->next)
-			tokens = (tokens)->next;
-		else
-			break;
+		tokens = next;
 	}
 }
 
@@ -367,7 +417,10 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 		f = 0;
 		new_node = alloc_new_node(current, mini_env, exit_code);
 		if (!new_node)
+		{
+			free_tokens(*tokens);
 			return ;
+		}
 		while (current && current->type != PIPEX)
 		{
 			if (current->type == REDIRECT_IN && current->next->value != NULL)
@@ -391,6 +444,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 		add_new_node(nodes, new_node);
 		if (current && current->type == PIPEX)
 			current = current->next;
+		// check_and_free_new_node(new_node);
 	}
 	free_tokens(*tokens);
 }
@@ -399,7 +453,7 @@ LEXER	*ft_init_lexer_input()
 {
 	LEXER	*new_input;
 	
-	new_input = try_malloc(sizeof(LEXER)); 
+	new_input = try_malloc(sizeof(LEXER));
 	new_input->data = NULL;
 	new_input->len = 0;
 	new_input->head = 0;
@@ -421,14 +475,15 @@ LEXER	*ft_init_lexer_input()
 
 void handle_c_signal(int signum)
 {
-    (void)signum;
+	(void)signum;
+	// dprintf(2, "handle signal dans parent\n");
 	ft_putstr_fd("\n", 1);
 	 // // Réinitialise l'affichage de la ligne d'entrée
-    rl_replace_line("", 0);
-    // Indique que la ligne doit être recalculée
-    rl_on_new_line();
-    // // Affiche une nouvelle ligne et le prompt
-    rl_redisplay();	
+	rl_replace_line("", 0);
+	// Indique que la ligne doit être recalculée
+	rl_on_new_line();
+	// // Affiche une nouvelle ligne et le prompt
+	rl_redisplay();	
 	exit_status = 130;
 }
 
@@ -452,8 +507,15 @@ int		main(int argc, char **argv, char **env)
 			L_input = ft_init_lexer_input();
 			tokens = NULL;
 			nodes = NULL;
+
+			// dprintf(2, "Avant reconfiguration dans le parent\n");
+       		// check_signal_handler();
+			
 			signal(SIGINT, handle_c_signal);
 			signal(SIGQUIT, SIG_IGN);
+
+			// dprintf(2, "Apres reconfiguration dans le parent\n");
+       		// check_signal_handler();
 			str_input = readline("\033[36;1mminishell ➜ \033[0m");
 			if (!str_input)
 			{
@@ -481,18 +543,22 @@ int		main(int argc, char **argv, char **env)
 				p = try_malloc(sizeof(*p));
 				ft_init_struct(p, mini_env, nodes);
 				handle_input(&nodes, p);
+				// signal(SIGINT, handle_c_signal);
+				// signal(SIGQUIT, SIG_IGN);
 				dprintf(2, "\b\b\n");
 				mini_env = p->mini_env;
 				exit_status = nodes->exit_code;
 				exit_code = nodes->exit_code;
 				// free(tokens);
+				reset_node(&nodes);
 				free(str_input);
 				free(p);
 				// free(nodes);
-				free(L_input);
+				// free(L_input);
 			}
 		}
 	}
+	// free(mini_env);
 	return (0);
 }
 
