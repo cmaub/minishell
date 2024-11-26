@@ -211,6 +211,8 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	int   status_code = 0;
 	pid_t waited_pid;
 	PARSER *current = *nodes;	
+	// int	tmp_fd;
+
 	while ((waited_pid = wait(&status)) != -1)
 	{
 		// Nettoyage conditionnel des fichiers temporaires
@@ -233,6 +235,12 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		 	{
 				dprintf(2, "wait donne le status code\n");
 				status_code = 128 + WTERMSIG(status);
+				// if (status_code == 130 && current->redir_type[current->f] == 4)
+				// {
+				// 	tmp_fd = open(current->file[current->f], O_WRONLY);
+				// 	safe_close(tmp_fd);
+				// 	unlink(current->file[current->f]);
+				// }
 		 	}
 		}
 	}	

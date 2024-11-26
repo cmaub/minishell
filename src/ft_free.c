@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/25 16:06:56 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/26 15:41:14 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,8 @@ void	reset_node(PARSER **node)
 	PARSER *temp;
 	
 	current = *node;
+	if (!node || !(*node))
+		return ;
 	while (current)
 	{
 		temp = current->next;
@@ -69,21 +71,3 @@ void	reset_node(PARSER **node)
 
 }
 
-// void free_tokens(t_token **tokens)
-// {
-// 	t_token *current;
-// 	t_token *next;
-
-// 	if (!tokens || !*tokens)
-// 		return;
-// 	current = *tokens;
-// 	while (current)
-// 	{
-// 		next = current->next;
-// 		if (current->value)
-// 			free(current->value);
-// 		free(current);
-// 		current = next;
-// 	}
-// 	*tokens = NULL;
-// }

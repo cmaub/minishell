@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/25 17:59:44 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/26 15:45:47 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,15 +368,11 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 	
 	current = (*nodes);
 	if (current->next == NULL && is_builtin(current))
-	{
-		dprintf(2, "entree dans simple process\n");
 		return (handle_simple_process(current, p), 0);
-	}
 	while (p->i < p->nb_cmd)
 	{
 		if(p->nb_cmd > 1 && p->i < p->nb_cmd - 1)
 		{
-			dprintf(2, "creation d'un pipe\n");
 			if (pipe(p->pipefd) == -1)
 				ft_error("pipe");
 		}
@@ -392,6 +388,5 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 		if (p->i == p->nb_cmd)
 			break;	
 	}
-	
 	return (ft_wait(p->last_pid, nodes));
 }

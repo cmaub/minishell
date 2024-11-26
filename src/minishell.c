@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/25 18:10:00 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/26 15:45:29 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,12 +317,55 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 	return (new_node);
 }
 
+void	handle_c_signal_heredoc(int signum)
+{
+	(void)signum;
+	dprintf(2, "handle c signal\n");
+	exit_status = 130;
+	write(1, "\n", 1);
+	exit(130);
+	
+}
+int	loop_readline(char *delimiter, int fd_heredoc)
+{
+	char	*input;
 
-void	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
+	signal(SIGINT, SIG_DFL);
+	while (1)
+	{
+		input = readline("heredoc> ");
+		if (!input)
+		{
+			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
+			close(fd_heredoc);
+			return (0);
+		}
+		dprintf(2, "delimit = %s, input = %s\n", delimiter, input);	
+		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0/* && input[ft_strlen(delimiter)] == '\n'*/)
+		{
+			close(fd_heredoc);
+			free(input);
+			break;
+		}
+		else
+		{
+			ft_putendl_fd(input, fd_heredoc);			
+		}
+		free(input);
+	}
+	close(fd_heredoc);
+	return (0);
+}
+
+int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 {
 	int		index_heredoc;
 	int		random;
 	char	*name_heredoc;
+	int	save_fd_heredoc;
+	int	tmp_fd;
+	int	pid;
+	int status = 0;
 
 	name_heredoc = ft_strdup("heredoc");
 	index_heredoc = 0;
@@ -335,17 +378,37 @@ void	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 		name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
 		random++;	
 	}
+	save_fd_heredoc = dup(new_node->fd_heredoc[*f]);
+	signal(SIGINT, SIG_IGN);
 	new_node->fd_heredoc[*f] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (new_node->fd_heredoc[*f] == -1)
 		perror("open");
+	
 	new_node->delimiter[*d] = ft_strdup(current->next->value);
-	get_lines(new_node, *f, *d);
+	pid = fork();
+	if (pid == 0)
+	{
+		// get_lines(new_node, *f, *d);
+		loop_readline(new_node->delimiter[*d], new_node->fd_heredoc[*f]);
+		exit(0);					
+	}
 	new_node->file[*f] = ft_strdup(name_heredoc);
 	new_node->redir_type[*f++] = current->type;
 	free(name_heredoc);
 	name_heredoc = ft_strdup("heredoc");
 	index_heredoc++;
 	d++;
+	wait(&status);
+	signal(SIGINT, handle_c_signal_heredoc);
+	if (status + 128 == 130)
+	{
+		tmp_fd = open(new_node->file[*f], O_WRONLY);
+		safe_close(tmp_fd);
+		exit_status = 130;
+		unlink(new_node->file[*f]);
+		return (-1);
+	}
+	return (0);
 }
 
 void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
@@ -401,7 +464,7 @@ void	free_tokens(t_token *tokens)
 	}
 }
 
-void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
+int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
 {
 	t_token	*current;
 	PARSER		*new_node;
@@ -419,7 +482,7 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 		if (!new_node)
 		{
 			free_tokens(*tokens);
-			return ;
+			return (-1);
 		}
 		while (current && current->type != PIPEX)
 		{
@@ -429,7 +492,12 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 				new_node->redir_type[f++] = current->type;
 			}
 			else if (current->type == HEREDOC && current->next->value != NULL)
-				create_heredoc(new_node, current, &f, &d);
+				if (create_heredoc(new_node, current, &f, &d) == -1)
+				{
+					dprintf(2, "create heredoc = -1\n");
+					free_tokens(*tokens);
+					return (-1);
+				}
 			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 					&& current->next->value != NULL)
 			{
@@ -446,7 +514,9 @@ void	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_co
 			current = current->next;
 		// check_and_free_new_node(new_node);
 	}
+	dprintf(2, "coucou\n");
 	free_tokens(*tokens);
+	return (0);
 }
 
 LEXER	*ft_init_lexer_input()
@@ -459,19 +529,6 @@ LEXER	*ft_init_lexer_input()
 	new_input->head = 0;
 	return (new_input);
 }
-
-// void	handle_sigint(int sig)
-// {
-// 	if (sig == SIGINT)
-// 	{
-// 		// Indique que la ligne doit être recalculée
-//     	rl_on_new_line();
-// 		// Réinitialise l'affichage de la ligne d'entrée
-//     	rl_replace_line("", 0);
-//     	// Affiche une nouvelle ligne et le prompt
-//     	rl_redisplay();
-// 	}
-// }
 
 void handle_c_signal(int signum)
 {
@@ -503,19 +560,11 @@ int		main(int argc, char **argv, char **env)
 	{
 		while (1)
 		{
-			// signal(SIGQUIT, SIG_IGN);	
 			L_input = ft_init_lexer_input();
 			tokens = NULL;
 			nodes = NULL;
-
-			// dprintf(2, "Avant reconfiguration dans le parent\n");
-       		// check_signal_handler();
-			
 			signal(SIGINT, handle_c_signal);
 			signal(SIGQUIT, SIG_IGN);
-
-			// dprintf(2, "Apres reconfiguration dans le parent\n");
-       		// check_signal_handler();
 			str_input = readline("\033[36;1mminishell ➜ \033[0m");
 			if (!str_input)
 			{
@@ -536,29 +585,25 @@ int		main(int argc, char **argv, char **env)
 			}
 			else
 			{
-				create_nodes(&tokens, &nodes, mini_env, exit_code);
-				// print_tokens_list(&tokens);
-				dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
-				print_nodes_list(&nodes);
-				p = try_malloc(sizeof(*p));
-				ft_init_struct(p, mini_env, nodes);
-				handle_input(&nodes, p);
-				// signal(SIGINT, handle_c_signal);
-				// signal(SIGQUIT, SIG_IGN);
-				dprintf(2, "\b\b\n");
-				mini_env = p->mini_env;
-				exit_status = nodes->exit_code;
-				exit_code = nodes->exit_code;
-				// free(tokens);
+				if (create_nodes(&tokens, &nodes, mini_env, exit_code) == 0)
+				{								
+					// print_tokens_list(&tokens);
+					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
+					// print_nodes_list(&nodes);
+					dprintf(2, "exit_status = %d (%s, %d)\n", exit_status, __FILE__, __LINE__);
+					p = try_malloc(sizeof(*p));
+					ft_init_struct(p, mini_env, nodes);
+					handle_input(&nodes, p);
+					dprintf(2, "\b\b\n");
+					mini_env = p->mini_env;
+					exit_code = nodes->exit_code;
+					free(p);
+				}
 				reset_node(&nodes);
 				free(str_input);
-				free(p);
-				// free(nodes);
-				// free(L_input);
 			}
 		}
 	}
-	// free(mini_env);
 	return (0);
 }
 

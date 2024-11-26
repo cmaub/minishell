@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_env.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 16:29:32 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/26 10:19:04 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,11 @@ int	ft_env(PARSER *current, char **mini_env)
 	}
 	while (*mini_env)
 	{
-		ft_putstr_fd(*mini_env, 1);
-		write(1, "\n", 1);
+		if (ft_strchr(*mini_env, '='))
+		{
+			ft_putstr_fd(*mini_env, 1);
+			write(1, "\n", 1);
+		}
 		mini_env++;
 	}
 	return (TRUE);
