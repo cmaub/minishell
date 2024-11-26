@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/25 14:29:26 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:48:40 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -435,14 +435,11 @@ int	expr(LEXER *input, t_token **list)
 		{
 			if ((ws(input) && command(input, list)) == FALSE)
 			{
-				printf("FALSE command at input->data[input->head] = %c\n", input->data[input->head]);
 				input->head = save;
 				return (FALSE);
 			}
 		}
 	}
-	
-//     printf("[expr OK]\n");
     return (TRUE);
 }
 

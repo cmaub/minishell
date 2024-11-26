@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/26 15:45:29 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/26 17:58:53 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -453,7 +453,6 @@ void	free_tokens(t_token *tokens)
 	while (tokens)
 	{
 		next = tokens->next;
-		dprintf(2, "token->value before free = %s\n", (tokens)->value);
 		if (tokens->value)
 		{
 			free((tokens)->value);
@@ -514,7 +513,6 @@ int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_cod
 			current = current->next;
 		// check_and_free_new_node(new_node);
 	}
-	dprintf(2, "coucou\n");
 	free_tokens(*tokens);
 	return (0);
 }
@@ -577,11 +575,8 @@ int		main(int argc, char **argv, char **env)
 			L_input->len = ft_strlen(str_input);
 			if (!fill_list_of_tokens(L_input, &tokens))
 			{
-				printf("input non valide\n");
-				free(tokens);
-				free(str_input);
-				free(nodes);
-				free(L_input);
+				printf("invalid input\n");
+				free_tokens(tokens);
 			}
 			else
 			{
@@ -607,3 +602,4 @@ int		main(int argc, char **argv, char **env)
 	return (0);
 }
 
+// check history
