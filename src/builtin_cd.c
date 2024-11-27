@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 12:36:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/27 18:51:19 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,20 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 	else
 	{
 		if (chdir(cmd[1]) == -1)
+		{
+			dprintf(2, "chdir echoue");
 			return (ft_error_int("cd", node));
+		}
+	}
+	if (env_var_exists(p->mini_env, "PWD") == -1)
+	{
+		node->exit_code = 1;
+		ft_putstr_fd("path not found\n", 2);
+		return (-1);
 	}
 	old_pwd = ft_strdup(return_var_from_env("PWD", p->mini_env));
+	if (!old_pwd)
+		return (ft_error_int("cd", node));
 	if (old_pwd)
 		ft_setenv("OLDPWD", old_pwd, p->mini_env);
 	new_pwd = getcwd(NULL, 0);

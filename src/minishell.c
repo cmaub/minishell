@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/26 17:58:53 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/27 16:54:36 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,6 @@ int	search_closing_quote(char *str, char c)
 			return (i);
 		i++;
 	}
-	dprintf(2, "i = %d\n", i);
 	return (i);
 }
 
@@ -143,15 +142,16 @@ char	*print_exit_code(char *result, PARSER *new_node, int *index)
 {
 	char	*expand_result;
 
-	dprintf(2, "exit_status = %d\n", exit_status);
 	if (exit_status != 130)
+	{
 		expand_result = ft_strdup(ft_itoa(new_node->exit_code));
+	}
 	else
 	{
 		expand_result = ft_strdup(ft_itoa(130));
 		exit_status = 0;
 	}
-	// new_node->exit_code = 0;
+	new_node->exit_code = 0;
 	*index += 2;
 	return (ft_strjoin(result, expand_result));
 }
@@ -320,7 +320,6 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 void	handle_c_signal_heredoc(int signum)
 {
 	(void)signum;
-	dprintf(2, "handle c signal\n");
 	exit_status = 130;
 	write(1, "\n", 1);
 	exit(130);
@@ -532,11 +531,12 @@ void handle_c_signal(int signum)
 {
 	(void)signum;
 	// dprintf(2, "handle signal dans parent\n");
-	ft_putstr_fd("\n", 1);
+	ft_putstr_fd("\n", 2);
 	 // // Réinitialise l'affichage de la ligne d'entrée
-	rl_replace_line("", 0);
 	// Indique que la ligne doit être recalculée
 	rl_on_new_line();
+	rl_replace_line("", 0);
+	// rl_done = 1;
 	// // Affiche une nouvelle ligne et le prompt
 	rl_redisplay();	
 	exit_status = 130;
@@ -563,17 +563,22 @@ int		main(int argc, char **argv, char **env)
 			nodes = NULL;
 			signal(SIGINT, handle_c_signal);
 			signal(SIGQUIT, SIG_IGN);
-			str_input = readline("\033[36;1mminishell ➜ \033[0m");
+			str_input = readline("\001\033[36;1m\002minishell ➜ \001\033[0m\002");
+			// str_input = readline("minishell ➜ ");
 			if (!str_input)
 			{
 				ft_putstr_fd("exit\n", 1);
+				rl_clear_history();
 				break;
 			}
-			if (str_input)
+			if (str_input && str_input[0])
 				add_history(str_input);
 			L_input->data = str_input;
 			L_input->len = ft_strlen(str_input);
-			if (!fill_list_of_tokens(L_input, &tokens))
+			if (str_input[0] == '\0')
+			{
+			}
+			else if (!fill_list_of_tokens(L_input, &tokens))
 			{
 				printf("invalid input\n");
 				free_tokens(tokens);
@@ -585,18 +590,22 @@ int		main(int argc, char **argv, char **env)
 					// print_tokens_list(&tokens);
 					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 					// print_nodes_list(&nodes);
-					dprintf(2, "exit_status = %d (%s, %d)\n", exit_status, __FILE__, __LINE__);
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, mini_env, nodes);
 					handle_input(&nodes, p);
-					dprintf(2, "\b\b\n");
 					mini_env = p->mini_env;
-					exit_code = nodes->exit_code;
+					if (nodes)
+						exit_code = nodes->exit_code;
 					free(p);
 				}
+
 				reset_node(&nodes);
-				free(str_input);
+
+				//str_input deplace
 			}
+			// rl_replace_line("", 0);
+			// rl_redisplay();
+			free(str_input);
 		}
 	}
 	return (0);

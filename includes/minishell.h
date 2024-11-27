@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/25 15:49:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/27 18:46:18 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,7 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
 char **ft_unset(PARSER *current, char **env);
 int	ft_export(PARSER *current, char **env);
 void	print_sorted_env(char **env);
+int		env_var_exists(char **env, char *var);
 
 /* ALLOC AND FREE */
 void	ft_free_tab(char **tab);
@@ -177,6 +178,10 @@ int PRINTABLE_SQUOTE(LEXER *input);
 int PRINTABLE_DQUOTE(LEXER *input);
 int HAT(LEXER *input);
 int	EQUAL(LEXER *input);
+int	PLUS(LEXER *input);
+int	STAR(LEXER *input);
+int	TAB_H(LEXER *input);
+int	TAB_V(LEXER *input);
 
 int ows(LEXER *input);
 int squote(LEXER *input);

@@ -3,32 +3,51 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/14 16:21:52 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/27 18:30:30 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	ft_echo(char **cmd)
+int		all_n(char *str)
 {
 	int	i;
 
-	i = 0;
-	if (ft_strncmp(cmd[1], "-n", 2) == 0)
+	i = 1;
+	while (str[i])
 	{
-		i = 2;
-		while (cmd[i])
-		ft_putstr_fd(cmd[i], 1);
-		if (cmd[i + 1])
-			write(1, " ", 1);
+		if (str[i] != 'n')
+			return (FALSE);
 		i++;
 	}
-	else
+	return (TRUE);
+}
+
+
+int	ft_echo(char **cmd)
+{
+	int	i;
+	int	is_n;
+
+	i = 1;
+	is_n = 0;
+	if (!cmd[1])
+		return (TRUE);
+	while (ft_strncmp(cmd[i], "-n", 2) == 0 && all_n(cmd[i]))
 	{
-		i = 1;
+		i++;
+		is_n = 1;
+	}
+	if (!cmd[i])
+	{
+		return (TRUE);
+	}
+	// dprintf(2, "LINE %d\n", __LINE__);
+	if (cmd[i][0] != '-' || !all_n(cmd[i]))
+	{
 		while (cmd[i])
 		{
 			ft_putstr_fd(cmd[i], 1);
@@ -36,7 +55,11 @@ int	ft_echo(char **cmd)
 				write(1, " ", 1);
 			i++;
 		}
-		write(1, "\n", 1);
+		if (is_n == 0)
+			write(1, "\n", 1);
+		return (TRUE);
 	}
 	return (TRUE);
 }
+
+	

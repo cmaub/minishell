@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/26 18:18:21 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/27 16:00:06 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,19 +75,19 @@ int	is_builtin(PARSER *current)
 {
 	if (current->command)
 	{
-		if (ft_strncmp(current->command[0], "echo", 4) == 0)
+		if (ft_strncmp(current->command[0], "echo", 5) == 0)
 			return (TRUE);
-		else if (ft_strncmp(current->command[0], "pwd", 3) == 0)
+		else if (ft_strncmp(current->command[0], "pwd", 4) == 0)
 			return (TRUE);
-		else if (ft_strncmp(current->command[0], "env", 3) == 0)
+		else if (ft_strncmp(current->command[0], "env", 4) == 0)
 			return (TRUE);
-		else if (ft_strncmp(current->command[0], "exit", 4) == 0)
+		else if (ft_strncmp(current->command[0], "exit", 5) == 0)
 			return (TRUE);
-		else if (ft_strncmp(current->command[0], "cd", 2) == 0)
+		else if (ft_strncmp(current->command[0], "cd", 3) == 0)
 			return (TRUE);
-		else if (ft_strncmp(current->command[0], "export", 6) == 0)
+		else if (ft_strncmp(current->command[0], "export", 7) == 0)
 			return (TRUE);
-		else if (ft_strncmp(current->command[0], "unset", 5) == 0)
+		else if (ft_strncmp(current->command[0], "unset", 6) == 0)
 			return (TRUE);
 	}
 	return (FALSE);
@@ -103,25 +103,34 @@ int	execute(PARSER *current, t_pipex *p)
 		free(current);
 		exit(EXIT_SUCCESS);
 	}
+	if (!current->command || (current->command && current->command[0][0] == '\0'))
+	{
+		ft_putstr_fd(" ", 2);
+		ft_putstr_fd(": command not found\n", 2);
+		return (-1);
+	}
 	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
 	{
 		if (access(current->command[0], F_OK) == 0)
 		{
 			if (access(current->command[0], R_OK) == -1)
 			{
-				perror("access");
+				perror(current->command[0]);
 				exit(126);
 			}
 		}
 		else
 		{
-			perror("access");
+			perror(current->command[0]);
 			exit(127);
 		}
-		execve(current->command[0], current->command, NULL);
+		if (!no_envp(p->mini_env))
+			execve(current->command[0], current->command, p->mini_env);
+		else
+			execve(current->command[0], current->command, NULL);
 	}
 	else if (!ft_strchr(current->command[0], '/') && !no_envp(p->mini_env))
-	{		
+	{			
 		path = get_path_and_check(&current->command[0], p->mini_env);
 		dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, current->command[0], current->command[1], current->command[2], current->command[3]);
 		if (execve(path, current->command, p->mini_env) == -1)
@@ -169,7 +178,9 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		safe_close(p->pipefd[1]);
 	}
 	if (execute((*nodes), p) == -1)
+	{
 		exit(127);
+	}
 }
 
 void	inter_child(t_pipex *p, PARSER **nodes)
@@ -366,7 +377,7 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 	PARSER		*current;
 	
 	current = (*nodes);
-	if (current->next == NULL && is_builtin(current))
+	if (current && current->next == NULL && is_builtin(current))
 		return (handle_simple_process(current, p), 0);
 	while (p->i < p->nb_cmd)
 	{

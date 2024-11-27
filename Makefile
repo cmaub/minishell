@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
+#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/25 15:20:59 by anvander         ###   ########.fr        #
+#    Updated: 2024/11/27 14:17:06 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,6 @@ LIBFT		= $(LIBFT_PATH)$(LIBFT_NAME)
 # Includes
 INC			=	-I ./includes/\
 				-I ./libft/\
-				-I /opt/homebrew/opt/readline/include
 
 # Sources
 SRC_PATH	=	src/
@@ -50,8 +49,6 @@ OBJ_PATH	= obj/
 OBJ			= $(SRC_FILES:.c=.o)
 OBJS		= $(addprefix $(OBJ_PATH), $(OBJ))
 
-# Linker flags
-LDFLAGS	= -L /opt/homebrew/opt/readline/lib -lreadline
 
 all: $(OBJ_PATH) $(LIBFT) $(NAME)
 
@@ -66,7 +63,7 @@ $(LIBFT):
 	@make -sC $(LIBFT_PATH)
 
 $(NAME): $(OBJS)
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT) $(INC) $(LDFLAGS)
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT) $(INC) -lreadline
 
 clean:
 	@echo "Removing .o object files..."

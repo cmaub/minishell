@@ -167,14 +167,16 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 
 	status_code = 0;
 	current = *nodes;
+	if (current == NULL)
+		return (0);
 	while ((waited_pid = wait(&status)) != -1)
 	{
-		if (current->redir_type && current->redir_type[current->f] == 4)
+		if (current && current->redir_type && current->redir_type[current->f] == 4)
 		{
 			unlink(current->file[current->f]);
 			current->f++;
 		}	
-		if (current->next)
+		if (current && current->next)
 			current = current->next;
 		else
 			current = *nodes;	
@@ -186,11 +188,14 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		 		status_code = 128 + WTERMSIG(status);
 		}
 	}	
-	if ((*nodes)->exit_code != 0)
-		status_code = (*nodes)->exit_code;	
-	(*nodes)->exit_code = status_code;
+	if (*nodes && (*nodes)->exit_code != 0)
+		status_code = (*nodes)->exit_code;
+	if (*nodes)
+		(*nodes)->exit_code = status_code;
 	return (signal(SIGINT, handle_c_signal), (*nodes)->exit_code);
 }
+
+		
 
 // void	get_lines(PARSER *nodes, int i, int d)
 // {

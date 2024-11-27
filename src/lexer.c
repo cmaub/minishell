@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/26 17:48:40 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/27 15:18:01 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,16 @@ int	SP(LEXER *input)
 	return (eat(input, ' '));
 }
 
+int	TAB_H(LEXER *input)
+{
+	return (eat(input, 9));
+}
+
+int	TAB_V(LEXER *input)
+{
+	return (eat(input, 11));
+}
+
 int	SQUOTE(LEXER *input)
 {
 	return (eat(input, 39));
@@ -163,6 +173,16 @@ int	EQUAL(LEXER *input)
 	return (eat(input, '='));
 }
 
+int	PLUS(LEXER *input)
+{
+	return (eat(input, '+'));
+}
+
+int	STAR(LEXER *input)
+{
+	return (eat(input, '*'));
+}
+
 int	PRINTABLE_SQUOTE(LEXER *input)
 {
 	int	i;
@@ -196,7 +216,7 @@ int	PRINTABLE_DQUOTE(LEXER *input)
 
 int	ows(LEXER *input)
 {
-	while (SP(input))
+	while (SP(input) || TAB_H(input) || TAB_V(input))
 	{}
 	return (TRUE);
 }
@@ -206,7 +226,7 @@ int ws(LEXER *input)
 	int	save;
 
 	save = input->head;
-	if (SP(input) == FALSE)
+	if (SP(input) == FALSE || TAB_H(input) == FALSE || TAB_V(input) == FALSE)
 	{
 		input->head = save;
 		return (FALSE);
@@ -267,7 +287,7 @@ int	arg(LEXER *input, t_token **list)
 	// new_node = try_malloc(sizeof(t_token));
 	ows(input);
 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
-		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input) || EQUAL(input))
+		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
 		i++;
 	if (i < 1)
 	{
@@ -424,8 +444,13 @@ int	expr(LEXER *input, t_token **list)
 	int	save;
 
 	save = input->head;
+	if (ows(input) && input->len == input->head)
+		return (TRUE);
 	if (!command(input, list))
+	{
+		dprintf(2, "invalide car pas de cmd ni espaces\n");
 		return (FALSE);
+	}
 	ows(input);
 	while (TRUE)
 	{
