@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 15:40:34 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/28 16:43:55 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,6 +355,33 @@ int	cpy_std(int cpy_stdin, int cpy_stdout)
 	return (TRUE);
 }
 
+int	restore_std(int cpy_stdin, int cpy_stdout)
+{
+	if (cpy_stdout != -1)
+	{
+		if (dup2(cpy_stdout, STDOUT_FILENO) == -1)
+		{
+			perror("STDOUT");
+			safe_close(cpy_stdin);
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			return (FALSE);
+		}
+		safe_close(cpy_stdout);
+	}
+	if (cpy_stdin != -1)
+	{
+		if (dup2(cpy_stdin, STDIN_FILENO) == -1)
+		{
+			perror("STDIN");
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			return (FALSE);
+		}
+		safe_close(cpy_stdin);
+	}
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	return (TRUE);
+}
+
 void	handle_simple_process(PARSER *current, t_pipex *p)
 {
 	int	fd_in;
@@ -368,7 +395,10 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	fd_out = -1;
 	current->f = 0;
 	p->flag = 1;
-	cpy_std(cpy_stdin, cpy_stdout); // a tester
+	if (cpy_std(cpy_stdin, cpy_stdout) == FALSE)
+	{	current->exit_code = 1;
+		return ;
+	}
 	while (current->file && current->file[current->f] != NULL)
 	{
 		if (current->redir_type[current->f] == REDIRECT_IN )
@@ -379,6 +409,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		{
 			perror(current->file[current->f]);
 			current->exit_code = 1;
+			restore_std(cpy_stdin, cpy_stdout);
 			return ; //retablir stdin et out
 		}
 		if (current->redir_type[current->f] == HEREDOC || current->redir_type[current->f] == REDIRECT_IN)
@@ -400,20 +431,27 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	}
 	if (exec_builtin(current, p))
 	{
-		if (cpy_stdout != -1)
+		// if (cpy_stdout != -1)
+		// {
+		// 	if (dup2(cpy_stdout, STDOUT_FILENO) == -1)
+		// 		perror("STDOUT");
+		// 	safe_close(cpy_stdout);
+		// }
+		// if (cpy_stdin != -1)
+		// {
+		// 	if (dup2(cpy_stdin, STDIN_FILENO) == -1)
+		// 		perror("STDIN");
+		// 	safe_close(cpy_stdin);
+		// }
+		if (restore_std(cpy_stdin, cpy_stdout) == FALSE)
 		{
-			if (dup2(cpy_stdout, STDOUT_FILENO) == -1)
-				perror("STDOUT");
-			safe_close(cpy_stdout);
-		}
-		if (cpy_stdin != -1)
-		{
-			if (dup2(cpy_stdin, STDIN_FILENO) == -1)
-				perror("STDIN");
-			safe_close(cpy_stdin);
+			current->exit_code = 1;
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			return ;
 		}
 		if (p->exit == 1)
 			exit (EXIT_SUCCESS);
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	}
 }
 

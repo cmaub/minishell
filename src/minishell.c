@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 15:11:14 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/28 16:42:16 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -572,6 +572,7 @@ int		main(int argc, char **argv, char **env)
 			// str_input = readline("minishell ➜ ");
 			if (!str_input)
 			{
+				dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				ft_putstr_fd("exit\n", 1);
 				rl_clear_history();
 				free(L_input);
@@ -600,9 +601,11 @@ int		main(int argc, char **argv, char **env)
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, mini_env, nodes);
 					handle_input(&nodes, p);
+					dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 					mini_env = p->mini_env;
 					if (nodes)
 						exit_code = nodes->exit_code;
+					dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 					free(p);
 				}
 				reset_node(&nodes);
