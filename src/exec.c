@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/27 16:00:06 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/28 15:40:34 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,21 @@ int	is_builtin(PARSER *current)
 	return (FALSE);
 }
 
+void	is_command(PARSER *current)
+{
+	if (!current->command)
+	{
+		ft_putstr_fd(" ", 2);
+		exit (0);
+	}
+	if ((current->command && current->command[0][0] == '\0'))
+	{
+		ft_putstr_fd(" ", 2);
+		ft_putstr_fd(": command not found\n", 2);
+		exit (127);
+	}
+}
+
 int	execute(PARSER *current, t_pipex *p)
 {
 	char	*path;
@@ -103,12 +118,18 @@ int	execute(PARSER *current, t_pipex *p)
 		free(current);
 		exit(EXIT_SUCCESS);
 	}
-	if (!current->command || (current->command && current->command[0][0] == '\0'))
-	{
-		ft_putstr_fd(" ", 2);
-		ft_putstr_fd(": command not found\n", 2);
-		return (-1);
-	}
+	// if (!current->command/* || (current->command && current->command[0][0] == '\0')*/)
+	// {
+	// 	ft_putstr_fd(" ", 2);
+	// 	// ft_putstr_fd(": command not found\n", 2);
+	// 	return (-1);
+	// }
+	// if ((current->command && current->command[0][0] == '\0'))
+	// {
+	// 	ft_putstr_fd(" ", 2);
+	// 	ft_putstr_fd(": command not found\n", 2);
+	// 	return (-1);
+	// }
 	else if (ft_strchr(current->command[0], '/') || no_envp(p->mini_env))
 	{
 		if (access(current->command[0], F_OK) == 0)
@@ -177,10 +198,9 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			ft_close_error(&fd_in, p, (*nodes)->file[(*nodes)->f]);
 		safe_close(p->pipefd[1]);
 	}
+	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
-	{
 		exit(127);
-	}
 }
 
 void	inter_child(t_pipex *p, PARSER **nodes)
@@ -228,6 +248,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 	if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
 		ft_close_error(&fd_in, p, "pipe");
 	safe_close(p->pipefd[1]);
+	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
 		exit(127);
 }
@@ -270,6 +291,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 			handle_output_redirection(nodes, p, fd_out);
 		(*nodes)->f++;
 	}
+	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
 		exit(127);
 }
@@ -296,6 +318,7 @@ void	parent_process(t_pipex *p)
 
 void	create_process(t_pipex *p, PARSER **nodes)
 {
+	
 	if (p->pid == -1)
 		ft_error("fork");
 	else if (p->pid == 0)
@@ -315,6 +338,23 @@ void	create_process(t_pipex *p, PARSER **nodes)
 		parent_process(p);
 }
 
+int	cpy_std(int cpy_stdin, int cpy_stdout)
+{
+	cpy_stdin = dup(STDIN_FILENO);
+	if (!cpy_stdin)
+	{
+		perror("cpy_stdin");
+		return (FALSE);
+	}
+	cpy_stdout = dup(STDOUT_FILENO);
+	if (!cpy_stdout)
+	{
+		perror("cpy_stdout");
+		return (FALSE);
+	}
+	return (TRUE);
+}
+
 void	handle_simple_process(PARSER *current, t_pipex *p)
 {
 	int	fd_in;
@@ -328,6 +368,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	fd_out = -1;
 	current->f = 0;
 	p->flag = 1;
+	cpy_std(cpy_stdin, cpy_stdout); // a tester
 	while (current->file && current->file[current->f] != NULL)
 	{
 		if (current->redir_type[current->f] == REDIRECT_IN )
@@ -335,10 +376,14 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		if (current->redir_type[current->f] == HEREDOC)
 			fd_in = open(current->file[current->f], O_RDONLY  | 0644);
 		if (fd_in == -1 && (current->redir_type[current->f] == REDIRECT_IN || current->redir_type[current->f] == HEREDOC))
-			ft_error(current->file[current->f]);
+		{
+			perror(current->file[current->f]);
+			current->exit_code = 1;
+			return ; //retablir stdin et out
+		}
 		if (current->redir_type[current->f] == HEREDOC || current->redir_type[current->f] == REDIRECT_IN)
 		{
-			cpy_stdin = dup(STDIN_FILENO);
+			
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 			{
 				safe_close(fd_in);
@@ -348,7 +393,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		}
 		if (current->redir_type[current->f] == REDIRECT_OUT || current->redir_type[current->f] == APPEND_OUT)
 		{
-			cpy_stdout = dup(STDOUT_FILENO);
+			
 			handle_output_redirection(&current, p, fd_out);
 		}
 		current->f++;

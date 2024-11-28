@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/27 18:47:11 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/28 14:32:27 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,28 @@
 int		env_var_exists(char **env, char *var)
 {
 	int	i;
+	int	size;
 
 	i = 0;
-	while (env[i])
+	size = count_env_var(env);
+	dprintf(2, "size dans env_var_exist = %d\n", size);
+	if (!var || var[0] == '\0')
+		return (-1);
+	if (!env)
+		dprintf(2, "env est nul\n");
+	// dprintf(2, "(%s, %d) et env[i] = %s\n", __FILE__, __LINE__, env[i]);
+	while (env[i] && i < size)
 	{
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		if (ft_strncmp(env[i], var, strlen(var)) == 0)
+		{
+			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			return (i);
+		}
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		i++;
 	}
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (-1);
 }
 

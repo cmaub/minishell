@@ -15,7 +15,7 @@
 void	ft_error(char *str)
 {
 	perror(str);
-	exit(EXIT_FAILURE);
+	// exit(EXIT_FAILURE); // fail avec < a echo a
 }
 
 int	ft_error_int(char *str, PARSER *node)
@@ -119,6 +119,8 @@ void	ft_free_tab(char **tab)
 	int	i;
 
 	i = 0;
+	if (!tab)
+		return;
 	while (tab[i])
 	{
 		free(tab[i]);
@@ -185,7 +187,10 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 			if (WIFEXITED(status))
 				status_code = WEXITSTATUS(status);
 			else if (WIFSIGNALED(status))
+			{
+				dprintf(2, "coucou %d\n", status);
 		 		status_code = 128 + WTERMSIG(status);
+			}
 		}
 	}	
 	if (*nodes && (*nodes)->exit_code != 0)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/27 18:46:18 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/28 15:09:34 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,7 @@ void	replace_prev_token(t_token **list, t_token *new);
 void	handle_c_signal(int signum);
 void	handle_c_signal_child(int signum);
 void	check_signal_handler();
+int	count_env_var(char **list);
 
 
 

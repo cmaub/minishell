@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_pwd.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 15:55:16 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/28 10:24:16 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ int	ft_pwd(PARSER *current)
 	if (!new_var)
 	{
 		perror("pwd");
+		current->exit_code = 1;
 		return (FALSE);
 	}
 	ft_putstr_fd(new_var, 1);

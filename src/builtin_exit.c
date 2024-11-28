@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/21 17:18:28 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/28 15:16:51 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p)
 		if (!isdigit(cmd[j]))
 		{
 			not_a_num(p, node);
-			exit (2);
+			exit(2);
 		}
 		j++;
 	}

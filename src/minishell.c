@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/27 16:54:36 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/28 15:11:14 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -559,6 +559,11 @@ int		main(int argc, char **argv, char **env)
 		while (1)
 		{
 			L_input = ft_init_lexer_input();
+			if (!L_input)
+			{
+				write(1, "fatal: out of memory\n", 21);
+				break;
+			}
 			tokens = NULL;
 			nodes = NULL;
 			signal(SIGINT, handle_c_signal);
@@ -569,6 +574,7 @@ int		main(int argc, char **argv, char **env)
 			{
 				ft_putstr_fd("exit\n", 1);
 				rl_clear_history();
+				free(L_input);
 				break;
 			}
 			if (str_input && str_input[0])
@@ -580,8 +586,9 @@ int		main(int argc, char **argv, char **env)
 			}
 			else if (!fill_list_of_tokens(L_input, &tokens))
 			{
-				printf("invalid input\n");
-				free_tokens(tokens);
+				ft_putendl_fd("syntax error", 2);
+				exit_code = 2;
+				// free_tokens(tokens);
 			}
 			else
 			{
@@ -598,7 +605,6 @@ int		main(int argc, char **argv, char **env)
 						exit_code = nodes->exit_code;
 					free(p);
 				}
-
 				reset_node(&nodes);
 
 				//str_input deplace
@@ -608,6 +614,7 @@ int		main(int argc, char **argv, char **env)
 			free(str_input);
 		}
 	}
+	ft_free_tab(mini_env);
 	return (0);
 }
 
