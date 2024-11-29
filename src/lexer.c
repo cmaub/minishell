@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/27 15:18:01 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 17:38:45 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,8 +366,8 @@ int process_redirect(LEXER *input, t_token **list, int start, int end, int redir
 	end = input->head;
 	if (end > start)
 	{
-	new_node = create_new_token(input, start, end, redirect_type);
-	add_new_token(list, new_node);
+		new_node = create_new_token(input, start, end, redirect_type);
+		add_new_token(list, new_node);
 	}
 	ows(input);
 	start = end;

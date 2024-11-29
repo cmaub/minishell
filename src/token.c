@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/29 15:09:40 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 17:36:04 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,6 @@ void	print_tokens_list(t_token **list)
 	i = 0;
 	if (!*list)
 	{
-		// dprintf(2, "la liste tokens est nulle\n");
 		return ;
 	}
 	while ((*list)->next)

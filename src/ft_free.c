@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/29 16:44:55 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 17:34:04 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,11 @@ void	reset_node(PARSER **node)
 
 	current = *node;
 	if (!node || !(*node))
+	{
 		return ;
+	}
 	while (current)
 	{
-		dprintf(2, "current->command = %s\n", current->command[0]);
 		temp = current->next;
 		if (current->file)
 		{

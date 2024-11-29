@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/29 16:51:15 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 17:31:48 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,13 +100,18 @@ void	is_command(PARSER *current)
 {
 	if (!current->command)
 	{
+		dprintf(2, "current-command n'existe pas\n");
 		ft_putstr_fd(" ", 2);
+		// reset_node(&current);
+		// free_pipex(p);
 		exit(0);
 	}
 	if ((current->command && current->command[0][0] == '\0'))
 	{
 		ft_putstr_fd(" ", 2);
 		ft_putstr_fd(": command not found\n", 2);
+		// reset_node(&current);
+		// free_pipex(p);
 		exit(127);
 	}
 }
@@ -130,7 +135,8 @@ int	execute(PARSER *current, t_pipex *p)
 	else
 	{
 		tmp_cmd = copy_tab(current->command);
-		tmp_minienv = copy_tab(p->mini_env);
+		if (!no_envp(p->mini_env))
+			tmp_minienv = copy_tab(p->mini_env);
 		free_pipex(p);
 		reset_node(&current);
 		if (ft_strchr(tmp_cmd[0], '/') || no_envp(tmp_minienv))
@@ -140,12 +146,16 @@ int	execute(PARSER *current, t_pipex *p)
 				if (access(tmp_cmd[0], R_OK) == -1)
 				{
 					perror(tmp_cmd[0]);
+					free(tmp_cmd),
+					free(tmp_minienv);
 					exit(126);
 				}
 			}
 			else
 			{
 				perror(tmp_cmd[0]);
+				free(tmp_cmd),
+				free(tmp_minienv);
 				exit(127);
 			}
 			if (!no_envp(tmp_minienv))
@@ -155,7 +165,9 @@ int	execute(PARSER *current, t_pipex *p)
 		}
 		else if (!ft_strchr(tmp_cmd[0], '/') && !no_envp(tmp_minienv))
 		{	
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			path = get_path_and_check(&tmp_cmd[0], tmp_minienv);
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
 
 			if (execve(path, tmp_cmd, tmp_minienv) == -1)
@@ -170,6 +182,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	int	fd_in;
 	int	fd_out;
 	
+	dprintf(2, "appel a first child\n");
 	fd_in = -1;
 	fd_out = -1;
 	(*nodes)->f = 0;
@@ -294,7 +307,10 @@ void	last_child(t_pipex *p, PARSER **nodes)
 	}
 	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
+	{
+		dprintf(2, "nope (%s, %d)\n", __FILE__, __LINE__);
 		exit(127);
+	}
 }
 
 void	parent_process(t_pipex *p)

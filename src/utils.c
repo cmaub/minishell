@@ -14,9 +14,13 @@
 
 void	free_pipex(t_pipex *p)
 {
-	dprintf(2, "coucou je suis la alors que je devrais pas\n");
-	if (p->mini_env)
-		ft_free_tab(p->mini_env);
+	// if (p->mini_env)
+	// {
+	// 	ft_free_tab(p->mini_env);
+	// 	p->mini_env = NULL;
+	// }
+	// if (p->mini_env == NULL)
+	// 	dprintf(2, "p->mini_env est free\n");
 	free(p);
 	p = NULL;
 }
@@ -97,6 +101,7 @@ char	**copy_tab(char **envp)
 
 void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 {
+	
 	p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
@@ -133,9 +138,11 @@ void	ft_free_tab(char **tab)
 	while (tab[i])
 	{
 		free(tab[i]);
+		tab[i] = NULL;
 		i++;
 	}
 	free(tab);
+	tab = NULL;
 }
 
 int	no_envp(char **tab)
@@ -238,22 +245,4 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 // 		free(str);
 // 	}
 // 	safe_close(nodes->fd_heredoc[i]);
-// }
-
-
-
-// void check_signal_handler()
-// {
-//     struct sigaction sa;
-//     sigaction(SIGINT, NULL, &sa);
-//     if (sa.sa_handler == handle_c_signal)
-//         dprintf(2, "Gestionnaire actif : Parent\n");
-//     else if (sa.sa_handler == handle_c_signal_child)
-//         dprintf(2, "Gestionnaire actif : Enfant\n");
-//     else if (sa.sa_handler == SIG_IGN)
-//         dprintf(2, "Gestionnaire actif : SIG_IGN\n");
-//     else if (sa.sa_handler == SIG_DFL)
-//         dprintf(2, "Gestionnaire actif : SIG_DFL\n");
-//     else
-//         dprintf(2, "Gestionnaire actif : Autre\n");
 // }

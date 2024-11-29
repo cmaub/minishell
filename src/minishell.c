@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/29 16:28:08 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 17:58:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -339,7 +339,6 @@ int	loop_readline(char *delimiter, int fd_heredoc)
 			safe_close(&fd_heredoc);
 			return (0);
 		}
-		dprintf(2, "delimit = %s, input = %s\n", delimiter, input);	
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0/* && input[ft_strlen(delimiter)] == '\n'*/)
 		{
 			safe_close(&fd_heredoc);
@@ -582,16 +581,25 @@ int		main(int argc, char **argv, char **env)
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, mini_env, nodes);
 					handle_input(&nodes, p);
+					
 					mini_env = copy_tab(p->mini_env);
+					ft_free_tab(p->mini_env);
 					if (nodes)
 						exit_code = nodes->exit_code;
 					free_pipex(p);
+					if (p == NULL)
+						dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
 					if (mini_env == NULL)
 						dprintf(2, "Le mini_env est nul, dommage\n");
 				}
 				else
 					free_tokens(tokens);
-				reset_node(&nodes);
+				if (nodes)
+				{
+					reset_node(&nodes);
+					if (nodes == NULL)
+						dprintf(2, "nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
+				}
 
 				//str_input deplace
 			}
