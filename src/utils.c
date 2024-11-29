@@ -12,10 +12,19 @@
 
 #include "minishell.h"
 
-void	ft_error(char *str)
+void	free_pipex(t_pipex *p)
+{
+	dprintf(2, "coucou je suis la alors que je devrais pas\n");
+	if (p->mini_env)
+		ft_free_tab(p->mini_env);
+	free(p);
+	p = NULL;
+}
+
+void	ft_error_exit(char *str, int exit_c)
 {
 	perror(str);
-	// exit(EXIT_FAILURE); // fail avec < a echo a
+	exit(exit_c);
 }
 
 int	ft_error_int(char *str, PARSER *node)
@@ -27,16 +36,16 @@ int	ft_error_int(char *str, PARSER *node)
 
 // if we try to close a fd that is already closed, it will return -1
 // an unsuccessful close will return (Bad file descriptor) in errno
-void	safe_close(int fd)
+void	safe_close(int *fd)
 {
-	if (fd != -1)
+	if (*fd != -1)
 	{
-		if (close(fd) == -1)
+		if (close(*fd) == -1)
 		{
-			perror("close AC");
-			exit (EXIT_FAILURE);
+			// perror("close2 AC");
+			return ;
 		}
-		fd = -1;
+		*fd = -1;
 	}
 	else
 		return ;
@@ -57,7 +66,7 @@ int		ft_size_list(PARSER **nodes)
 	return (size);
 }
 
-char	**copy_env(char **envp)
+char	**copy_tab(char **envp)
 {
 	char	**mini_env;
 	int	i;
@@ -145,20 +154,27 @@ int	no_envp(char **tab)
 	}
 	return (0);
 }
-void	ft_close_error(int *fd, t_pipex *p, char *str)
+void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)
 {
 	if (fd)
-	{
-		close(*fd);
-		close(p->pipefd[1]);
-		close(p->pipefd[0]);
-		perror(str);
-		exit(EXIT_FAILURE);
-	}
+		safe_close(fd);
+	safe_close(&p->pipefd[1]);
+	safe_close(&p->pipefd[0]);
+	perror(str);
+	free_pipex(p);
+	reset_node(nodes);
+	exit(exit_c);
 }
-
-
-
+void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str)
+{
+	if (fd)
+		safe_close(fd);
+	safe_close(&p->pipefd[1]);
+	safe_close(&p->pipefd[0]);
+	perror(str);
+	free_pipex(p);
+	reset_node(nodes);
+}
 
 int ft_wait(pid_t last_pid, PARSER **nodes)
 {
@@ -185,16 +201,16 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		if (waited_pid == last_pid)
 		{
 			if (WIFEXITED(status))
-				status_code = WEXITSTATUS(status);
-			else if (WIFSIGNALED(status))
 			{
-				dprintf(2, "coucou %d\n", status);
-		 		status_code = 128 + WTERMSIG(status);
+				status_code = WEXITSTATUS(status);
+				exit_status = 0;
 			}
+			else if (WIFSIGNALED(status))
+		 		status_code = 128 + WTERMSIG(status);
 		}
 	}	
-	if (*nodes && (*nodes)->exit_code != 0)
-		status_code = (*nodes)->exit_code;
+	// if (*nodes && (*nodes)->exit_code != 0)
+	// 	status_code = (*nodes)->exit_code;
 	if (*nodes)
 		(*nodes)->exit_code = status_code;
 	return (signal(SIGINT, handle_c_signal), (*nodes)->exit_code);

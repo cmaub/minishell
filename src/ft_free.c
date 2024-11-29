@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/26 18:20:00 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:44:55 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	free_array_and_close_fds(char **array)
 	while (array[i])
 	{
 		temp_file_fd = open(array[i], O_WRONLY);
-		safe_close(temp_file_fd);
+		safe_close(&temp_file_fd);
 		free(array[i]);
 		i++;
 	}
@@ -52,7 +52,7 @@ void	close_heredoc(PARSER *current)
 	i = 0;
 	while(i < current->nb_heredoc)
 	{
-		safe_close(current->fd_heredoc[i]);
+		safe_close(&current->fd_heredoc[i]);
 		i++;
 	}
 }
@@ -67,6 +67,7 @@ void	reset_node(PARSER **node)
 		return ;
 	while (current)
 	{
+		dprintf(2, "current->command = %s\n", current->command[0]);
 		temp = current->next;
 		if (current->file)
 		{

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/21 10:47:05 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:51:25 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ char	*get_path(char *cmd, char **env)
 char	*get_path_and_check(char **split_cmd, char **env)
 {
 	char	*new_path;
-
+	
 	new_path = get_path(split_cmd[0], env);
 	if (!new_path)
 	{

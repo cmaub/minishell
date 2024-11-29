@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 15:09:34 by anvander         ###   ########.fr       */
+/*   Updated: 2024/11/29 16:37:29 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ typedef struct s_token
 
 typedef struct s_pipex
 {
-	int	         	ac;
+	// int	         	ac;
 	char			**mini_env;
 	int		 	nb_cmd;
 	int		       i; // ceci est un compteur qui compte les pid
@@ -102,19 +102,22 @@ int create_and_add_token(LEXER *input, int start, int end, t_token **list, int t
 
 /* MINISHELL */
 char	*get_path_and_check(char **split_cmd, char **env);
-char	**copy_env(char **envp);
+char	**copy_tab(char **envp);
 char	*return_var_from_env(char *str, char **mini_env);
 
 void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
-void	ft_error(char *str);
 int	ft_error_int(char *str, PARSER *node);
+void	ft_error_exit(char *str, int exit_c);
+void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
-void	safe_close(int fd);
+void	safe_close(int *fd);
 void	get_lines(PARSER *nodes, int i, int d);
-void	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
-void   ft_close_error(int *fd, t_pipex *p, char *str);
+int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
+void   close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c);
+void	free_array(char **array);
+void	free_pipex(t_pipex *p);
 void	replace_prev_token(t_token **list, t_token *new);
 void	handle_c_signal(int signum);
 void	handle_c_signal_child(int signum);
@@ -153,6 +156,7 @@ int		env_var_exists(char **env, char *var);
 
 /* ALLOC AND FREE */
 void	ft_free_tab(char **tab);
+char	**copy_tab_free(char **envp);
 void	free_new_node(PARSER *new_node);
 void	reset_node(PARSER **node);
 
