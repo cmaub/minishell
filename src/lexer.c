@@ -6,11 +6,18 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/29 17:38:45 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 11:18:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+
+#define DEBUG_S debug(input, (char*)__FUNCTION__)
+
+void debug(LEXER* input, char* fname) {
+	printf("%-30s > \033[30;1m%.*s\033[42;30;1m%c\033[0m\033[30;1m%s\033[0m\n", fname, (int)input->head, input->data, input->data[input->head], input->data + input->head + 1);
+}
 
 /*
 eat est la seul fonction qui a le droit de lire notre chaine
@@ -48,7 +55,7 @@ int	eatRange(LEXER *input, int start, int end)
 }
 
 int	PIPE(LEXER *input, t_token **list)
-{
+{DEBUG_S;
 	int	i;
 	int	start;
 	int	end;
@@ -274,173 +281,256 @@ int	squote(LEXER *input)
 	return (TRUE);
 }
 
-int	arg(LEXER *input, t_token **list)
-{
+int	arg(LEXER *input)
+{DEBUG_S;
 	int	i;
 	int	start;
-	int	end;
-	t_token	*new_node;
+	// int	end;
+	// t_token	*new_node;
 
 	i = 0;
 	start = input->head;
-	end = start;
-	// new_node = try_malloc(sizeof(t_token));
-	ows(input);
+	// end = start;
 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
-		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
+		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input))
 		i++;
 	if (i < 1)
 	{
 		input->head = start;
 		return (FALSE);
 	}
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, ARGUMENT);
-		add_new_token(list, new_node);
-	}
+	// end = input->head;
+	// if (end > start)
+	// {
+	// 	new_node = create_new_token(input, start, end, ARGUMENT);
+	// 	add_new_token(list, new_node);
+	// }
 	return (TRUE);
-}
-
-int handle_delimiter(LEXER *input, t_token **list, int start)
-{
-	t_token	*new_node;
-	int		end;
-
-	// new_node = try_malloc(sizeof(t_token));
-	end = input->head;
-	if (!arg(input, list))
-		return (FALSE);
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, DELIMITER);
-		replace_prev_token(list, new_node);
-	}
-	return (TRUE);
-}
-
-int process_heredoc(LEXER *input, t_token **list, int start, int end)
-{
-	t_token *new_node;
-
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, HEREDOC);
-		add_new_token(list, new_node);
-	}
-	ows(input);
-	start = end;
-	end = input->head;
-	if (!handle_delimiter(input, list, end))
-	{
-		input->head = start;
-		return (FALSE);
-	}
-	return (TRUE);
-}
-
-int handle_filename(LEXER *input, t_token **list, int start)
-{
-	int end;
-	t_token *new_node;
-
-	end = input->head;
-	if (!arg(input, list))
-		return (FALSE);
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, FILENAME);
-		replace_prev_token(list, new_node);
-	}
-	return (TRUE);
-}
-
-int process_redirect(LEXER *input, t_token **list, int start, int end, int redirect_type)
-{
-	t_token *new_node;
-
-	end = input->head;
-	if (end > start)
-	{
-		new_node = create_new_token(input, start, end, redirect_type);
-		add_new_token(list, new_node);
-	}
-	ows(input);
-	start = end;
-	end = input->head;
-	if (!handle_filename(input, list, end))
-	{
-		input->head = start;
-		return (FALSE);
-	}
-	return (TRUE);
-}
-
-int handle_redirect_out(LEXER *input, t_token **list)
-{
-	int start;
-	int end;
-
-	start = input->head;
-	end = input->head;
-	if (R_ARROW(input))
-	{
-		if (R_ARROW(input)) // Double flèche (>>)
-			return (process_redirect(input, list, start, end, APPEND_OUT));
-		return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
-	}
-	return (FALSE);
-}
-
-int handle_redirect_in(LEXER *input, t_token **list)
-{
-	int start;
-	int end;
-
-	start = input->head;
-	end = input->head;
-	if (L_ARROW(input))
-	{
-		if (L_ARROW(input)) // Double flèche (<<)
-			return (process_heredoc(input, list, start, end)); // creer tous les heredoc a ce moment la ?
-		return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
-	}
-	return (FALSE);
 }
 
 int redir(LEXER *input, t_token **list)
-{
-	int start = input->head;
-	if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
-		return (TRUE);
-	input->head = start;
-	return (FALSE);
-}
+{DEBUG_S;
+	int save;
+	int start;
+	int type;
 
-int command(LEXER *input, t_token **list)
-{
-	int start = input->head;
+	save = input->head;
+	if (R_ARROW(input)) {
+		if (R_ARROW(input))
+			type = APPEND_OUT;
+		else
+			type = REDIRECT_OUT;
+	} else if (L_ARROW(input)) {
+		if (L_ARROW(input))
+			type = HEREDOC;
+		else
+			type = REDIRECT_IN;
+	} else
+		return (FALSE);
 	ows(input);
-
-	if (!arg(input, list) && ows(input) && !redir(input, list))
-	{
-		input->head = start;
+	start = input->head;
+	if (!arg(input)) {
+		input->head = save;
 		return (FALSE);
 	}
-	ows(input);
-	while (arg(input, list) || redir(input, list))
-	{
+	add_new_token(list, create_new_token(input, start, input->head, type));
+	return (TRUE);
+}
+
+
+int command(LEXER *input, t_token **list)
+{DEBUG_S;
+	int save;
+	int start;
+	int i;
+
+	i = 0;
+	save = input->head;
+	while (TRUE) {
+		if (!redir(input, list))
+		{
+			start = input->head;
+			if (!arg(input))
+				break;
+			add_new_token(list, create_new_token(input, start, input->head, ARGUMENT));
+		}
 		ows(input);
+		i++;
+	}
+	if (i < 1) {
+		input->head = save;
+		return (FALSE);
 	}
 	return (TRUE);
 }
 
+// int	arg(LEXER *input, t_token **list)
+// {
+// 	int	i;
+// 	int	start;
+// 	int	end;
+// 	t_token	*new_node;
+
+// 	i = 0;
+// 	start = input->head;
+// 	end = start;
+// 	// new_node = try_malloc(sizeof(t_token));
+// 	ows(input);
+// 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
+// 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
+// 		i++;
+// 	if (i < 1)
+// 	{
+// 		input->head = start;
+// 		return (FALSE);
+// 	}
+// 	end = input->head;
+// 	if (end > start)
+// 	{
+// 		new_node = create_new_token(input, start, end, ARGUMENT);
+// 		add_new_token(list, new_node);
+// 	}
+// 	return (TRUE);
+// }
+
+// int handle_delimiter(LEXER *input, t_token **list, int start)
+// {
+// 	t_token	*new_node;
+// 	int		end;
+
+// 	// new_node = try_malloc(sizeof(t_token));
+// 	end = input->head;
+// 	if (!arg(input, list))
+// 		return (FALSE);
+// 	end = input->head;
+// 	if (end > start)
+// 	{
+// 		new_node = create_new_token(input, start, end, DELIMITER);
+// 		replace_prev_token(list, new_node);
+// 	}
+// 	return (TRUE);
+// }
+
+// int process_heredoc(LEXER *input, t_token **list, int start, int end)
+// {
+// 	t_token *new_node;
+
+// 	end = input->head;
+// 	if (end > start)
+// 	{
+// 		new_node = create_new_token(input, start, end, HEREDOC);
+// 		add_new_token(list, new_node);
+// 	}
+// 	ows(input);
+// 	start = end;
+// 	end = input->head;
+// 	if (!handle_delimiter(input, list, end))
+// 	{
+// 		input->head = start;
+// 		return (FALSE);
+// 	}
+// 	return (TRUE);
+// }
+
+// int handle_filename(LEXER *input, t_token **list, int start)
+// {
+// 	int end;
+// 	t_token *new_node;
+
+// 	end = input->head;
+// 	if (!arg(input, list))
+// 		return (FALSE);
+// 	end = input->head;
+// 	if (end > start)
+// 	{
+// 		new_node = create_new_token(input, start, end, FILENAME);
+// 		replace_prev_token(list, new_node);
+// 	}
+// 	return (TRUE);
+// }
+
+// int process_redirect(LEXER *input, t_token **list, int start, int end, int redirect_type)
+// {
+// 	t_token *new_node;
+
+// 	end = input->head;
+// 	if (end > start)
+// 	{
+// 		new_node = create_new_token(input, start, end, redirect_type);
+// 		add_new_token(list, new_node);
+// 	}
+// 	ows(input);
+// 	start = end;
+// 	end = input->head;
+// 	if (!handle_filename(input, list, end))
+// 	{
+// 		input->head = start;
+// 		return (FALSE);
+// 	}
+// 	return (TRUE);
+// }
+
+// int handle_redirect_out(LEXER *input, t_token **list)
+// {
+// 	int start;
+// 	int end;
+
+// 	start = input->head;
+// 	end = input->head;
+// 	if (R_ARROW(input))
+// 	{
+// 		if (R_ARROW(input)) // Double flèche (>>)
+// 			return (process_redirect(input, list, start, end, APPEND_OUT));
+// 		return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
+// 	}
+// 	return (FALSE);
+// }
+
+// int handle_redirect_in(LEXER *input, t_token **list)
+// {
+// 	int start;
+// 	int end;
+
+// 	start = input->head;
+// 	end = input->head;
+// 	if (L_ARROW(input))
+// 	{
+// 		if (L_ARROW(input)) // Double flèche (<<)
+// 			return (process_heredoc(input, list, start, end)); // creer tous les heredoc a ce moment la ?
+// 		return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
+// 	}
+// 	return (FALSE);
+// }
+
+// int redir(LEXER *input, t_token **list)
+// {
+// 	int start = input->head;
+// 	if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
+// 		return (TRUE);
+// 	input->head = start;
+// 	return (FALSE);
+// }
+
+// int command(LEXER *input, t_token **list)
+// {
+// 	int start = input->head;
+// 	ows(input);
+
+// 	if (!arg(input, list) && ows(input) && !redir(input, list))
+// 	{
+// 		input->head = start;
+// 		return (FALSE);
+// 	}
+// 	ows(input);
+// 	while (arg(input, list) || redir(input, list))
+// 	{
+// 		ows(input);
+// 	}
+// 	return (TRUE);
+// }
+
 int	expr(LEXER *input, t_token **list)
-{
+{DEBUG_S;
 	int	save;
 
 	save = input->head;
@@ -456,15 +546,24 @@ int	expr(LEXER *input, t_token **list)
 	{
 		if (input->len == input->head)
 			break;
-		if ((PIPE(input, list) && command(input, list)) == FALSE)
+		// if ((PIPE(input, list) && command(input, list)) == FALSE)
+		// {
+		// 	if ((ws(input) && command(input, list)) == FALSE)
+		// 	{
+		// 		input->head = save;
+		// 		return (FALSE);
+		// 	}
+		// }
+		while (TRUE)
 		{
-			if ((ws(input) && command(input, list)) == FALSE)
-			{
-				input->head = save;
+			ows(input);
+			if (!PIPE(input, list))
+				break;
+			ows(input);
+			if (!command(input, list))
 				return (FALSE);
-			}
 		}
 	}
-    return (TRUE);
+	return (TRUE);
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/29 16:37:29 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/02 11:07:12 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,8 @@ int	TAB_V(LEXER *input);
 int ows(LEXER *input);
 int squote(LEXER *input);
 int dquote(LEXER *input);
-int arg(LEXER *input, t_token **list);
+// int arg(LEXER *input, t_token **list);
+int	arg(LEXER *input);
 int redir(LEXER *input, t_token **list);
 int command(LEXER *input, t_token **list);
 int expr(LEXER *input, t_token **list);

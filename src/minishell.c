@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/29 17:58:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 13:48:35 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -325,7 +325,7 @@ void	handle_c_signal_heredoc(int signum)
 	exit(130);
 	
 }
-int	loop_readline(char *delimiter, int fd_heredoc)
+int	loop_readline(char *delimiter, int *fd_heredoc)
 {
 	char	*input;
 
@@ -336,22 +336,23 @@ int	loop_readline(char *delimiter, int fd_heredoc)
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-			safe_close(&fd_heredoc);
+			safe_close(fd_heredoc);
 			return (0);
 		}
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0/* && input[ft_strlen(delimiter)] == '\n'*/)
 		{
-			safe_close(&fd_heredoc);
+			safe_close(fd_heredoc);
 			free(input);
 			break;
 		}
 		else
 		{
-			ft_putendl_fd(input, fd_heredoc);			
+			ft_putendl_fd(input, *fd_heredoc);			
 		}
 		free(input);
 	}
-	safe_close(&fd_heredoc);
+	// safe_close(fd_heredoc);
+	// dprintf(2, "fd_heredoc = %d\n", *fd_heredoc);
 	return (0);
 }
 
@@ -376,28 +377,33 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 		name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
 		random++;	
 	}
-	save_fd_heredoc = dup(new_node->fd_heredoc[*f]);
+	
 	signal(SIGINT, SIG_IGN);
 	new_node->fd_heredoc[*f] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	
 	if (new_node->fd_heredoc[*f] == -1)
 		perror("open");
-	
-	new_node->delimiter[*d] = ft_strdup(current->next->value);
+	save_fd_heredoc = dup(new_node->fd_heredoc[*f]);
+	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)
 	pid = fork();
 	if (pid == -1)
 		return (perror("fork"), FALSE);
 	if (pid == 0)
 	{
 		// get_lines(new_node, *f, *d);
-		loop_readline(new_node->delimiter[*d], new_node->fd_heredoc[*f]);
+		// loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*f]);
+		loop_readline(new_node->delimiter[*d], &save_fd_heredoc);
+		dprintf(2, "fd_heredoc apres loop = %d\n", save_fd_heredoc);
+		safe_close(&save_fd_heredoc);
 		exit(0);					
 	}
+	safe_close(&save_fd_heredoc);
 	new_node->file[*f] = ft_strdup(name_heredoc);
-	new_node->redir_type[*f++] = current->type;
+	new_node->redir_type[*f] = current->type;
 	free(name_heredoc);
 	name_heredoc = ft_strdup("heredoc");
 	index_heredoc++;
-	d++;
+	// d++;
 	wait(&status);
 	signal(SIGINT, handle_c_signal_heredoc);
 	if (status + 128 == 130)
@@ -438,7 +444,6 @@ void	free_tokens(t_token *tokens)
 		tokens = next;
 	}
 }
-
 int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
 {
 	t_token	*current;
@@ -461,22 +466,28 @@ int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_cod
 		}
 		while (current && current->type != PIPEX)
 		{
-			if (current->type == REDIRECT_IN && current->next->value != NULL)
+			if (current->type == REDIRECT_IN)
 			{
-				new_node->file[f] = ft_strdup(current->next->value);
+				new_node->file[f] = ft_strdup(current->value);
 				new_node->redir_type[f++] = current->type;
 			}
-			else if (current->type == HEREDOC && current->next->value != NULL)
+			else if (current->type == HEREDOC && current->value != NULL)
+			{
+				dprintf(2, "avant create_heredoc f = %d\n", f);
 				if (create_heredoc(new_node, current, &f, &d) == -1)
 				{
 					dprintf(2, "create heredoc = -1\n");
 					// free_tokens(*tokens);
 					return (-1);
 				}
-			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
-					&& current->next->value != NULL)
+				dprintf(2, "apres create_heredoc current->file[f] = %s et f = %d\n", new_node->file[f], f);
+				f++;
+				d++;
+				
+			}
+			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 			{
-					new_node->file[f] = ft_strdup(current->next->value);
+					new_node->file[f] = ft_strdup(current->value);
 					new_node->redir_type[f++] = current->type;
 			}
 			else if (current->type == ARGUMENT && current->value != NULL)
@@ -492,6 +503,60 @@ int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_cod
 	// free_tokens(*tokens);
 	return (0);
 }
+
+// int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
+// {
+// 	t_token	*current;
+// 	PARSER		*new_node;
+// 	int		cmd;
+// 	int		d;
+// 	int		f;
+
+// 	current = *tokens;
+// 	while (current)
+// 	{
+// 		cmd = 0;
+// 		d = 0;
+// 		f = 0;
+// 		new_node = alloc_new_node(current, mini_env, exit_code);
+// 		if (!new_node)
+// 		{
+// 			// free_tokens(*tokens);
+// 			return (-1);
+// 		}
+// 		while (current && current->type != PIPEX)
+// 		{
+// 			if (current->type == REDIRECT_IN && current->next->value != NULL)
+// 			{
+// 				new_node->file[f] = ft_strdup(current->next->value);
+// 				new_node->redir_type[f++] = current->type;
+// 			}
+// 			else if (current->type == HEREDOC && current->next->value != NULL)
+// 				if (create_heredoc(new_node, current, &f, &d) == -1)
+// 				{
+// 					dprintf(2, "create heredoc = -1\n");
+// 					// free_tokens(*tokens);
+// 					return (-1);
+// 				}
+// 			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
+// 					&& current->next->value != NULL)
+// 			{
+// 					new_node->file[f] = ft_strdup(current->next->value);
+// 					new_node->redir_type[f++] = current->type;
+// 			}
+// 			else if (current->type == ARGUMENT && current->value != NULL)
+// 					new_node->command[cmd++] = ft_strdup(current->value);
+// 			current = current->next;
+// 		}
+// 		add_null_to_tab(new_node, f, d, cmd);
+// 		add_new_node(nodes, new_node);
+// 		if (current && current->type == PIPEX)
+// 			current = current->next;
+// 		// check_and_free_new_node(new_node);
+// 	}
+// 	// free_tokens(*tokens);
+// 	return (0);
+// }
 
 LEXER	*ft_init_lexer_input()
 {
@@ -564,6 +629,7 @@ int		main(int argc, char **argv, char **env)
 			}
 			else if (!fill_list_of_tokens(L_input, &tokens))
 			{
+				print_tokens_list(&tokens);
 				ft_putendl_fd("syntax error", 2);
 				exit_code = 2;
 				// free_tokens(tokens);
@@ -573,11 +639,11 @@ int		main(int argc, char **argv, char **env)
 			{
 				if (create_nodes(&tokens, &nodes, mini_env, exit_code) == 0)
 				{
-					// print_tokens_list(&tokens);
+					print_tokens_list(&tokens);
 					free_tokens(tokens);						
 					// print_tokens_list(&tokens);
 					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
-					// print_nodes_list(&nodes);
+					print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, mini_env, nodes);
 					handle_input(&nodes, p);
