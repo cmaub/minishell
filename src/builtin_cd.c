@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/27 18:51:19 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/02 17:18:36 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ permet de recuperer le chemin absolu du repertoire courant
 int	ft_setenv(char *dest, char *src, char **mini_env)
 {	
 	dest = ft_strjoin(dest, "=");
+	if (!dest)
+		return (-1);
 	while (*mini_env && ft_strnstr(*mini_env, dest, ft_strlen(dest)) == NULL)
 		mini_env++;
 	if (*mini_env == NULL)
@@ -40,12 +42,18 @@ int	ft_setenv(char *dest, char *src, char **mini_env)
 		{
 			*mini_env = try_malloc(sizeof(char *));
 			*mini_env = ft_strjoin(dest, ft_strdup(src));
+			if (!*mini_env)
+				return (free(dest), -1);
 		}
 		else
 			return (-1);
 	}
 	else if (*mini_env)
+	{
 		*mini_env = ft_strjoin(dest, ft_strdup(src));
+		if (!*mini_env)
+			return (free(dest), -1);
+	}
 	return (0);
 }
 

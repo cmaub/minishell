@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 13:48:35 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 18:23:14 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,16 @@ char	*return_var_from_env(char *str, char **mini_env)
 
 	new_var = NULL;
 	str = ft_strjoin(str, "=");
+	if (!str)
+		return (NULL);
 	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
 		mini_env++;
 	if (*mini_env == NULL)
 		return (NULL);
 	new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
+	if (!new_var)
+		return (free(str), NULL);
+	free(str);
 	return (new_var);
 }
 
@@ -132,10 +137,14 @@ int	search_closing_quote(char *str, char c)
 char	*join_char(char c, char *tmp)
 {
 	char	single_char[2];
+	char	*result;
 
 	single_char[0] = c;
 	single_char[1] = '\0';
-	return (ft_strjoin(tmp, single_char));
+	result = ft_strjoin(tmp, single_char);
+	if (!result)
+		return (NULL);
+	return (result);
 }
 
 char	*print_exit_code(char *result, PARSER *new_node, int *index)
@@ -153,6 +162,7 @@ char	*print_exit_code(char *result, PARSER *new_node, int *index)
 	}
 	new_node->exit_code = 0;
 	*index += 2;
+	
 	return (ft_strjoin(result, expand_result));
 }
 
@@ -186,16 +196,28 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 			|| ((str[(*index) + 1]) == 39 && (str[(*index) + 2] == 39))))
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
+			{
 				tmp = print_exit_code(result, new_node, index);
+				if (!tmp)
+					return (free(result), NULL);
+			}
 			else
+			{
 				tmp = print_expand(str, &(*index), mini_env);
+				if (!tmp)
+					return (free(result), NULL); //verifier retour ici
+			}
 			result = ft_strjoin(result, tmp);
+			if (!result)
+				return(free(result), free(tmp), NULL);
 			free(tmp);
 		}
 		else
 		{
 			
 			tmp = join_char(str[*index], result);
+			if (!tmp)
+				return (free(result), NULL);
 			free(result);
 			result = tmp;
 			if (result[ft_strlen(result) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
@@ -217,6 +239,8 @@ char	*process_single_quotes(char *str, int *index)
 	while (str[*index] != 39 && str[*index] != '\0')
 	{
 		tmp = join_char(str[*index], result);
+		if (!tmp)
+			return (free(result), NULL);
 		free(result);
 		result = tmp;
 		(*index)++;
@@ -244,11 +268,15 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 			else
 				tmp = print_expand(str, &(*index), mini_env);
 			result = ft_strjoin(result, tmp);
+			if (!result)
+				return (free(tmp), NULL);
 			free(tmp);
 		}
 		else
 		{
 			tmp = join_char(str[*index], result);
+			if (!tmp)
+				return (free(result), NULL);
 			free(result);
 			result = tmp;
 			(*index)++;
@@ -276,7 +304,9 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 		else
 			tmp = process_unquoted(new_node, str, &start, mini_env);
 		result = ft_strjoin(result, tmp);
-		free (tmp);
+		if (!result)
+			return (free(tmp), NULL);
+		free(tmp);
 	}
 	return (result);
 }
@@ -366,24 +396,28 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	int	pid;
 	int status = 0;
 
-	name_heredoc = ft_strdup("heredoc");
+	name_heredoc = try_malloc(20 * sizeof(char)); // CALCULER TAILLE
+	ft_strlcpy(name_heredoc, "heredoc", 8);
+	dprintf(2, "name_heredoc apres ft_strlcpy = %s\n", name_heredoc);
 	index_heredoc = 0;
 	random = 1;
-	name_heredoc[ft_strlen(name_heredoc)] = index_heredoc + '0';
-	name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
+	name_heredoc[7] = index_heredoc + '0';
+	name_heredoc[8] = '\0';
+	dprintf(2, "name_heredoc avant while = %s\n", name_heredoc);
 	while (access(name_heredoc, F_OK) == 0)
 	{
-		name_heredoc[ft_strlen(name_heredoc)] = (index_heredoc + random) + '0';
-		name_heredoc[ft_strlen(name_heredoc) + 1] = '\0';
+		name_heredoc[7] = (index_heredoc + random) + '0';
+		name_heredoc[8] = '\0';
+		dprintf(2, "name_heredoc dans while = %s\n", name_heredoc);
 		random++;	
 	}
-	
 	signal(SIGINT, SIG_IGN);
 	new_node->fd_heredoc[*f] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	
 	if (new_node->fd_heredoc[*f] == -1)
 		perror("open");
 	save_fd_heredoc = dup(new_node->fd_heredoc[*f]);
+	safe_close(&new_node->fd_heredoc[*f]);
 	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)
 	pid = fork();
 	if (pid == -1)
@@ -408,6 +442,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	signal(SIGINT, handle_c_signal_heredoc);
 	if (status + 128 == 130)
 	{
+		dprintf(2, "coucou\n");
 		tmp_fd = open(new_node->file[*f], O_WRONLY);
 		safe_close(&tmp_fd);
 		exit_status = 130;
@@ -664,8 +699,11 @@ int		main(int argc, char **argv, char **env)
 				{
 					reset_node(&nodes);
 					if (nodes == NULL)
-						dprintf(2, "nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
+						printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
+
+					
 				}
+				dprintf(0, "hello\n");
 
 				//str_input deplace
 			}

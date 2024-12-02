@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 14:32:27 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 18:25:45 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,6 @@ int		env_var_exists(char **env, char *var)
 	// dprintf(2, "(%s, %d) et env[i] = %s\n", __FILE__, __LINE__, env[i]);
 	while (env[i] && i < size)
 	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		if (ft_strncmp(env[i], var, strlen(var)) == 0)
 		{
 			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
@@ -44,7 +43,7 @@ int		env_var_exists(char **env, char *var)
 		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		i++;
 	}
-	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (-1);
 }
 
@@ -147,12 +146,14 @@ int	check_name(char *name)
 	i = 0;
 	if (!name || !name[0] || ft_isdigit(name[0]))
 		return (FALSE);
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	while (name[i] && name[i] != '=')
 	{
 		if (!ft_isalnum(name[i]) && name[i] != '_')
 			return (FALSE);
 		i++;
 	}
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (TRUE);
 }
 
@@ -207,10 +208,14 @@ void	handle_variable_without_value(char *cmd, PARSER *current, char **env)
 	index = env_var_exists(env, cmd);
 	if (index < 0)
 	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		while (env[j])
 			j++;
 		env[j] = ft_strdup(cmd);
+		if (!env[j])
+			return ;
 		env[j + 1] = NULL;
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	}
 }
 

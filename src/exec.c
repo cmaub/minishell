@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 12:33:09 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 16:49:17 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,28 +178,87 @@ int	execute(PARSER *current, t_pipex *p)
 	return (-1);
 }
 
+
+
+// void	first_child(t_pipex *p, PARSER **nodes)
+// {
+// 	int	fd_in;
+// 	int	fd_out;
+	
+// 	fd_in = -1;
+// 	fd_out = -1;
+// 	(*nodes)->f = 0;
+// 	safe_close(&p->pipefd[0]);
+// 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
+// 	{
+// 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+// 		{
+// 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+// 			if (fd_in == -1)
+// 				close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
+// 			// if (dup2(fd_in, STDIN_FILENO) == -1)
+// 			// {
+// 			// 	reset_node(nodes);
+// 			// 	close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
+// 			// }
+// 			// dprintf(2, "fd_in apres dup = %d, STDIN_FILENO apres dup %d\n", fd_in, STDIN_FILENO);
+// 			safe_close(&fd_in);
+// 		}
+// 		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+// 		{
+// 			dprintf(2, "dans first child -- (*nodes)->file[(*nodes)->f = %s\n", (*nodes)->file[(*nodes)->f]);
+// 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
+// 			if (fd_in == -1)
+// 				close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
+// 			if (dup2(fd_in, STDIN_FILENO) == -1)
+// 			{
+// 				reset_node(nodes);
+// 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
+// 			}
+// 			dprintf(2, "fd_in apres dup = %d, STDIN_FILENO apres dup %d\n", fd_in, STDIN_FILENO);
+// 			safe_close(&fd_in);
+// 		}
+// 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+// 		{
+// 			if (!handle_output_redirection(nodes, p, fd_out))
+// 			{
+// 				exit(1) ;
+// 			}
+// 		}
+// 		(*nodes)->f++;
+
+// 	}
+// 	if ((*nodes)->next)
+// 	{
+// 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
+// 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
+// 		safe_close(&p->pipefd[1]);
+// 	}
+// 	is_command(*nodes);
+// 	if (execute((*nodes), p) == -1)
+// 		exit(127);
+// }
+
 void	first_child(t_pipex *p, PARSER **nodes)
 {
 	int	fd_in;
 	int	fd_out;
 	
-	dprintf(2, "appel a first child\n");
 	fd_in = -1;
 	fd_out = -1;
 	(*nodes)->f = 0;
 	safe_close(&p->pipefd[0]);
-	dprintf(2, "fd de STDIN = %d, fd de STDOUT = %d au debut de first_child\n", STDIN_FILENO, STDOUT_FILENO);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
 		{
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-			dprintf(2, "dans REDIRECT_IN - fd_in = %d, (*nodes)->file[%d] = %s\n", fd_in, (*nodes)->f, (*nodes)->file[(*nodes)->f]);
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+		else if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
 		{
+			dprintf(2, "dans first child -- (*nodes)->file[(*nodes)->f = %s\n", (*nodes)->file[(*nodes)->f]);
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-			dprintf(2, "dans HEREDOC - fd_in = %d, (*nodes)->file[%d] = %s\n", fd_in, (*nodes)->f, (*nodes)->file[(*nodes)->f]);
+			dprintf(2, "fd_in apres open = %d, STDIN_FILENO apres dup %d\n", fd_in, STDIN_FILENO);
 		}
 		if (fd_in == -1 && ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN || (*nodes)->redir_type[(*nodes)->f] == HEREDOC))
 			close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
@@ -207,18 +266,16 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		{
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 			{
-				dprintf(2, "dup du fd_in a fail (%s, %d)\n", __FILE__, __LINE__);
 				reset_node(nodes);
 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 			}
+			dprintf(2, "fd_in apres dup = %d, STDIN_FILENO apres dup %d\n", fd_in, STDIN_FILENO);
 			safe_close(&fd_in);
-			dprintf(2, "apres sfe_close fd_in = %d\n", fd_in);
 		}
 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 			{
-				dprintf(2, "handle input a fail\n");
 				exit(1) ;
 			}
 		}
@@ -227,7 +284,6 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	}
 	if ((*nodes)->next)
 	{
-		dprintf(2, "nodes->next\n");
 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 		safe_close(&p->pipefd[1]);
@@ -317,9 +373,9 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		(*nodes)->f++;
 	}
 	is_command(*nodes);
+	dprintf(2, "avant execute de last child\n");
 	if (execute((*nodes), p) == -1)
 	{
-		dprintf(2, "nope (%s, %d)\n", __FILE__, __LINE__);
 		exit(127);
 	}
 }
@@ -371,12 +427,14 @@ int	cpy_std(int *cpy_stdin, int *cpy_stdout)
 		perror("cpy_stdin");
 		return (FALSE);
 	}
+	// safe_close(cpy_stdin);
 	*cpy_stdout = dup(STDOUT_FILENO);
 	if (!*cpy_stdout)
 	{
 		perror("cpy_stdout");
 		return (FALSE);
 	}
+	// safe_close(cpy_stdout);
 	return (TRUE);
 }
 
@@ -405,6 +463,8 @@ int	restore_std(int *cpy_stdin, int *cpy_stdout)
 	}
 	if (*cpy_stdout != -1)
 		return (FALSE);
+	dprintf(2, "cpy_stdin = %d et cpy_stdout = %d\n", *cpy_stdin, *cpy_stdout);
+	dprintf(2, "stdin = %d et stdout = %d\n", STDIN_FILENO, STDOUT_FILENO);
 	return (TRUE);
 }
 
@@ -422,7 +482,8 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	current->f = 0;
 	p->flag = 1;
 	if (cpy_std(&cpy_stdin, &cpy_stdout) == FALSE)
-	{	current->exit_code = 1;
+	{	
+		current->exit_code = 1;
 		return ;
 	}
 	while (current->file && current->file[current->f] != NULL)
@@ -464,6 +525,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	{
 		if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
 		{
+			dprintf(2, "yoooo et apres pause\n");
 			current->exit_code = 1;
 			return ;
 		}
@@ -507,5 +569,6 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 		if (p->i == p->nb_cmd)
 			break;	
 	}
+	
 	return (close_pipefds(p), ft_wait(p->last_pid, nodes));
 }

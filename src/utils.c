@@ -190,17 +190,32 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	pid_t waited_pid;
 	PARSER *current;	
 
+	dprintf(2, "entree dans wait\n");
 	status_code = 0;
 	current = *nodes;
 	if (current == NULL)
 		return (0);
 	while ((waited_pid = wait(&status)) != -1)
 	{
-		if (current && current->redir_type && current->redir_type[current->f] == 4)
+		dprintf(2, "WAITED_PID = %d\n", waited_pid);
+		// while (current && current->redir_type && current->redir_type[current->f] == 4)
+		// {
+		// 	unlink(current->file[current->f]);
+		// 	dprintf(2, "file dans wait %s\n", current->file[current->f]);
+		// 	current->f++;
+		// }
+		while (current && current->redir_type != NULL)
 		{
-			unlink(current->file[current->f]);
-			current->f++;
-		}	
+			if (current && current->redir_type[current->f] == 4)
+			{
+				unlink(current->file[current->f]);
+				dprintf(2, "file dans wait %s\n", current->file[current->f]);
+			}
+			if (current && current->redir_type[current->f + 1])
+				current->f++;
+			else
+				break ;
+		}
 		if (current && current->next)
 			current = current->next;
 		else

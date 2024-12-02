@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/02 11:18:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 17:12:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int	PIPE(LEXER *input, t_token **list)
 	start = input->head;
 	end = start;
 	i = eat(input, '|');
-	if (!i)
+	if (i == 0)
 	{
 		input->head = start;
 		return (FALSE);
@@ -291,8 +291,8 @@ int	arg(LEXER *input)
 	i = 0;
 	start = input->head;
 	// end = start;
-	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
-		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || UNDERSCORE(input))
+	while  (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
+		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
 		i++;
 	if (i < 1)
 	{
@@ -346,23 +346,44 @@ int command(LEXER *input, t_token **list)
 
 	i = 0;
 	save = input->head;
+	dprintf(2, "COMMAND\n");
 	while (TRUE) {
 		if (!redir(input, list))
 		{
 			start = input->head;
 			if (!arg(input))
+			{
 				break;
+			}
 			add_new_token(list, create_new_token(input, start, input->head, ARGUMENT));
 		}
 		ows(input);
 		i++;
 	}
-	if (i < 1) {
+	if (i < 1) 
+	{
 		input->head = save;
 		return (FALSE);
 	}
 	return (TRUE);
 }
+// int command(LEXER *input, t_token **list)
+// {
+// 	int start = input->head;
+// 	ows(input);
+
+// 	if (!arg(input, list) && ows(input) && !redir(input, list))
+// 	{
+// 		input->head = start;
+// 		return (FALSE);
+// 	}
+// 	ows(input);
+// 	while (arg(input, list) || redir(input, list))
+// 	{
+// 		ows(input);
+// 	}
+// 	return (TRUE);
+// }
 
 // int	arg(LEXER *input, t_token **list)
 // {
@@ -511,23 +532,7 @@ int command(LEXER *input, t_token **list)
 // 	return (FALSE);
 // }
 
-// int command(LEXER *input, t_token **list)
-// {
-// 	int start = input->head;
-// 	ows(input);
 
-// 	if (!arg(input, list) && ows(input) && !redir(input, list))
-// 	{
-// 		input->head = start;
-// 		return (FALSE);
-// 	}
-// 	ows(input);
-// 	while (arg(input, list) || redir(input, list))
-// 	{
-// 		ows(input);
-// 	}
-// 	return (TRUE);
-// }
 
 int	expr(LEXER *input, t_token **list)
 {DEBUG_S;
@@ -554,15 +559,14 @@ int	expr(LEXER *input, t_token **list)
 		// 		return (FALSE);
 		// 	}
 		// }
-		while (TRUE)
+		ows(input);
+		if (!PIPE(input, list))
 		{
-			ows(input);
-			if (!PIPE(input, list))
-				break;
-			ows(input);
-			if (!command(input, list))
-				return (FALSE);
+			break;
 		}
+		ows(input);
+		if (!command(input, list))
+			return (FALSE);
 	}
 	return (TRUE);
 }

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/29 17:08:19 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 18:25:03 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,11 @@ char	*create_tmp_filename(char *path, char *cmd)
 
 	tmp_path = ft_strjoin(path, "/");
 	if (!tmp_path)
-		return (free(path), NULL);
+		return (NULL); //free(path) enleve
 	tmp_filename = ft_strjoin(tmp_path, cmd);
-	free(tmp_path);
 	if (!tmp_filename)
-		return (free(path), NULL);
+		return (free(tmp_path), NULL); //free(path) enleve
+	free(tmp_path);
 	return (tmp_filename);
 }
 

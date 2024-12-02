@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 11:07:12 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/02 18:24:44 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,6 +187,7 @@ int	PLUS(LEXER *input);
 int	STAR(LEXER *input);
 int	TAB_H(LEXER *input);
 int	TAB_V(LEXER *input);
+int HASHTAG(LEXER *input);
 
 int ows(LEXER *input);
 int squote(LEXER *input);
