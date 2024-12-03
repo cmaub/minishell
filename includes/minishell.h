@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 18:24:44 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 15:10:19 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ typedef struct PARSER
 	char	**command; // n'exec que la premiere
 	char	**delimiter;
 	int		*redir_type;
-	int		*fd_heredoc;
+	// int		*fd_heredoc;
 	int		cmd;
 	int		f;
 	int	nb_command;
@@ -58,6 +58,7 @@ typedef struct PARSER
 	int	nb_heredoc;
 	struct PARSER	*next;
 	int			exit_code;
+	int	**fd_heredoc;
 } PARSER ;
 
 typedef struct _LEXER {
@@ -97,6 +98,12 @@ typedef struct s_sig
 	
 }t_sig;
 
+typedef struct s_pipe_fds_heredoc
+{
+	int	fd[2];
+}t_pipe_fds_heredoc;
+
+
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 
 
@@ -124,10 +131,12 @@ void	handle_c_signal_child(int signum);
 void	check_signal_handler();
 int	count_env_var(char **list);
 
+/* LEXER */
+int parserHasReachEnd(LEXER *input) ;
 
-
+/* TOKENS */
 int	give_type_to_token(t_token *token);
-// int	list_size(t_token *list);
+int	fill_list_of_tokens(LEXER *L_input, t_token **list);
 int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
@@ -142,6 +151,9 @@ int    ft_wait(pid_t last_pid, PARSER **nodes);
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
 void	print_nodes_list(PARSER **nodes);
 void	add_new_node(PARSER **nodes, PARSER *new_node);
+
+/* NODES */
+int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code);
 
 /* BUILTINS */
 int	ft_echo(char **cmd);
@@ -159,6 +171,8 @@ void	ft_free_tab(char **tab);
 char	**copy_tab_free(char **envp);
 void	free_new_node(PARSER *new_node);
 void	reset_node(PARSER **node);
+void	free_tokens(t_token *tokens);
+void check_and_free_new_node(PARSER *new_node);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

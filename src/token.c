@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/11/29 17:36:04 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 10:38:51 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,31 +15,42 @@
 /*
 Cette fonction permet de changer la nature du token identifie en supprimant celui qui vient d'etre ajoute s'il peut etre precise
 */
-void	replace_prev_token(t_token **list, t_token *new)
-{
-	t_token	*current;
+// void	replace_prev_token(t_token **list, t_token *new)
+// {
+// 	t_token	*current;
 
-	if (!list || !new)
-		return ;
-	if (*list == NULL)
+// 	if (!list || !new)
+// 		return ;
+// 	if (*list == NULL)
+// 	{
+// 		*list = new;
+// 		return ;
+// 	}
+// 	else
+// 	{
+// 		current = *list;
+// 		while (current->next != NULL)
+// 			current = current->next;
+// 		if (current->prev != NULL)
+// 			current->prev->next = new;
+// 		else
+// 			*list = new;
+// 		new->prev = current->prev;
+// 		new->next = NULL;
+// 		free(current->value);
+// 		free(current);
+// 	}
+// }
+
+int	fill_list_of_tokens(LEXER *L_input, t_token **list)
+{
+	if (!expr(L_input, list) || !parserHasReachEnd(L_input))
 	{
-		*list = new;
-		return ;
+		free(L_input);
+		return (FALSE);
 	}
-	else
-	{
-		current = *list;
-		while (current->next != NULL)
-			current = current->next;
-		if (current->prev != NULL)
-			current->prev->next = new;
-		else
-			*list = new;
-		new->prev = current->prev;
-		new->next = NULL;
-		free(current->value);
-		free(current);
-	}
+	free(L_input);
+	return (TRUE);
 }
 
 void	add_new_token(t_token **list, t_token *new)
@@ -116,67 +127,5 @@ void	print_tokens_list(t_token **list)
 		i++;
 	}
 	printf("[%s] de type %d\n", (*list)->value, (*list)->type);
-}
-
-void	print_nodes_list(PARSER **nodes)
-{
-	int	f = 0;
-	int	h = 0;
-	int	d = 0;
-	int	index = 0;
-	PARSER	*tmp;
-
-	tmp = (*nodes);
-	if (!(*nodes))
-		return ;
-	while (index <= ft_size_list(nodes))
-	{
-		f = 0;
-		h = 0;
-		while (f < 30 && tmp->file && tmp->file[f] != NULL)
-		{
-			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir_type[f]);
-			if (tmp->delimiter && tmp->delimiter[d] != NULL)
-			{
-				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
-				d++;
-			}
-			f++;
-		}
-		while (h < 30 && tmp->command && tmp->command[h] != NULL)
-		{
-			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
-			h++;
-		}
-		if (!tmp->next)
-			break;
-		tmp = tmp->next;
-		index++;
-		printf("\n");
-	}
-	printf("\n");
-}
-
-void	add_new_node(PARSER **nodes, PARSER *new_node)
-{
-	PARSER	*current;
-
-	if (!nodes || !new_node)
-	{
-		return ;
-	}
-	if (!(*nodes))
-	{
-		*nodes = new_node;
-		return ;
-	}
-	else
-	{
-		current = *nodes;
-		while (current->next != NULL)
-			current = current->next;
-		current->next = new_node;
-	}
-
 }
 

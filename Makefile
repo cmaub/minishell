@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
+#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/27 14:17:06 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/12/03 10:39:37 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,6 +29,7 @@ INC			=	-I ./includes/\
 SRC_PATH	=	src/
 SRC_FILES			=	minishell.c \
 							token.c \
+							nodes.c \
 							utils.c \
 							lexer.c \
 							exec.c \
