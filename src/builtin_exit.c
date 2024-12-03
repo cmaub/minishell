@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 15:16:51 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:15:34 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int	is_arg_too_big(char *cmd)
 		return (0);
 }
 
-void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p)
+void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 {
 	int	j;
 
@@ -78,23 +78,30 @@ void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p)
 		if (!isdigit(cmd[j]))
 		{
 			not_a_num(p, node);
+			safe_close(cpy_stdin);
+			safe_close(cpy_stdout);
+			reset_node(&node);
 			exit(2);
 		}
 		j++;
 	}
 }
 
-int	ft_exit(char **cmd, t_pipex *p, PARSER *node)
+int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout)
 {
 	int	i;
+	int	exit_code;
 
 	i = 1;
 	if (cmd[i])
 	{
-		check_exit_arg(cmd[i], node, p);
+		check_exit_arg(cmd[i], node, p, cpy_stdin, cpy_stdout);
 		if (is_arg_too_big(cmd[1]))
 		{
 			not_a_num(p, node);
+			safe_close(cpy_stdin);
+			safe_close(cpy_stdout);
+			reset_node(&node);
 			exit(2);
 		}
 		i++;
@@ -104,7 +111,16 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node)
 	else
 	{
 		input_ok(p, cmd[1], node);
-		exit(node->exit_code);
+		safe_close(cpy_stdin);
+		safe_close(cpy_stdout);
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		exit_code = node->exit_code;
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		reset_node(&node);
+		free_pipex(&p);
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		exit(exit_code);
+		
 	}
 	return (TRUE);
 }

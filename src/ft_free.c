@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 11:21:53 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:31:39 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,21 +49,23 @@ void	free_new_node(PARSER *new_node)
 	}
 }
 
-void	free_tokens(t_token *tokens)
+void	free_tokens(t_token **tokens)
 {
 	t_token	*next;
 	
-	while (tokens)
+	if (!tokens || !(*tokens))
+		return ;
+	while (*tokens)
 	{
-		next = tokens->next;
-		if (tokens->value)
+		next = (*tokens)->next;
+		if ((*tokens)->value)
 		{
-			printf("Freeing token with value: %s\n", tokens->value);
-			free((tokens)->value);
-			tokens->value = NULL;
+			printf("Freeing token with value: %s\n", (*tokens)->value);
+			free((*tokens)->value);
+			(*tokens)->value = NULL;
 		}
-		free(tokens);
-		tokens = next;
+		free((*tokens));
+		*tokens = next;
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 15:10:19 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:31:55 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void	get_lines(PARSER *nodes, int i, int d);
 int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
 void   close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c);
 void	free_array(char **array);
-void	free_pipex(t_pipex *p);
+void	free_pipex(t_pipex **p);
 void	replace_prev_token(t_token **list, t_token *new);
 void	handle_c_signal(int signum);
 void	handle_c_signal_child(int signum);
@@ -159,7 +159,8 @@ int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_cod
 int	ft_echo(char **cmd);
 int	ft_pwd(PARSER *current);
 int	ft_env(PARSER *current, char **mini_env);
-int	ft_exit(char **cmd, t_pipex *p, PARSER *node);
+// int	ft_exit(char **cmd, t_pipex *p, PARSER *node);
+int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout);
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
 char **ft_unset(PARSER *current, char **env);
 int	ft_export(PARSER *current, char **env);
@@ -171,7 +172,7 @@ void	ft_free_tab(char **tab);
 char	**copy_tab_free(char **envp);
 void	free_new_node(PARSER *new_node);
 void	reset_node(PARSER **node);
-void	free_tokens(t_token *tokens);
+void	free_tokens(t_token **tokens);
 void check_and_free_new_node(PARSER *new_node);
 
 /* LEXER */

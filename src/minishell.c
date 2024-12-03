@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 13:24:52 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:32:17 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,9 @@ int		main(int argc, char **argv, char **env)
 				if (create_nodes(&tokens, &nodes, mini_env, exit_code) == 0)
 				{
 					print_tokens_list(&tokens);
-					free_tokens(tokens);						
+					free_tokens(&tokens);	
+					if (tokens == NULL)
+						dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
 					// print_tokens_list(&tokens);
 					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 					print_nodes_list(&nodes);
@@ -112,22 +114,24 @@ int		main(int argc, char **argv, char **env)
 					handle_input(&nodes, p);
 					
 					mini_env = copy_tab(p->mini_env);
-					ft_free_tab(p->mini_env);
+					// if (p->mini_env)
+					// 	ft_free_tab(p->mini_env);
 					if (nodes)
 						exit_code = nodes->exit_code;
-					free_pipex(p);
+					if (p)
+						free_pipex(&p);
 					if (p == NULL)
 						dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
-					if (mini_env == NULL)
-						dprintf(2, "Le mini_env est nul, dommage\n");
+					// if (mini_env == NULL)
+					// 	dprintf(2, "Le mini_env est nul, dommage\n");
 				}
-				else
-					free_tokens(tokens);
+				else if (tokens)
+					free_tokens(&tokens);
 				if (nodes)
 				{
 					reset_node(&nodes);
-					if (nodes == NULL)
-						printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
+					// if (nodes == NULL)
+					// 	printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
 
 					
 				}

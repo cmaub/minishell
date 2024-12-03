@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/03 16:49:06 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:56:31 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -311,18 +311,29 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 
 void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 {
+	char	*tmp;
+
+	tmp = NULL;
 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC 
 		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 	{
 		if (cur->type == HEREDOC)
 			new_node->nb_heredoc++;
-		if (cur->next != NULL)
-			cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
+		if (cur->type) // checker que next n'est pas un pb
+		{
+			tmp = ft_strdup(cur->value);
+			free(cur->value);
+			cur->value = withdraw_quotes(new_node, tmp, mini_env);
+			free(tmp);
+		}
 		new_node->nb_file++;
 	}
 	else if (cur->type == ARGUMENT)
 	{
-		cur->value = withdraw_quotes(new_node, cur->value, mini_env);
+		tmp = ft_strdup(cur->value);
+		free(cur->value);
+		cur->value = withdraw_quotes(new_node, tmp, mini_env);
+		free(tmp);
 		new_node->nb_command++;
 	}
 }
@@ -468,7 +479,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	// sa.sa_sigaction = handle_c_signal_heredoc;
 	wait(&status);
 	dprintf(2, "status dans heredoc = %d\n", status);
-	status = 2;
+	// status = 2;
 	if (status + 128 == 130)
 	{
 		dprintf(2, "entree dans cdt parent status + 128\n");

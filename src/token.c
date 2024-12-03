@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/03 10:38:51 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:36:31 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,11 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
        	return NULL;
 	len = end - start;
 	new = try_malloc(sizeof(t_token));
+	if (new->value)
+	{
+		dprintf(2, "NOOOOON ne m'ecrase pas\n");
+		free(new->value);
+	}
 	new->value = ft_substr(input->data, start, len);
 	if (!new->value)
 	{

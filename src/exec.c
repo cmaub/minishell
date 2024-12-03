@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 12:18:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/03 17:33:39 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out)
 	return (TRUE);
 }
 
-int	exec_builtin(PARSER *current, t_pipex *p)
+int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 {
 	if (ft_strncmp(current->command[0], "echo", 4) == 0)
 		return (ft_echo(current->command));
@@ -63,7 +63,7 @@ int	exec_builtin(PARSER *current, t_pipex *p)
 	if (ft_strncmp(current->command[0], "env", 3) == 0)
 		return (ft_env(current, p->mini_env));
 	if (ft_strncmp(current->command[0], "exit", 4) == 0)
-		return (ft_exit(current->command, p, current));
+		return (ft_exit(current->command, p, current, cpy_stdin, cpy_stdout));
 	if (ft_strncmp(current->command[0], "cd", 2) == 0)
 		return (ft_cd(current->command, p, current));
 	if (ft_strncmp(current->command[0], "export", 6) == 0)
@@ -131,7 +131,7 @@ int	execute(PARSER *current, t_pipex *p)
 	tmp_minienv = NULL;
 	if (is_builtin(current) == 1)
 	{
-		exec_builtin(current, p); //verifier si on free bien les 2 structures
+		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
 		free(current);
 		exit(EXIT_SUCCESS);
 	}
@@ -140,7 +140,7 @@ int	execute(PARSER *current, t_pipex *p)
 		tmp_cmd = copy_tab(current->command);
 		if (!no_envp(p->mini_env))
 			tmp_minienv = copy_tab(p->mini_env);
-		free_pipex(p);
+		free_pipex(&p);
 		reset_node(&current);
 		if (ft_strchr(tmp_cmd[0], '/') || no_envp(tmp_minienv))
 		{
@@ -177,67 +177,6 @@ int	execute(PARSER *current, t_pipex *p)
 	}
 	return (-1);
 }
-
-
-
-// void	first_child(t_pipex *p, PARSER **nodes)
-// {
-// 	int	fd_in;
-// 	int	fd_out;
-	
-// 	fd_in = -1;
-// 	fd_out = -1;
-// 	(*nodes)->f = 0;
-// 	safe_close(&p->pipefd[0]);
-// 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
-// 	{
-// 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
-// 		{
-// 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-// 			if (fd_in == -1)
-// 				close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-// 			// if (dup2(fd_in, STDIN_FILENO) == -1)
-// 			// {
-// 			// 	reset_node(nodes);
-// 			// 	close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-// 			// }
-// 			// dprintf(2, "fd_in apres dup = %d, STDIN_FILENO apres dup %d\n", fd_in, STDIN_FILENO);
-// 			safe_close(&fd_in);
-// 		}
-// 		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
-// 		{
-// 			dprintf(2, "dans first child -- (*nodes)->file[(*nodes)->f = %s\n", (*nodes)->file[(*nodes)->f]);
-// 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-// 			if (fd_in == -1)
-// 				close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-// 			if (dup2(fd_in, STDIN_FILENO) == -1)
-// 			{
-// 				reset_node(nodes);
-// 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-// 			}
-// 			dprintf(2, "fd_in apres dup = %d, STDIN_FILENO apres dup %d\n", fd_in, STDIN_FILENO);
-// 			safe_close(&fd_in);
-// 		}
-// 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
-// 		{
-// 			if (!handle_output_redirection(nodes, p, fd_out))
-// 			{
-// 				exit(1) ;
-// 			}
-// 		}
-// 		(*nodes)->f++;
-
-// 	}
-// 	if ((*nodes)->next)
-// 	{
-// 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
-// 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-// 		safe_close(&p->pipefd[1]);
-// 	}
-// 	is_command(*nodes);
-// 	if (execute((*nodes), p) == -1)
-// 		exit(127);
-// }
 
 void	first_child(t_pipex *p, PARSER **nodes)
 {
@@ -572,7 +511,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		}
 		current->f++;
 	}
-	if (exec_builtin(current, p))
+	if (exec_builtin(current, p, &cpy_stdin, &cpy_stdout))
 	{
 		if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
 		{

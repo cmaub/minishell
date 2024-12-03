@@ -12,17 +12,15 @@
 
 #include "minishell.h"
 
-void	free_pipex(t_pipex *p)
+void	free_pipex(t_pipex **p)
 {
-	// if (p->mini_env)
-	// {
-	// 	ft_free_tab(p->mini_env);
-	// 	p->mini_env = NULL;
-	// }
-	// if (p->mini_env == NULL)
-	// 	dprintf(2, "p->mini_env est free\n");
-	free(p);
-	p = NULL;
+	if ((*p)->mini_env)
+	{
+		ft_free_tab((*p)->mini_env);
+		(*p)->mini_env = NULL;
+	}
+	free(*p);
+	*p = NULL;
 }
 
 void	ft_error_exit(char *str, int exit_c)
@@ -133,9 +131,9 @@ void	ft_free_tab(char **tab)
 	int	i;
 
 	i = 0;
-	if (!tab)
+	if (!tab || !(*tab))
 		return;
-	while (tab[i])
+	while (tab[i] && tab[i] != NULL)
 	{
 		free(tab[i]);
 		tab[i] = NULL;
@@ -168,7 +166,7 @@ void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int ex
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
-	free_pipex(p);
+	free_pipex(&p);
 	reset_node(nodes);
 	exit(exit_c);
 }
@@ -179,7 +177,7 @@ void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str)
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
-	free_pipex(p);
+	free_pipex(&p);
 	reset_node(nodes);
 }
 
