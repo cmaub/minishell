@@ -204,11 +204,15 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		{
 			if (WIFEXITED(status))
 			{
+				
 				status_code = WEXITSTATUS(status);
-				exit_status = 0;
+				// exit_status = 0;
 			}
-			else if (WIFSIGNALED(status))
-		 		status_code = 128 + WTERMSIG(status);
+			if (g_signal != 0)
+			{
+		 		status_code = 128 + g_signal;
+				g_signal = 0;
+			}
 		}
 	}	
 	// if (*nodes && (*nodes)->exit_code != 0)

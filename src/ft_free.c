@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 17:31:39 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/04 16:05:30 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void	free_tokens(t_token **tokens)
 		next = (*tokens)->next;
 		if ((*tokens)->value)
 		{
-			printf("Freeing token with value: %s\n", (*tokens)->value);
+			// printf("Freeing token with value: %s\n", (*tokens)->value);
 			free((*tokens)->value);
 			(*tokens)->value = NULL;
 		}

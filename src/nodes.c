@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/03 17:56:31 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/04 16:38:15 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,127 +366,146 @@ void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
 		new_node->command[cmd] = NULL;
 }
 
-void	handle_c_signal_heredoc(int sig, siginfo_t *info, void *context)
-{
-	(void)sig;
-	(void)info;
-	t_pipe_fds_heredoc	*fds;
-	
-	// dprintf(2, "entree dans handle_c_signal_heredoc\n");
-	dprintf(2, "Adresse reçue pour context : %p\n", (void *)context);
-	if (!context)
-		dprintf(2, "context pas valide\n");
-	fds = (t_pipe_fds_heredoc *)context;
-	dprintf(2, "fds dans signal C ---- fds.fd[0] = %d, fds.fd[1] = %d\n", fds->fd[0], fds->fd[1]);
-	safe_close(&fds->fd[0]);
-	safe_close(&fds->fd[1]);
-	dprintf(2, "Ligne = %d fds apres close -- fds->fd[0] = %d, fds->fd[1] = %d\n", __LINE__, fds->fd[0], fds->fd[1]);
-
-	// free(fds);
-	exit_status = 130;
-	write(1, "\n", 1);
-	dprintf(2, "sorte de handle_c_signal_heredoc\n");
-	exit(130);
-}
-
-// void	handle_c_signal_heredoc(int signum)
+// void	handle_c_signal_heredoc(int sig, siginfo_t *info, void *context)
 // {
-// 	(void)signum;
+// 	(void)sig;
+// 	(void)info;
+// 	t_pipe_fds_heredoc	*fds;
+	
+// 	// dprintf(2, "entree dans handle_c_signal_heredoc\n");
+// 	dprintf(2, "Adresse reçue pour context : %p\n", (void *)context);
+// 	if (!context)
+// 		dprintf(2, "context pas valide\n");
+// 	fds = (t_pipe_fds_heredoc *)context;
+// 	dprintf(2, "fds dans signal C ---- fds.fd[0] = %d, fds.fd[1] = %d\n", fds->fd[0], fds->fd[1]);
+// 	safe_close(&fds->fd[0]);
+// 	safe_close(&fds->fd[1]);
+// 	dprintf(2, "Ligne = %d fds apres close -- fds->fd[0] = %d, fds->fd[1] = %d\n", __LINE__, fds->fd[0], fds->fd[1]);
+
+// 	// free(fds);
 // 	exit_status = 130;
 // 	write(1, "\n", 1);
 // 	dprintf(2, "sorte de handle_c_signal_heredoc\n");
 // 	exit(130);
+// }//rl_done
+// void	get_lines(char *delimiter, int *fd_heredoc)
+// {
+// 	char	*str;
+
+// 	signal(SIGINT, handle_c_signal_heredoc);
+// 	while (1)
+// 	{
+// 		write(1, "heredoc> ", 9);
+// 		str = get_next_line(0);
+// 		if (g_signal == SIGINT)
+// 		{
+// 			ft_putendl_fd("signal recu heredoc interrompu", 2);
+// 			free(str);
+// 			safe_close(fd_heredoc);
+// 			return ;
+// 		}
+// 		if (!str)
+// 		{
+// 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
+// 			safe_close(fd_heredoc);
+// 			return ;
+// 		}
+// 		if (ft_strncmp(str, delimiter, ft_strlen(delimiter)) == 0
+// 			&& str[ft_strlen(delimiter)] == '\n')
+// 		{
+// 			free(str);
+// 			get_next_line(-42);
+// 			safe_close(fd_heredoc);
+// 			return ;
+// 		}
+// 		write(*fd_heredoc, str, ft_strlen(str));
+// 		free(str);
+// 	}
+// 	safe_close(fd_heredoc);
 // }
+void	handle_c_signal_heredoc(int signum)
+{
+	g_signal = signum;
+	write(1, "\n", 1);
+	// rl_on_new_line();
+	rl_replace_line("", 0);
+	// rl_redisplay();
+	rl_done = 1;
+	close(STDIN_FILENO);
+}
 
 int	loop_readline(char *delimiter, int *fd_heredoc)
 {
 	char	*input;
 
 	// signal(SIGINT, SIG_DFL);
-	while (1)
+	signal(SIGINT, handle_c_signal_heredoc);
+	while (g_signal == 0)
 	{
 		input = readline("heredoc> ");
+		if (g_signal == SIGINT)
+		{
+			free(input);
+			safe_close(fd_heredoc);
+			return (-1);
+		}
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
 			safe_close(fd_heredoc);
 			return (0);
 		}
-		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0/* && input[ft_strlen(delimiter)] == '\n'*/)
+		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0)
 		{
 			safe_close(fd_heredoc);
 			free(input);
 			break;
 		}
-		else
+		else //verifier variable globale
 		{
-			ft_putendl_fd(input, *fd_heredoc);			
+			ft_putendl_fd(input, *fd_heredoc);
 		}
 		free(input);
 	}
-	// safe_close(fd_heredoc);
-	// dprintf(2, "fd_heredoc = %d\n", *fd_heredoc);
 	return (0);
 }
 
 int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 {
-	int	pid;
-	int status = 0;
-	struct sigaction sa;
-	t_pipe_fds_heredoc	*fds;
-	
-	fds = NULL;
-	signal(SIGINT, SIG_IGN);
-	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)
-	pid = fork();
-	if (pid == -1)
-		return (perror("fork"), FALSE);
-	if (pid == 0)
+	int	fd;
+
+	fd = dup(STDIN_FILENO);
+	if (fd == -1)
 	{
-		fds = try_malloc(sizeof(t_pipe_fds_heredoc));
-		fds->fd[0] = new_node->fd_heredoc[*d][0];
-		fds->fd[1] = new_node->fd_heredoc[*d][1];
-		if (!fds)
-		{
-			perror("malloc failed");
-			exit(1);
-		}
-		dprintf(2, "Initialisation des fds dans create heredoc ---- fds.fd[0] = %d, fds.fd[1] = %d\n", fds->fd[0], fds->fd[1]);
-		dprintf(2, "Adresse initiale de fds : %p\n", (void *)&fds);
-		sa.sa_flags = SA_SIGINFO;
-		sa.sa_sigaction = handle_c_signal_heredoc;
-		sigemptyset(&sa.sa_mask);
-		if(sigaction(SIGINT, &sa, NULL) == -1)
-		{
-			perror("Erreur sigaction");
-			free(fds);
-			exit(1);
-		}
-		safe_close(&new_node->fd_heredoc[*d][0]);
-		loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]);
-		// signal(SIGINT, handle_c_signal_heredoc);
-		safe_close(&new_node->fd_heredoc[*d][1]);
-		// safe_close(&new_node->fd_heredoc[*d][0]);
-		free(fds);
-		exit(0);					
+		perror("dup");
+		return (0);
 	}
-	dprintf(2, "sortie de l'enfant dans create_heredoc\n");
+	
+	signal(SIGINT, SIG_IGN); //
+	
+	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)	
+	loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]);
+	
+	// get_lines(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]);
 	safe_close(&new_node->fd_heredoc[*d][1]);
 	new_node->redir_type[*f] = current->type;
 	
-	// signal(SIGINT, handle_c_signal_heredoc);
-	// sa.sa_sigaction = handle_c_signal_heredoc;
-	wait(&status);
-	dprintf(2, "status dans heredoc = %d\n", status);
-	// status = 2;
-	if (status + 128 == 130)
+	signal(SIGINT, SIG_DFL); //
+
+	if (dup2(fd, STDIN_FILENO) == -1)
 	{
-		dprintf(2, "entree dans cdt parent status + 128\n");
-		exit_status = 130;
-		safe_close(&new_node->fd_heredoc[*d][0]);
-		safe_close(&new_node->fd_heredoc[*d][1]);
-		return (-1);
+		perror ("dup");
+		return (0);
+	}
+	safe_close(&fd);
+	if (g_signal == SIGINT)
+	{
+		dprintf(2, "g_signal = 2\n");
+		// g_signal = 0;
+		// exit_status = 130;
+		// safe_close(&new_node->fd_heredoc[*d][0]);
+		// safe_close(&new_node->fd_heredoc[*d][1]);
+		return (0);
 	}
 	return (0);
 }

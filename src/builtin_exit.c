@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 17:15:34 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/04 16:05:56 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,12 +113,9 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdou
 		input_ok(p, cmd[1], node);
 		safe_close(cpy_stdin);
 		safe_close(cpy_stdout);
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		exit_code = node->exit_code;
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		reset_node(&node);
 		free_pipex(&p);
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		exit(exit_code);
 		
 	}

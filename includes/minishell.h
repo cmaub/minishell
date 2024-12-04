@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 17:31:55 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/04 14:22:26 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	safe_close(int *fd);
-void	get_lines(PARSER *nodes, int i, int d);
+void	get_lines(char *delimiter, int *fd_heredoc);
 int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
 void   close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c);
 void	free_array(char **array);
@@ -215,4 +215,5 @@ int expr(LEXER *input, t_token **list);
 int start(LEXER *input);
 
 extern int	exit_status;
+extern int	g_signal;
 #endif

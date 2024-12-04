@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 17:32:17 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/04 16:09:51 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 int	exit_status = 0;
+int g_signal = 0;
 
 int parserHasReachEnd(LEXER *input) 
 {
@@ -34,8 +35,7 @@ LEXER	*ft_init_lexer_input()
 
 void handle_c_signal(int signum)
 {
-	(void)signum;
-	dprintf(2, "handle signal recu\n");
+	g_signal = signum;
 	ft_putstr_fd("\n", 2);
 	 // // Réinitialise l'affichage de la ligne d'entrée
 	// Indique que la ligne doit être recalculée
@@ -44,7 +44,7 @@ void handle_c_signal(int signum)
 	// rl_done = 1;
 	// // Affiche une nouvelle ligne et le prompt
 	rl_redisplay();
-	exit_status = 130;
+	// exit_status = 130;
 }
 
 int		main(int argc, char **argv, char **env)
@@ -102,13 +102,13 @@ int		main(int argc, char **argv, char **env)
 			{
 				if (create_nodes(&tokens, &nodes, mini_env, exit_code) == 0)
 				{
-					print_tokens_list(&tokens);
+					// print_tokens_list(&tokens);
 					free_tokens(&tokens);	
-					if (tokens == NULL)
-						dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
+					// if (tokens == NULL)
+					// 	dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
 					// print_tokens_list(&tokens);
 					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
-					print_nodes_list(&nodes);
+					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, mini_env, nodes);
 					handle_input(&nodes, p);
@@ -120,8 +120,8 @@ int		main(int argc, char **argv, char **env)
 						exit_code = nodes->exit_code;
 					if (p)
 						free_pipex(&p);
-					if (p == NULL)
-						dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
+					// if (p == NULL)
+					// 	dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
 					// if (mini_env == NULL)
 					// 	dprintf(2, "Le mini_env est nul, dommage\n");
 				}

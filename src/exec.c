@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/03 17:33:39 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/04 16:38:49 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,7 +379,7 @@ void	create_process(t_pipex *p, PARSER **nodes)
 	
 	if (p->pid == 0)
 	{
-		exit_status = 0;
+		// exit_status = 0;
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_IGN);
 		if (p->i == 0)
