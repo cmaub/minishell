@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/04 16:05:30 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/04 17:31:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,10 +74,10 @@ void	free_array_and_close_fds(char **array)
 	int i;
 	int		temp_file_fd;
 
-	if (!array)
+	if (!array || !(*array))
 		return;
 	i = 0;
-	while (array[i])
+	while (array[i] && array[i] != NULL)
 	{
 		temp_file_fd = open(array[i], O_WRONLY);
 		safe_close(&temp_file_fd);
@@ -145,16 +145,16 @@ void	reset_node(PARSER **node)
 		if (current->redir_type)
 		{
 			free(current->redir_type);
-			current->redir_type = NULL;
+			// current->redir_type = NULL;
 		}
 		if (current->fd_heredoc)
 		{
 			close_heredoc(current);
 			free(current->fd_heredoc);
-			current->fd_heredoc[2] = NULL;
-			
+			// current->fd_heredoc[2] = NULL;		
 		}
-		free(current);
+		if (current)
+			free(current);
 		current = temp;
 	}
 	*node = NULL;

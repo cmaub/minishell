@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/04 16:38:15 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/04 17:52:26 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,9 +183,13 @@ char	*print_expand(char *str, int *index, char **mini_env)
 char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 {
 	char	*result;
+	char	*tmp_result;
 	char	*tmp;
 
 	result = ft_strdup("");
+	if (!result)
+		return (NULL);
+	tmp_result = NULL;
 	tmp = NULL;
 	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
 	{
@@ -205,10 +209,12 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 				if (!tmp)
 					return (free(result), NULL); //verifier retour ici
 			}
-			result = ft_strjoin(result, tmp);
-			if (!result)
-				return(free(result), free(tmp), NULL);
+			tmp_result = ft_strjoin(result, tmp);
 			free(tmp);
+			if (!result)
+				return(free(result), NULL);
+			free (result);
+			result = tmp_result;			
 		}
 		else
 		{
@@ -438,17 +444,16 @@ int	loop_readline(char *delimiter, int *fd_heredoc)
 {
 	char	*input;
 
-	// signal(SIGINT, SIG_DFL);
 	signal(SIGINT, handle_c_signal_heredoc);
 	while (g_signal == 0)
 	{
 		input = readline("heredoc> ");
-		if (g_signal == SIGINT)
-		{
-			free(input);
-			safe_close(fd_heredoc);
-			return (-1);
-		}
+		// if (g_signal == SIGINT)
+		// {
+		// 	free(input);
+		// 	safe_close(fd_heredoc);
+		// 	return (-1);
+		// }
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
@@ -476,37 +481,16 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 
 	fd = dup(STDIN_FILENO);
 	if (fd == -1)
-	{
-		perror("dup");
-		return (0);
-	}
-	
+		return (perror("dup"), 0);
 	signal(SIGINT, SIG_IGN); //
-	
 	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)	
 	loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]);
-	
-	// get_lines(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]);
 	safe_close(&new_node->fd_heredoc[*d][1]);
 	new_node->redir_type[*f] = current->type;
-	
 	signal(SIGINT, SIG_DFL); //
-
 	if (dup2(fd, STDIN_FILENO) == -1)
-	{
-		perror ("dup");
-		return (0);
-	}
+		return (perror ("dup"), 0);
 	safe_close(&fd);
-	if (g_signal == SIGINT)
-	{
-		dprintf(2, "g_signal = 2\n");
-		// g_signal = 0;
-		// exit_status = 130;
-		// safe_close(&new_node->fd_heredoc[*d][0]);
-		// safe_close(&new_node->fd_heredoc[*d][1]);
-		return (0);
-	}
 	return (0);
 }
 
@@ -569,6 +553,5 @@ int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_cod
 			current = current->next;
 		// check_and_free_new_node(new_node);
 	}
-	// free_tokens(*tokens);
 	return (0);
 }

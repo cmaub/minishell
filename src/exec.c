@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/04 16:38:49 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/04 17:34:58 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,8 @@ int	execute(PARSER *current, t_pipex *p)
 	if (is_builtin(current) == 1)
 	{
 		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
-		free(current);
+		reset_node(&current);
+		free_pipex(&p);
 		exit(EXIT_SUCCESS);
 	}
 	else
@@ -149,7 +150,7 @@ int	execute(PARSER *current, t_pipex *p)
 				if (access(tmp_cmd[0], R_OK) == -1)
 				{
 					perror(tmp_cmd[0]);
-					free(tmp_cmd),
+					free(tmp_cmd);
 					free(tmp_minienv);
 					exit(126);
 				}
@@ -157,7 +158,7 @@ int	execute(PARSER *current, t_pipex *p)
 			else
 			{
 				perror(tmp_cmd[0]);
-				free(tmp_cmd),
+				free(tmp_cmd);
 				free(tmp_minienv);
 				exit(127);
 			}
