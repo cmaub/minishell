@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/03 13:15:41 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 10:40:10 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,8 @@ int	eatRange(LEXER *input, int start, int end)
 }
 
 int	PIPE(LEXER *input, t_token **list)
-{DEBUG_S;
+{
+	// DEBUG_S;
 	int	i;
 	int	start;
 	int	end;
@@ -340,7 +341,6 @@ int command(LEXER *input, t_token **list)
 
 	i = 0;
 	save = input->head;
-	dprintf(2, "COMMAND\n");
 	while (TRUE) {
 		if (!redir(input, list))
 		{

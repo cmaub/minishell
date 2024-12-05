@@ -14,11 +14,13 @@
 
 void	free_pipex(t_pipex **p)
 {
-	if ((*p)->mini_env)
-	{
-		ft_free_tab((*p)->mini_env);
-		(*p)->mini_env = NULL;
-	}
+	// if ((*p)->mini_env)
+	// {
+	// 	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+	// 	ft_free_tab((*p)->mini_env);
+	// 	(*p)->mini_env = NULL;
+	// 	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+	// }
 	free(*p);
 	*p = NULL;
 }
@@ -68,39 +70,56 @@ int		ft_size_list(PARSER **nodes)
 	return (size);
 }
 
-char	**copy_tab(char **envp)
+// char	**copy_env()
+// {
+// 	char	**new_tab;
+// 	int	i;
+
+// 	i = 0;
+
+// 	new_tab = try_malloc(4 * sizeof(char *));
+// 	if (!new_tab)
+// 		return (NULL);
+// 	new_tab[0] = getcwd(NULL, 0);
+// 	new_tab[1] = NULL;
+// 	dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
+// 	return (new_tab);
+// }
+
+char	**copy_tab(char **tab)
 {
-	char	**mini_env;
+	char	**new_tab;
 	int	i;
 
 	i = 0;
-	while (envp[i])
+	while (tab[i])
 		i++;
-	mini_env = try_malloc((i + 1) * sizeof(char *));
-	if (!mini_env)
+	new_tab = try_malloc((i + 1) * sizeof(char *));
+	if (!new_tab)
 		return (NULL);
 	i = 0;
-	while (envp[i])
+	while (tab[i])
 	{
-		mini_env[i] = ft_strdup(envp[i]);
-		if (!mini_env[i])
+		new_tab[i] = ft_strdup(tab[i]);
+		if (!new_tab[i])
 		{
 			while (i >= 0)
 			{
-				free(mini_env[i]);
+				free(new_tab[i]);
+				new_tab[i] = NULL;
 				i--;
 			}
 		}
 		i++;
 	}
-	mini_env[i] = NULL;
-	return (mini_env);
+	new_tab[i] = NULL;
+	return (new_tab);
 }
 
 void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 {
-	
-	p->mini_env = env;
+	p->mini_env = copy_tab(env);
+	// p->mini_env = env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
 	p->prev_fd = -1;
@@ -131,12 +150,19 @@ void	ft_free_tab(char **tab)
 	int	i;
 
 	i = 0;
+	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	if (!tab || !(*tab))
 		return;
+	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	while (tab[i] && tab[i] != NULL)
 	{
-		free(tab[i]);
-		tab[i] = NULL;
+		// dprintf(2, "tab[i] = %s\n", tab[i]);
+		if (tab[i] != NULL)
+		{
+			free(tab[i]);
+			tab[i] = NULL;
+		}
+		
 		i++;
 	}
 	free(tab);
@@ -159,6 +185,7 @@ int	no_envp(char **tab)
 	}
 	return (0);
 }
+
 void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)
 {
 	if (fd)
@@ -170,6 +197,7 @@ void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int ex
 	reset_node(nodes);
 	exit(exit_c);
 }
+
 void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str)
 {
 	if (fd)
@@ -188,7 +216,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	pid_t waited_pid;
 	PARSER *current;	
 
-	dprintf(2, "entree dans wait\n");
+	// dprintf(2, "entree dans wait\n");
 	status_code = 0;
 	current = *nodes;
 	if (current == NULL)
@@ -218,8 +246,13 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	// if (*nodes && (*nodes)->exit_code != 0)
 	// 	status_code = (*nodes)->exit_code;
 	if (*nodes)
+	{
 		(*nodes)->exit_code = status_code;
-	return (signal(SIGINT, handle_c_signal), (*nodes)->exit_code);
+		status_code = (*nodes)->exit_code;
+		// reset_node(nodes);
+	}
+	dprintf(2, "sortie du wait\n");
+	return (signal(SIGINT, handle_c_signal), status_code);
 }
 
 		

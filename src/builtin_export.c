@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 18:25:45 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:59:07 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,20 +30,17 @@ int		env_var_exists(char **env, char *var)
 	dprintf(2, "size dans env_var_exist = %d\n", size);
 	if (!var || var[0] == '\0')
 		return (-1);
-	if (!env)
-		dprintf(2, "env est nul\n");
-	// dprintf(2, "(%s, %d) et env[i] = %s\n", __FILE__, __LINE__, env[i]);
+	if (!env || !(*env))
+	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		return (-1);
+	}
 	while (env[i] && i < size)
 	{
 		if (ft_strncmp(env[i], var, strlen(var)) == 0)
-		{
-			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			return (i);
-		}
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		i++;
 	}
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (-1);
 }
 
@@ -72,6 +69,7 @@ void	sort_tab_ascii(char **env, int count)
 			env[i] = env[min_idx];
 			env[min_idx] = temp;
 		}
+		dprintf(2, "env[%d] = %s\n", i, env[i]);
 		i++;
 	}
 }
@@ -102,7 +100,8 @@ void	print_sorted_env(char **sorted_env)
 	int	i;
 
 	i = 0;
-	while (sorted_env[i] != NULL)
+	// while (sorted_env[i] != NULL)
+	while (i < count_env_var(sorted_env))
 	{
 		if (sorted_env[i] && sorted_env[i][0] == '_' && (sorted_env[i][1] == '\0' || sorted_env[i][1] == '='))
 		{
@@ -111,7 +110,8 @@ void	print_sorted_env(char **sorted_env)
 			else
 				break ;
 		}
-		write_var(sorted_env[i]);
+		else if (sorted_env[i])
+			write_var(sorted_env[i]);
 		i++;
 	}
 }
@@ -136,7 +136,9 @@ void	copy_and_sort_env(char **env)
 	sorted_env[count] = NULL;
 	sort_tab_ascii(sorted_env, count);
 	print_sorted_env(sorted_env);
-	free(sorted_env);
+	dprintf(2, "**** ici = (%s, %d)\n", __FILE__, __LINE__);
+	free_array(sorted_env);
+	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 }
 
 int	check_name(char *name)
@@ -146,14 +148,14 @@ int	check_name(char *name)
 	i = 0;
 	if (!name || !name[0] || ft_isdigit(name[0]))
 		return (FALSE);
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	while (name[i] && name[i] != '=')
 	{
 		if (!ft_isalnum(name[i]) && name[i] != '_')
 			return (FALSE);
 		i++;
 	}
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (TRUE);
 }
 
@@ -182,7 +184,9 @@ void	handle_value(char *cmd, PARSER *current, char **env)
 	*equal = '=';
 	if (index >= 0)
 	{
+		dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 		free(env[index]);
+		dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 		env[index] = ft_strdup(cmd);
 	}
 	else
@@ -200,6 +204,7 @@ void	handle_variable_without_value(char *cmd, PARSER *current, char **env)
 	int j;
 
 	j = 0;
+	dprintf(2, "dans handle_variable_without_value ** cmd = %s\n", cmd);
 	if (!check_name(cmd))
 	{
 		print_error_msg(cmd, current);
@@ -225,9 +230,15 @@ int	ft_export(PARSER *current, char **env)
 
 	i = 1;
 	if (!current->command[1]) // si pas d'arg afficher par ordre ascii
+	{
+		dprintf(2, "size dans env_var_exist = %d\n", count_env_var(env));
+		// print_sorted_env(env);
+		// return (TRUE);
 		return (copy_and_sort_env(env), TRUE);
+	}
 	while (current->command[i])
 	{
+		dprintf(2, "haut ** current->command[%d] = %s\n", i, current->command[i]);
 		if (current->command[i] && current->command[i][0] == '-')
 		{
 			ft_putstr_fd("export:", 2);
@@ -240,6 +251,7 @@ int	ft_export(PARSER *current, char **env)
 				return (FALSE);
 			}				
 		}
+		dprintf(2, "bas ** current->command[%d] = %s\n", i, current->command[i]);
 		if (ft_strchr(current->command[i], '=') != NULL)
 			handle_value(current->command[i++], current, env);
 		else

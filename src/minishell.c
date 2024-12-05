@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/04 16:09:51 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/05 16:49:48 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,20 @@ void handle_c_signal(int signum)
 	// exit_status = 130;
 }
 
+char	**copy_env()
+{
+	char	**new_tab;
+
+	new_tab = try_malloc(4 * sizeof(char *));
+	if (!new_tab)
+		return (NULL);
+	new_tab[0] = ft_strjoin("PWD=", getcwd(NULL, 0));
+	new_tab[1] = ft_strdup("SHLVL=1");
+	new_tab[2] = ft_strdup("_=./minishell");
+	new_tab[3] = NULL;
+	return (new_tab);
+}
+
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
@@ -58,7 +72,10 @@ int		main(int argc, char **argv, char **env)
 	char		**mini_env;
 	int			exit_code = 0;
 
-	mini_env = copy_tab(env);
+	if (!env || !(*env))
+		mini_env = copy_env();
+	else	
+		mini_env = copy_tab(env);
 	if (argc >= 1)
 	{
 		while (1)
@@ -104,48 +121,62 @@ int		main(int argc, char **argv, char **env)
 				{
 					// print_tokens_list(&tokens);
 					free_tokens(&tokens);	
-					// if (tokens == NULL)
-					// 	dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
+					if (tokens == NULL)
+						dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
 					// print_tokens_list(&tokens);
 					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					ft_init_struct(p, mini_env, nodes);
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					handle_input(&nodes, p);
-					
+				
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					mini_env = copy_tab(p->mini_env);
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					
 					// if (p->mini_env)
 					// 	ft_free_tab(p->mini_env);
 					if (nodes)
 						exit_code = nodes->exit_code;
 					if (p)
+					{
+						dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 						free_pipex(&p);
-					// if (p == NULL)
-					// 	dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
-					// if (mini_env == NULL)
-					// 	dprintf(2, "Le mini_env est nul, dommage\n");
+						dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					}
+					if (p == NULL)
+						dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
+					if (mini_env == NULL)
+						dprintf(2, "Le mini_env est nul, dommage\n");
 				}
 				else if (tokens)
+				{
 					free_tokens(&tokens);
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+				}
 				if (nodes)
 				{
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					reset_node(&nodes);
-					// if (nodes == NULL)
-					// 	printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
-
-					
+					if (nodes == NULL)
+						printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
 				}
-				dprintf(0, "hello\n");
-
+				dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 				//str_input deplace
 			}
+			dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			// rl_replace_line("", 0);
 			// rl_redisplay();
 			free(str_input);
 		}
 	}
-	
-	ft_free_tab(mini_env);
+	if (mini_env)
+	{
+		dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+		ft_free_tab(mini_env);
+	}
 	return (0);
 }
 

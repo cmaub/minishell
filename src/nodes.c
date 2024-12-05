@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/04 17:52:26 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/05 11:03:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 			}
 			tmp_result = ft_strjoin(result, tmp);
 			free(tmp);
-			if (!result)
+			if (!tmp_result)
 				return(free(result), NULL);
 			free (result);
 			result = tmp_result;			
@@ -238,6 +238,8 @@ char	*process_single_quotes(char *str, int *index)
 	char	*tmp;
 
 	result = ft_strdup("");
+	if (!result)
+		return (NULL);
 	tmp = NULL;
 	(*index)++; // passer quote ouvrante
 	while (str[*index] != 39 && str[*index] != '\0')
@@ -258,8 +260,12 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 {
 	char	*result;
 	char	*tmp;
+	char	*tmp_result;
 
 	result = ft_strdup("");
+	if (!result)
+		return (NULL);
+	tmp_result = NULL;
 	tmp = NULL;
 	(*index)++; // Passer quote ouvrante
 	while (str[*index] != 34 && str[*index] != '\0')
@@ -268,13 +274,23 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?'))
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
+			{
 				tmp = print_exit_code(result, new_node, index);
+				if (!tmp)
+					return (free(result), NULL);
+			}
 			else
+			{
 				tmp = print_expand(str, &(*index), mini_env);
-			result = ft_strjoin(result, tmp);
-			if (!result)
-				return (free(tmp), NULL);
+				if (!tmp)
+					return (free(result), NULL);
+			}
+			tmp_result = ft_strjoin(result, tmp);
 			free(tmp);
+			if (!tmp_result)
+				return (free(result), NULL);
+			free(result);
+			result = tmp_result;
 		}
 		else
 		{
@@ -295,10 +311,12 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 {
 	int	start;
 	char	*result;
+	char	*tmp_result;
 	char	*tmp;
 
 	start = 0;
-	result = "";
+	result = ft_strdup("");
+	tmp_result = NULL;
 	while (str[start] != '\0')
 	{
 		if (str[start] == 34)
@@ -307,10 +325,16 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 			tmp = process_single_quotes(str, &start);
 		else
 			tmp = process_unquoted(new_node, str, &start, mini_env);
-		result = ft_strjoin(result, tmp);
-		if (!result)
-			return (free(tmp), NULL);
+		if (!tmp)
+			return (free(result), NULL);
+		
+		tmp_result = ft_strjoin(result, tmp);
 		free(tmp);
+		if (!tmp_result)
+			return (free(result), NULL);
+		free(result);
+		result = tmp_result;
+		
 	}
 	return (result);
 }
@@ -331,6 +355,8 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 			free(cur->value);
 			cur->value = withdraw_quotes(new_node, tmp, mini_env);
 			free(tmp);
+			if (!cur->value)
+				return ;	
 		}
 		new_node->nb_file++;
 	}
@@ -340,6 +366,8 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 		free(cur->value);
 		cur->value = withdraw_quotes(new_node, tmp, mini_env);
 		free(tmp);
+		if (!cur->value)
+			return ;
 		new_node->nb_command++;
 	}
 }
@@ -372,63 +400,6 @@ void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
 		new_node->command[cmd] = NULL;
 }
 
-// void	handle_c_signal_heredoc(int sig, siginfo_t *info, void *context)
-// {
-// 	(void)sig;
-// 	(void)info;
-// 	t_pipe_fds_heredoc	*fds;
-	
-// 	// dprintf(2, "entree dans handle_c_signal_heredoc\n");
-// 	dprintf(2, "Adresse reçue pour context : %p\n", (void *)context);
-// 	if (!context)
-// 		dprintf(2, "context pas valide\n");
-// 	fds = (t_pipe_fds_heredoc *)context;
-// 	dprintf(2, "fds dans signal C ---- fds.fd[0] = %d, fds.fd[1] = %d\n", fds->fd[0], fds->fd[1]);
-// 	safe_close(&fds->fd[0]);
-// 	safe_close(&fds->fd[1]);
-// 	dprintf(2, "Ligne = %d fds apres close -- fds->fd[0] = %d, fds->fd[1] = %d\n", __LINE__, fds->fd[0], fds->fd[1]);
-
-// 	// free(fds);
-// 	exit_status = 130;
-// 	write(1, "\n", 1);
-// 	dprintf(2, "sorte de handle_c_signal_heredoc\n");
-// 	exit(130);
-// }//rl_done
-// void	get_lines(char *delimiter, int *fd_heredoc)
-// {
-// 	char	*str;
-
-// 	signal(SIGINT, handle_c_signal_heredoc);
-// 	while (1)
-// 	{
-// 		write(1, "heredoc> ", 9);
-// 		str = get_next_line(0);
-// 		if (g_signal == SIGINT)
-// 		{
-// 			ft_putendl_fd("signal recu heredoc interrompu", 2);
-// 			free(str);
-// 			safe_close(fd_heredoc);
-// 			return ;
-// 		}
-// 		if (!str)
-// 		{
-// 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-// 			safe_close(fd_heredoc);
-// 			return ;
-// 		}
-// 		if (ft_strncmp(str, delimiter, ft_strlen(delimiter)) == 0
-// 			&& str[ft_strlen(delimiter)] == '\n')
-// 		{
-// 			free(str);
-// 			get_next_line(-42);
-// 			safe_close(fd_heredoc);
-// 			return ;
-// 		}
-// 		write(*fd_heredoc, str, ft_strlen(str));
-// 		free(str);
-// 	}
-// 	safe_close(fd_heredoc);
-// }
 void	handle_c_signal_heredoc(int signum)
 {
 	g_signal = signum;

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 14:30:31 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 15:17:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,15 @@ char	**suppress_var(char **env, int index)
 		if (i != index)
 		{
 			new_env[j] = ft_strdup(env[i]);
-			// free(env[i]);
+			free(env[i]);
+			// env[i] = NULL;
 			j++;
 		}
 		else
 		{
 			dprintf(2, "env[%d]= %s\n", i, env[i]);
 			free(env[i]);
+			env[i] = NULL;
 		}
 		i++;
 	}
@@ -93,7 +95,7 @@ char	**ft_unset(PARSER *current, char **env)
 	while (current->command[i])
 	{
 		index = env_var_exists(env, current->command[i]);
-		// dprintf(2, "index = %d\n", index);
+		dprintf(2, "index = %d\n", index);
 		if (index >= 0)
 		{
 			dprintf(2, "i = %d\n", i);
