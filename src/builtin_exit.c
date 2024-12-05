@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/04 16:05:56 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:54:10 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	input_ok(t_pipex *p, char *cmd, PARSER *node)
 {
 	if (p->flag == 1)
 	{
-		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit\n", 1);
 		p->exit = 1;
 	}
 	if (cmd)
@@ -38,7 +38,7 @@ void	too_many(t_pipex *p, PARSER *node)
 {
 	if (p->flag == 1)
 	{
-		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit\n", 1);  // sortie renvoyee sur le terminal et non stderr
 		ft_putstr_fd("exit: too many arguments\n", 2);
 	}
 	node->exit_code = 1;
@@ -48,8 +48,8 @@ void	not_a_num(t_pipex *p, PARSER *node)
 {
 	if (p->flag == 1)
 	{
-		ft_putstr_fd("exit\n", 2);
-		ft_putstr_fd("exit: not a numeric argument\n", 2);
+		ft_putstr_fd("exit\n", 1); // sortie renvoyee sur le terminal et non stderr
+		ft_putstr_fd("exit: numeric argument required\n", 2);
 		p->exit = 1;
 	}
 	node->exit_code = 2;
@@ -73,7 +73,7 @@ void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p, int *cpy_stdin, int *cp
 	j = 0;
 	while (cmd[j])
 	{
-		if (cmd[0] == '-')
+		if (cmd[0] == '-' || cmd[0] == '+')
 			j++;
 		if (!isdigit(cmd[j]))
 		{

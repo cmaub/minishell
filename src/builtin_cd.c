@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 17:18:36 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:46:32 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,12 +68,15 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 		return (ft_putstr_fd("cd: no directory specified\n", 2), -1);
 	}
 	if (cmd[2])
-		return (ft_error_int("cd", node));
+	{
+		node->exit_code = 1;
+		return (ft_putstr_fd("too many arguments", 2), -1);
+	}
 	else
 	{
 		if (chdir(cmd[1]) == -1)
 		{
-			dprintf(2, "chdir echoue");
+			//dprintf(2, "chdir echoue");
 			return (ft_error_int("cd", node));
 		}
 	}

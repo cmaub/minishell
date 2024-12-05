@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/05 11:03:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:43:02 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,7 +145,7 @@ char	*join_char(char c, char *tmp)
 	return (result);
 }
 
-char	*print_exit_code(char *result, PARSER *new_node, int *index)
+char	*print_exit_code(PARSER *new_node, int *index)
 {
 	char	*expand_result;
 
@@ -161,7 +161,8 @@ char	*print_exit_code(char *result, PARSER *new_node, int *index)
 	new_node->exit_code = 0;
 	*index += 2;
 	
-	return (ft_strjoin(result, expand_result));
+	// return (ft_strjoin(result, expand_result));
+	return (expand_result);
 }
 
 char	*print_expand(char *str, int *index, char **mini_env)
@@ -185,6 +186,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 	char	*result;
 	char	*tmp_result;
 	char	*tmp;
+	char	*expand;
 
 	result = ft_strdup("");
 	if (!result)
@@ -199,18 +201,19 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
-				tmp = print_exit_code(result, new_node, index);
-				if (!tmp)
-					return (free(result), NULL);
+				expand = print_exit_code(new_node, index);
+				if (!expand)
+					return (NULL);
 			}
 			else
 			{
-				tmp = print_expand(str, &(*index), mini_env);
-				if (!tmp)
-					return (free(result), NULL); //verifier retour ici
+				expand = print_expand(str, &(*index), mini_env);
+				if (!expand)
+					return (NULL); //free result ?
 			}
-			tmp_result = ft_strjoin(result, tmp);
+			tmp_result = ft_strjoin(result, expand);
 			free(tmp);
+			tmp = NULL;
 			if (!tmp_result)
 				return(free(result), NULL);
 			free (result);
@@ -261,6 +264,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 	char	*result;
 	char	*tmp;
 	char	*tmp_result;
+	char	*expand;
 
 	result = ft_strdup("");
 	if (!result)
@@ -275,30 +279,40 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 		{
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
-				tmp = print_exit_code(result, new_node, index);
-				if (!tmp)
-					return (free(result), NULL);
+				expand = print_exit_code(new_node, index);
+				// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
+				if (!expand)
+					return (NULL);
 			}
 			else
 			{
-				tmp = print_expand(str, &(*index), mini_env);
-				if (!tmp)
-					return (free(result), NULL);
+				expand = print_expand(str, &(*index), mini_env);
+				// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
+				if (!expand)
+					return (NULL);
 			}
-			tmp_result = ft_strjoin(result, tmp);
+			tmp_result = ft_strjoin(result, expand);
+			// tmp_result = ft_strdup(tmp);
+			// dprintf(2, "**** result = %s, tmp_result = %s a la line = %d\n", result, tmp_result, __LINE__);
 			free(tmp);
+			tmp = NULL;
 			if (!tmp_result)
 				return (free(result), NULL);
 			free(result);
 			result = tmp_result;
+			// dprintf(2, "**** result = %s a la line = %d\n", result, __LINE__);
 		}
 		else
 		{
 			tmp = join_char(str[*index], result);
+			// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
 			if (!tmp)
 				return (free(result), NULL);
 			free(result);
 			result = tmp;
+			// dprintf(2, "**** result = %s a la line = %d\n", result, __LINE__);
+			// free(tmp);
+			tmp = NULL;
 			(*index)++;
 		}
 	}

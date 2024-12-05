@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 16:49:48 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:06:20 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ int		main(int argc, char **argv, char **env)
 			// str_input = readline("minishell ➜ ");
 			if (!str_input)
 			{
-				dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+				//dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				ft_putstr_fd("exit\n", 1);
 				rl_clear_history();
 				free(L_input);
@@ -122,19 +122,19 @@ int		main(int argc, char **argv, char **env)
 					// print_tokens_list(&tokens);
 					free_tokens(&tokens);	
 					if (tokens == NULL)
-						dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
+						//dprintf(2, "tokens est freeee (%s, %d)\n", __FILE__, __LINE__);				
 					// print_tokens_list(&tokens);
-					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
+					// //dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					ft_init_struct(p, mini_env, nodes);
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					handle_input(&nodes, p);
 				
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					mini_env = copy_tab(p->mini_env);
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					
 					// if (p->mini_env)
 					// 	ft_free_tab(p->mini_env);
@@ -142,31 +142,34 @@ int		main(int argc, char **argv, char **env)
 						exit_code = nodes->exit_code;
 					if (p)
 					{
-						dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+						//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 						free_pipex(&p);
-						dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+						//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					}
 					if (p == NULL)
-						dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
+					{}
+						//dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
 					if (mini_env == NULL)
-						dprintf(2, "Le mini_env est nul, dommage\n");
+					{}
+						//dprintf(2, "Le mini_env est nul, dommage\n");
 				}
 				else if (tokens)
 				{
 					free_tokens(&tokens);
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 				}
 				if (nodes)
 				{
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					reset_node(&nodes);
 					if (nodes == NULL)
-						printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
+					{}
+						// printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
 				}
-				dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+				//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 				//str_input deplace
 			}
-			dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			// rl_replace_line("", 0);
 			// rl_redisplay();
 			free(str_input);
@@ -174,7 +177,7 @@ int		main(int argc, char **argv, char **env)
 	}
 	if (mini_env)
 	{
-		dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+		//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 		ft_free_tab(mini_env);
 	}
 	return (0);

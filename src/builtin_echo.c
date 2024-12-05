@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 11:10:00 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:04:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	ft_echo(char **cmd)
 	{
 		return (TRUE);
 	}
-	// dprintf(2, "LINE %d\n", __LINE__);
+	// //dprintf(2, "LINE %d\n", __LINE__);
 	if (cmd[i][0] != '-' || !all_n(cmd[i]))
 	{
 		while (cmd[i])

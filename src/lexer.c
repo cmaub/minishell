@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/05 10:40:10 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 17:04:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -372,7 +372,7 @@ int	expr(LEXER *input, t_token **list)
 		return (TRUE);
 	if (!command(input, list))
 	{
-		dprintf(2, "invalide car pas de cmd ni espaces\n");
+		//dprintf(2, "invalide car pas de cmd ni espaces\n");
 		return (FALSE);
 	}
 	ows(input);

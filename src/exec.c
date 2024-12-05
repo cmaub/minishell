@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 14:34:29 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/05 18:24:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out)
 	}
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
 	{
-		dprintf(2, "dupe de stdout a fail\n");
+		//dprintf(2, "dupe de stdout a fail\n");
 		ft_close_error_no_exit(&fd_out, p, nodes, (*nodes)->file[(*nodes)->f]);
 		return (FALSE);
 	}
@@ -103,7 +103,7 @@ void	is_command(PARSER *current)
 {
 	if (!current->command)
 	{
-		dprintf(2, "current-command n'existe pas\n");
+		//dprintf(2, "current-command n'existe pas\n");
 		ft_putstr_fd(" ", 2);
 		// reset_node(&current);
 		// free_pipex(p);
@@ -170,8 +170,8 @@ int	execute(PARSER *current, t_pipex *p)
 		else if (!ft_strchr(tmp_cmd[0], '/') && !no_envp(tmp_minienv))
 		{	
 			path = get_path_and_check(&tmp_cmd[0], tmp_minienv);
-			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
+			// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			// //dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
 			if (execve(path, tmp_cmd, tmp_minienv) == -1)
 				return (free(tmp_cmd), free(path), free(tmp_minienv), -1);
 		}
@@ -184,15 +184,17 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	int	fd_in;
 	int	fd_out;
 	int	d;
+	int	flag_output;
 	
 	fd_in = -1;
 	fd_out = -1;
 	(*nodes)->f = 0;
 	d = 0;
+	flag_output = 0;
 	safe_close(&p->pipefd[0]);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		// dprintf(2, "(*nodes)->redir_type[%d] = %d\n", (*nodes)->f, (*nodes)->redir_type[(*nodes)->f]);
+		// //dprintf(2, "(*nodes)->redir_type[%d] = %d\n", (*nodes)->f, (*nodes)->redir_type[(*nodes)->f]);
 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
 		if (fd_in == -1 && (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
@@ -213,7 +215,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
 			{
-				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+				// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				// reset_node(nodes); //deja free avec le close_error
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);//rajouter fd heredoc
 			}
@@ -226,20 +228,21 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			{
 				exit(1) ;
 			}
+			flag_output = 1;
 		}
 		(*nodes)->f++;
 
 	}
-	if ((*nodes)->next)
+	if (flag_output == 0 && (*nodes)->next)
 	{
 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
 		{
-			dprintf(2, "c'est ici le pb\n");
+			//dprintf(2, "c'est ici le pb\n");
 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 		}
 		safe_close(&p->pipefd[1]);
 	}
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	//dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
 		exit(127);
@@ -250,11 +253,13 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 	int	fd_in;
 	int	fd_out;
 	int	d;
+	int	flag_output;
 
 	fd_in = -1;
 	fd_out = -1;
 	(*nodes)->f = 0;
 	d = 0;
+	flag_output = 0;
 	if (dup2(p->prev_fd, STDIN_FILENO) == -1)
 		close_error_and_free(NULL, p, nodes, "pipe", 1);
 	safe_close(&p->pipefd[0]); 
@@ -276,7 +281,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
 			{
-				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+				// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				// reset_node(nodes);
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);//rajouter fd heredoc
 			}
@@ -287,11 +292,15 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 				exit(1);
+			flag_output = 1;
 		}
 		(*nodes)->f++;
 	}
-	if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
-		close_error_and_free(&fd_in, p, nodes, "pipe", 1);
+	if (flag_output == 0 && (*nodes)->next)
+	{
+		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
+			close_error_and_free(&fd_in, p, nodes, "pipe", 1);
+	}
 	safe_close(&p->pipefd[1]);
 	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
@@ -331,7 +340,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
 			{
-				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+				// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				// reset_node(nodes);
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);
 			}
@@ -437,8 +446,8 @@ int	restore_std(int *cpy_stdin, int *cpy_stdout)
 	}
 	if (*cpy_stdout != -1)
 		return (FALSE);
-	// dprintf(2, "cpy_stdin = %d et cpy_stdout = %d\n", *cpy_stdin, *cpy_stdout);
-	// dprintf(2, "stdin = %d et stdout = %d\n", STDIN_FILENO, STDOUT_FILENO);
+	// //dprintf(2, "cpy_stdin = %d et cpy_stdout = %d\n", *cpy_stdin, *cpy_stdout);
+	// //dprintf(2, "stdin = %d et stdout = %d\n", STDIN_FILENO, STDOUT_FILENO);
 	return (TRUE);
 }
 
@@ -514,7 +523,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	{
 		if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
 		{
-			// dprintf(2, "yoooo et apres pause\n");
+			// //dprintf(2, "yoooo et apres pause\n");
 			current->exit_code = 1;
 			return ;
 		}

@@ -16,10 +16,10 @@ void	free_pipex(t_pipex **p)
 {
 	// if ((*p)->mini_env)
 	// {
-	// 	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+	// 	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	// 	ft_free_tab((*p)->mini_env);
 	// 	(*p)->mini_env = NULL;
-	// 	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+	// 	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	// }
 	free(*p);
 	*p = NULL;
@@ -82,7 +82,7 @@ int		ft_size_list(PARSER **nodes)
 // 		return (NULL);
 // 	new_tab[0] = getcwd(NULL, 0);
 // 	new_tab[1] = NULL;
-// 	dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
+// 	//dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
 // 	return (new_tab);
 // }
 
@@ -150,13 +150,13 @@ void	ft_free_tab(char **tab)
 	int	i;
 
 	i = 0;
-	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	if (!tab || !(*tab))
 		return;
-	dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	while (tab[i] && tab[i] != NULL)
 	{
-		// dprintf(2, "tab[i] = %s\n", tab[i]);
+		// //dprintf(2, "tab[i] = %s\n", tab[i]);
 		if (tab[i] != NULL)
 		{
 			free(tab[i]);
@@ -216,14 +216,14 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	pid_t waited_pid;
 	PARSER *current;	
 
-	// dprintf(2, "entree dans wait\n");
+	// //dprintf(2, "entree dans wait\n");
 	status_code = 0;
 	current = *nodes;
 	if (current == NULL)
 		return (0);
 	while ((waited_pid = wait(&status)) != -1)
 	{
-		dprintf(2, "WAITED_PID = %d\n", waited_pid);
+		//dprintf(2, "WAITED_PID = %d\n", waited_pid);
 		if (current && current->next)
 			current = current->next;
 		else
@@ -251,7 +251,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		status_code = (*nodes)->exit_code;
 		// reset_node(nodes);
 	}
-	dprintf(2, "sortie du wait\n");
+	//dprintf(2, "sortie du wait\n");
 	return (signal(SIGINT, handle_c_signal), status_code);
 }
 
