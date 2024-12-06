@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 12:23:11 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 17:29:24 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,13 @@ typedef struct s_token
     struct s_token  *next;
 }t_token;
 
+typedef struct s_env
+{
+	char	*var;
+	struct s_env *prev;
+	struct s_env *next;
+}t_env;
+
 typedef struct s_pipex
 {
 	// int	         	ac;
@@ -88,6 +95,7 @@ typedef struct s_pipex
 	int			flag;
 	pid_t	        	pid;
 	pid_t	        	last_pid;
+	t_env			test_env;
 }	t_pipex;
 
 typedef struct s_sig

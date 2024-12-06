@@ -70,21 +70,21 @@ int		ft_size_list(PARSER **nodes)
 	return (size);
 }
 
-// char	**copy_env()
-// {
-// 	char	**new_tab;
-// 	int	i;
+char	**copy_env()
+{
+	char	**new_tab;
+	int	i;
 
-// 	i = 0;
+	i = 0;
 
-// 	new_tab = try_malloc(4 * sizeof(char *));
-// 	if (!new_tab)
-// 		return (NULL);
-// 	new_tab[0] = getcwd(NULL, 0);
-// 	new_tab[1] = NULL;
-// 	//dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
-// 	return (new_tab);
-// }
+	new_tab = try_malloc(4 * sizeof(char *));
+	if (!new_tab)
+		return (NULL);
+	new_tab[0] = getcwd(NULL, 0);
+	new_tab[1] = NULL;
+	//dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
+	return (new_tab);
+}
 
 char	**copy_tab(char **tab)
 {

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 12:53:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 17:40:02 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,18 +47,71 @@ void handle_c_signal(int signum)
 	// exit_status = 130;
 }
 
-char	**copy_env()
+void	add_new_var(t_env **mini_env, t_env *new_var)
 {
-	char	**new_tab;
+	t_env	*current;
 
-	new_tab = try_malloc(4 * sizeof(char *));
-	if (!new_tab)
-		return (NULL);
-	new_tab[0] = ft_strjoin("PWD=", getcwd(NULL, 0));
-	new_tab[1] = ft_strdup("SHLVL=1");
-	new_tab[2] = ft_strdup("_=./minishell");
-	new_tab[3] = NULL;
-	return (new_tab);
+	if (!mini_env || !new_var)
+	{
+		return ;
+	}
+	if (!(*mini_env))
+	{
+		*mini_env = new_var;
+		return ;
+	}
+	else
+	{
+		current = *mini_env;
+		while (current->next != NULL)
+			current = current->next;
+		current->next = new_var;
+	}
+}
+
+void	copy_env_list(t_env **mini_env, char **env)
+{
+	t_env	*new_env;
+	t_env	*new_var_pwd;
+	t_env	*new_var_shlvl;
+	t_env	*new_var_;
+	int	i;
+
+	// t_env *test_env = NULL;
+	new_env = NULL;
+	
+	i = 0;
+	if (!env || !(*env))
+	{
+		new_var_pwd = try_malloc(sizeof(t_env));
+		new_var_pwd->var = ft_strjoin("PWD=", getcwd(NULL, 0));
+		add_new_var(mini_env, new_var_pwd);
+		new_var_shlvl = try_malloc(sizeof(t_env));
+		new_var_shlvl->var = ft_strdup("SHLVL=1");;
+		add_new_var(mini_env, new_var_shlvl);		
+		new_var_ = try_malloc(sizeof(t_env));
+		new_var_->var = ft_strdup("_=./minishell");
+		add_new_var(mini_env, new_var_);		
+	}
+	else
+	{
+		while (env[i] && env[i] != NULL)
+		{
+			new_env = try_malloc(sizeof(t_env));
+			new_env->var = ft_strdup(env[i]);
+			add_new_var(mini_env, new_env);
+			i++;
+		}	
+	}
+
+	// test_env = new_env;
+	// while (test_env != NULL)
+	// {
+	// 	dprintf(2, "coucou\n");
+	// 	dprintf(2, "mini_env->var = %s\n", test_env->var);
+	// 	test_env = test_env->next;
+	// }
+	
 }
 
 int		main(int argc, char **argv, char **env)
@@ -70,12 +123,13 @@ int		main(int argc, char **argv, char **env)
 	PARSER		*nodes = NULL;
 	t_pipex	*p = NULL;
 	char		**mini_env;
+	t_env		*test_env;
 	int			exit_code = 0;
+	
+	mini_env = copy_tab(env);
 
-	if (!env || !(*env))
-		mini_env = copy_env();
-	else	
-		mini_env = copy_tab(env);
+	test_env = NULL;
+	copy_env_list(&test_env, env);
 	if (argc >= 1)
 	{
 		while (1)
