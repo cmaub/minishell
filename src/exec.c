@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 18:24:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:27:01 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,21 +54,31 @@ int	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out)
 	return (TRUE);
 }
 
+int	is_command(char *cmd)
+{
+	if (!cmd || cmd[0] == '\0' || ft_is_only_spaces(cmd))
+	{
+		return (FALSE);
+	}
+	return (TRUE);
+	
+}
+
 int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 {
-	if (ft_strncmp(current->command[0], "echo", 4) == 0)
+	if (ft_strncmp(current->command[0], "echo", 5) == 0)
 		return (ft_echo(current->command));
-	if (ft_strncmp(current->command[0], "pwd", 3) == 0)
+	if (ft_strncmp(current->command[0], "pwd", 4) == 0)
 		return (ft_pwd(current));
-	if (ft_strncmp(current->command[0], "env", 3) == 0)
+	if (ft_strncmp(current->command[0], "env", 4) == 0)
 		return (ft_env(current, p->mini_env));
-	if (ft_strncmp(current->command[0], "exit", 4) == 0)
+	if (ft_strncmp(current->command[0], "exit", 5) == 0)
 		return (ft_exit(current->command, p, current, cpy_stdin, cpy_stdout));
-	if (ft_strncmp(current->command[0], "cd", 2) == 0)
+	if (ft_strncmp(current->command[0], "cd", 3) == 0)
 		return (ft_cd(current->command, p, current));
-	if (ft_strncmp(current->command[0], "export", 6) == 0)
+	if (ft_strncmp(current->command[0], "export", 7) == 0)
 		return (ft_export(current, p->mini_env));
-	if (ft_strncmp(current->command[0], "unset", 5) == 0)
+	if (ft_strncmp(current->command[0], "unset", 6) == 0)
 	{
 		p->mini_env = ft_unset(current, p->mini_env);
 		return (TRUE);
@@ -79,7 +89,7 @@ int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 
 int	is_builtin(PARSER *current)
 {
-	if (current->command)
+	if (current->command != NULL)
 	{
 		if (ft_strncmp(current->command[0], "echo", 5) == 0)
 			return (TRUE);
@@ -99,28 +109,6 @@ int	is_builtin(PARSER *current)
 	return (FALSE);
 }
 
-void	is_command(PARSER *current)
-{
-	if (!current->command)
-	{
-		//dprintf(2, "current-command n'existe pas\n");
-		ft_putstr_fd(" ", 2);
-		// reset_node(&current);
-		// free_pipex(p);
-		exit(0);
-	}
-	if ((current->command && current->command[0][0] == '\0'))
-	{
-		ft_putstr_fd(" ", 2);
-		ft_putstr_fd(": command not found\n", 2);
-		// reset_node(&current);
-		// free_pipex(p);
-		exit(127);
-	}
-}
-
-
-
 int	execute(PARSER *current, t_pipex *p)
 {
 	char	*path;
@@ -131,6 +119,7 @@ int	execute(PARSER *current, t_pipex *p)
 	tmp_minienv = NULL;
 	if (is_builtin(current) == 1)
 	{
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
 		reset_node(&current);
 		free_pipex(&p);
@@ -138,6 +127,7 @@ int	execute(PARSER *current, t_pipex *p)
 	}
 	else
 	{
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		tmp_cmd = copy_tab(current->command);
 		if (!no_envp(p->mini_env))
 			tmp_minienv = copy_tab(p->mini_env);
@@ -152,6 +142,7 @@ int	execute(PARSER *current, t_pipex *p)
 					perror(tmp_cmd[0]);
 					free(tmp_cmd);
 					free(tmp_minienv);
+					// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 					exit(126);
 				}
 			}
@@ -160,18 +151,27 @@ int	execute(PARSER *current, t_pipex *p)
 				perror(tmp_cmd[0]);
 				free(tmp_cmd);
 				free(tmp_minienv);
+				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				exit(127);
 			}
 			if (!no_envp(tmp_minienv))
+			{
+				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				execve(tmp_cmd[0], tmp_cmd, tmp_minienv);
+			}
 			else
+			{
+				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				execve(tmp_cmd[0], tmp_cmd, NULL);
+			}
 		}
 		else if (!ft_strchr(tmp_cmd[0], '/') && !no_envp(tmp_minienv))
 		{	
+			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			path = get_path_and_check(&tmp_cmd[0], tmp_minienv);
-			// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-			// //dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
+			// dprintf(2, "path = %s\n", path);
+			// // dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
 			if (execve(path, tmp_cmd, tmp_minienv) == -1)
 				return (free(tmp_cmd), free(path), free(tmp_minienv), -1);
 		}
@@ -242,10 +242,8 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		}
 		safe_close(&p->pipefd[1]);
 	}
-	//dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
-		exit(127);
+		exit(126);
 }
 
 void	inter_child(t_pipex *p, PARSER **nodes)
@@ -302,9 +300,8 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 			close_error_and_free(&fd_in, p, nodes, "pipe", 1);
 	}
 	safe_close(&p->pipefd[1]);
-	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
-		exit(127);
+		exit(126);
 }
 
 void	last_child(t_pipex *p, PARSER **nodes)
@@ -356,10 +353,9 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		}
 		(*nodes)->f++;
 	}
-	is_command(*nodes);
 	if (execute((*nodes), p) == -1)
 	{
-		exit(127);
+		exit(126);
 	}
 }
 
@@ -519,6 +515,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		}
 		current->f++;
 	}
+	
 	if (exec_builtin(current, p, &cpy_stdin, &cpy_stdout))
 	{
 		if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)

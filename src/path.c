@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/02 18:25:03 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 14:24:39 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ char	*get_path(char *cmd, char **env)
 				free(tmp_filename);
 				free(cmd);
 				ft_free_tab(env);
-				exit (126);
+				exit (127);
 			}
 			filename = tmp_filename;
 			break ;
@@ -73,6 +73,7 @@ char	*get_path(char *cmd, char **env)
 		free(tmp_filename);
 		i++;
 	}
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (ft_free_tab(path), filename);
 }
 
@@ -87,8 +88,9 @@ char	*get_path_and_check(char **split_cmd, char **env)
 		ft_putendl_fd(": command not found", 2);
 		ft_free_tab(split_cmd);
 		ft_free_tab(env); //peut-etre pas besoin de free
-		exit (127); //
+		exit(127); //
 	}
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (new_path);
 }
 

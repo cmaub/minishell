@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/04 14:22:26 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/06 12:23:11 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,7 @@ typedef struct s_pipe_fds_heredoc
 
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 
+int	is_command(char *cmd);
 
 /* MINISHELL */
 char	*get_path_and_check(char **split_cmd, char **env);

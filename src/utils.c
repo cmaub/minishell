@@ -223,6 +223,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		return (0);
 	while ((waited_pid = wait(&status)) != -1)
 	{
+		// dprintf(2, "exit_status = %d, (*nodes)->exit_code = %d, status_code = %d\n", exit_status, (*nodes)->exit_code, status_code);
 		//dprintf(2, "WAITED_PID = %d\n", waited_pid);
 		if (current && current->next)
 			current = current->next;
@@ -238,11 +239,14 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 			}
 			if (g_signal != 0)
 			{
+				dprintf(2, "g_signal = %d\n", g_signal);
 		 		status_code = 128 + g_signal;
 				g_signal = 0;
 			}
 		}
-	}	
+	}		
+	// dprintf(2, "apres boucle wait ** exit_status = %d, (*nodes)->exit_code = %d, status_code = %d\n", exit_status, (*nodes)->exit_code, status_code);
+	
 	// if (*nodes && (*nodes)->exit_code != 0)
 	// 	status_code = (*nodes)->exit_code;
 	if (*nodes)
@@ -253,6 +257,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	}
 	//dprintf(2, "sortie du wait\n");
 	return (signal(SIGINT, handle_c_signal), status_code);
+	// return (status_code);
 }
 
 		

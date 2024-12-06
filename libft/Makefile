@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
+#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/22 08:22:29 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/21 11:09:39 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/12/06 10:58:56 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,6 +14,7 @@ FILES = ft_atoi.c \
 		ft_atol.c \
 		ft_bzero.c \
 		ft_calloc.c \
+		ft_is_only_spaces.c \
 		ft_isalnum.c \
 		ft_isalpha.c \
 		ft_isascii.c \

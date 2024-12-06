@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 17:06:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 12:53:49 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,24 +127,18 @@ int		main(int argc, char **argv, char **env)
 					// //dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
-					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					ft_init_struct(p, mini_env, nodes);
-					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					handle_input(&nodes, p);
-				
-					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					mini_env = copy_tab(p->mini_env);
-					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					
 					// if (p->mini_env)
 					// 	ft_free_tab(p->mini_env);
+					// dprintf(2, "nodes->exit_code = %d\n", nodes->exit_code);
 					if (nodes)
 						exit_code = nodes->exit_code;
 					if (p)
 					{
-						//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 						free_pipex(&p);
-						//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					}
 					if (p == NULL)
 					{}
@@ -156,20 +150,16 @@ int		main(int argc, char **argv, char **env)
 				else if (tokens)
 				{
 					free_tokens(&tokens);
-					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 				}
 				if (nodes)
 				{
-					//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					reset_node(&nodes);
 					if (nodes == NULL)
 					{}
 						// printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
 				}
-				//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 				//str_input deplace
 			}
-			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			// rl_replace_line("", 0);
 			// rl_redisplay();
 			free(str_input);
