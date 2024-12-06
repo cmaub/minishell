@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/06 14:31:03 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 18:02:05 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,19 +99,28 @@ void	calloc_tab_of_node(PARSER *new_node)
 	}
 }
 
-char	*return_var_from_env(char *str, char **mini_env)
+char	*return_var_from_env(char *str/*char **mini_env*/, t_env **chained_env)
 {
 	char	*new_var;
+	t_env	*temp;
 
+	temp = *chained_env;
 	new_var = NULL;
 	str = ft_strjoin(str, "=");
 	if (!str)
 		return (NULL);
-	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
-		mini_env++;
-	if (*mini_env == NULL)
+	while (temp && ft_strnstr(temp->var, str, ft_strlen(str) == NULL))
+	{
+			temp = temp-> next;
+	}
+	if (temp == NULL)
 		return (NULL);
-	new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
+	new_var = ft_strdup(temp->var - 1 + (ft_strlen(str) + 1));
+	// while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
+	// 	mini_env++;
+	// if (*mini_env == NULL)
+	// 	return (NULL);
+	// new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
 	if (!new_var)
 		return (free(str), NULL);
 	free(str);
@@ -165,13 +174,13 @@ char	*print_exit_code(PARSER *new_node, int *index)
 	return (expand_result);
 }
 
-char	*print_expand(char *str, int *index, char **mini_env)
+char	*print_expand(char *str, int *index, t_env **chained_env)
 {
 	char	*expand_expr;
 	char	*expand_result;
 
 	expand_expr = isolate_expand(str, *index + 1);
-	expand_result = return_var_from_env(expand_expr, mini_env);
+	expand_result = return_var_from_env(expand_expr, chained_env);
 	// if (!expand_expr)
 	// 	return (NULL);
 	*index += ft_strlen(expand_expr) + 1;
@@ -181,7 +190,7 @@ char	*print_expand(char *str, int *index, char **mini_env)
 	return (ft_strdup(""));
 }
 
-char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
+char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env *chained_env)
 {
 	char	*result;
 	char	*tmp_result;
@@ -207,7 +216,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
 			}
 			else
 			{
-				expand = print_expand(str, &(*index), mini_env);
+				expand = print_expand(str, &(*index), chained_env);
 				if (!expand)
 					return (NULL); //free result ?
 			}
@@ -259,7 +268,7 @@ char	*process_single_quotes(char *str, int *index)
 	return (result);
 }
 
-char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini_env)
+char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **chained_env)
 {
 	char	*result;
 	char	*tmp;
@@ -286,7 +295,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 			}
 			else
 			{
-				expand = print_expand(str, &(*index), mini_env);
+				expand = print_expand(str, &(*index), chained_env);
 				// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
 				if (!expand)
 					return (NULL);
@@ -321,7 +330,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini
 	return (result);
 }
 
-char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
+char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 {
 	int	start;
 	char	*result;
@@ -334,11 +343,11 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 	while (str[start] != '\0')
 	{
 		if (str[start] == 34)
-			tmp = process_double_quotes(new_node, str, &start, mini_env);
+			tmp = process_double_quotes(new_node, str, &start, chained_env);
 		else if (str[start] == 39)
 			tmp = process_single_quotes(str, &start);
 		else
-			tmp = process_unquoted(new_node, str, &start, mini_env);
+			tmp = process_unquoted(new_node, str, &start, chained_env);
 		if (!tmp)
 			return (free(result), NULL);
 		
@@ -354,7 +363,7 @@ char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
 	return (result);
 }
 
-void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
+void	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 {
 	char	*tmp;
 
@@ -368,7 +377,7 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 		{
 			tmp = ft_strdup(cur->value);
 			free(cur->value);
-			cur->value = withdraw_quotes(new_node, tmp, mini_env);
+			cur->value = withdraw_quotes(new_node, tmp, chained_env);
 			free(tmp);
 			if (!cur->value)
 				return ;	
@@ -379,7 +388,7 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 	{
 		tmp = ft_strdup(cur->value);
 		free(cur->value);
-		cur->value = withdraw_quotes(new_node, tmp, mini_env);	
+		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
 		free(tmp);
 		if (!cur->value || !*cur->value)
 			return ;
@@ -387,7 +396,7 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
 	}
 }
 
-PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
+PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 {
 	t_token	*cur;
 	PARSER		*new_node;
@@ -397,7 +406,7 @@ PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
 	new_node->exit_code = exit_code;
 	while (cur && cur->type != PIPEX)
 	{
-		calculate_size_of_tab(cur, new_node, mini_env);
+		calculate_size_of_tab(cur, new_node, chained_env);
 		cur = cur->next;
 	}
 	calloc_tab_of_node(new_node);
@@ -480,7 +489,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	return (0);
 }
 
-int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
+int	create_nodes(t_token **tokens, PARSER **nodes, t_env **chained_env, int exit_code)
 {
 	t_token	*current;
 	PARSER		*new_node;
@@ -494,7 +503,7 @@ int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_cod
 		cmd = 0;
 		d = 0;
 		f = 0;
-		new_node = alloc_new_node(current, mini_env, exit_code);
+		new_node = alloc_new_node(current, chained_env, exit_code);
 		if (!new_node)
 		{
 			// free_tokens(*tokens);

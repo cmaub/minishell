@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 14:27:01 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 18:18:19 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,12 +108,26 @@ int	is_builtin(PARSER *current)
 	}
 	return (FALSE);
 }
+int	copy_list_in_str(char **str_env, t_env **env_nodes)
+{
+	t_env	*temp;
+	int		i;
+
+	temp = *env_nodes;
+	i = 0;
+	while (temp)
+	{
+		str_env[i] = ft_strdup((*env_nodes)->var);
+		i++;
+	}
+}
 
 int	execute(PARSER *current, t_pipex *p)
 {
 	char	*path;
 	char	**tmp_cmd;
 	char	**tmp_minienv;
+	char	**str_env;
 	
 	tmp_cmd = NULL;
 	tmp_minienv = NULL;
@@ -127,6 +141,11 @@ int	execute(PARSER *current, t_pipex *p)
 	}
 	else
 	{
+		str_env = try_malloc(sizeof(char*) * lstsize_t_env(p->env_nodes));
+		if (!str_env)
+			return (-1);
+		copy_list_in_str(str_env, p->env_nodes);
+		
 		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		tmp_cmd = copy_tab(current->command);
 		if (!no_envp(p->mini_env))

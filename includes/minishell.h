@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 17:29:24 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 18:10:58 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,7 @@ typedef struct s_pipex
 	int			flag;
 	pid_t	        	pid;
 	pid_t	        	last_pid;
-	t_env			test_env;
+	t_env			**env_nodes;
 }	t_pipex;
 
 typedef struct s_sig
@@ -111,6 +111,7 @@ typedef struct s_pipe_fds_heredoc
 	int	fd[2];
 }t_pipe_fds_heredoc;
 
+int	lstsize_t_env(t_env *lst);
 
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 

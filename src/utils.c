@@ -12,6 +12,22 @@
 
 #include "minishell.h"
 
+
+int	lstsize_t_env(t_env *lst)
+{
+	t_list	*temp;
+	int		size;
+
+	temp = lst;
+	size = 0;
+	while (temp != NULL)
+	{
+		size++;
+		temp = temp->next;
+	}
+	return (size);
+}
+
 void	free_pipex(t_pipex **p)
 {
 	// if ((*p)->mini_env)
@@ -116,10 +132,11 @@ char	**copy_tab(char **tab)
 	return (new_tab);
 }
 
-void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
+void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes)
 {
 	p->mini_env = copy_tab(env);
 	// p->mini_env = env;
+	p->env_nodes = chained_env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
 	p->prev_fd = -1;

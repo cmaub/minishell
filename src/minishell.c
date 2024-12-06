@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 17:40:02 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 18:07:58 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,13 +123,13 @@ int		main(int argc, char **argv, char **env)
 	PARSER		*nodes = NULL;
 	t_pipex	*p = NULL;
 	char		**mini_env;
-	t_env		*test_env;
+	t_env		*chained_env;
 	int			exit_code = 0;
 	
 	mini_env = copy_tab(env);
 
-	test_env = NULL;
-	copy_env_list(&test_env, env);
+	chained_env = NULL;
+	copy_env_list(&chained_env, env);
 	if (argc >= 1)
 	{
 		while (1)
@@ -171,7 +171,7 @@ int		main(int argc, char **argv, char **env)
 			// free_tokens(tokens);
 			else
 			{
-				if (create_nodes(&tokens, &nodes, mini_env, exit_code) == 0)
+				if (create_nodes(&tokens, &nodes, chained_env, exit_code) == 0)
 				{
 					// print_tokens_list(&tokens);
 					free_tokens(&tokens);	
@@ -181,9 +181,12 @@ int		main(int argc, char **argv, char **env)
 					// //dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
 					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
-					ft_init_struct(p, mini_env, nodes);
+					ft_init_struct(p, chained_env, nodes);
 					handle_input(&nodes, p);
-					mini_env = copy_tab(p->mini_env);
+
+					chained_env = p->env_nodes; //faire plutot copie
+					// mini_env = copy_tab(p->mini_env);
+					
 					
 					// if (p->mini_env)
 					// 	ft_free_tab(p->mini_env);
@@ -192,12 +195,12 @@ int		main(int argc, char **argv, char **env)
 						exit_code = nodes->exit_code;
 					if (p)
 					{
-						free_pipex(&p);
+						free_pipex(&p); // modifier la maniere de free p avec la struct
 					}
 					if (p == NULL)
 					{}
 						//dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
-					if (mini_env == NULL)
+					if (chained_env == NULL)
 					{}
 						//dprintf(2, "Le mini_env est nul, dommage\n");
 				}
@@ -219,10 +222,11 @@ int		main(int argc, char **argv, char **env)
 			free(str_input);
 		}
 	}
-	if (mini_env)
+	if (chained_env)
 	{
 		//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
-		ft_free_tab(mini_env);
+		// ft_free_tab(mini_env);
+		//free la liste chainee
 	}
 	return (0);
 }
