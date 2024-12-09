@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 17:04:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/09 12:43:17 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,16 +73,18 @@ char	**suppress_var(char **env, int index)
 	return (new_env);
 }
 
-char	**ft_unset(PARSER *current, char **env)
+t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 {
 	int		i;
+	int		j;
 	int		index;
-	char	**new_env;
+	t_env	*temp;
+	t_env	*saved;
 
 	i = 1;
-	new_env = NULL;
+	temp = *env_nodes;
 	if (!current->command[1])
-		return (env);
+		return (env_nodes);
 	
 	if (current->command[1] && current->command[1][0] == '-')
 	{
@@ -90,29 +92,27 @@ char	**ft_unset(PARSER *current, char **env)
 		ft_putstr_fd(current->command[1], 2);
 		ft_putendl_fd(": invalid option", 2);
 		current->exit_code = 2;
-		return (env);
+		return (env_nodes);
 	}
 	while (current->command[i])
 	{
-		index = env_var_exists(env, current->command[i]);
+		index = env_var_exists(env_nodes, current->command[i]);
+		j = 0;
 		//dprintf(2, "index = %d\n", index);
 		if (index >= 0)
 		{
 			//dprintf(2, "i = %d\n", i);
 			// //dprintf(2, "nb de var d'env = %d\n", count_env_var(env));
-			new_env = suppress_var(env, index);
+			// new_env = suppress_var(env, index);
 			// //dprintf(2, "new_env = %s (%s, %d)\n", new_env[0], __FILE__, __LINE__);
-			if (!new_env)
-			{
-				current->exit_code = 1;
-				write(1, "fatal: out of memory\n", 21);
-				return (env);
-			}
-			env = new_env;
-			// //dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
-			// free(new_env);
-			// //dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
-			i++;
+			while (temp && temp->next != NULL && j < index - 1)
+				temp = temp->next;
+			saved = temp->next;
+			if (temp->next->next != NULL)
+				temp = temp->next->next;
+			else
+				temp->next = NULL;
+			free(saved);
 		}
 		else
 			i++;
@@ -120,6 +120,6 @@ char	**ft_unset(PARSER *current, char **env)
 	// if (!new_env)
 	// 	return (env);
 	// //dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
-	return (env);
+	return (env_nodes);
 }
 

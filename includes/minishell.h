@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 18:10:58 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:00:19 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,12 @@ typedef struct s_pipe_fds_heredoc
 	int	fd[2];
 }t_pipe_fds_heredoc;
 
-int	lstsize_t_env(t_env *lst);
+
+// ENV
+int	lstsize_t_env(t_env **lst);
+void	ft_lstadd_env_back(t_env **lst, t_env *new);
+void	add_new_var(t_env **mini_env, t_env *new_var);
+void	print_t_env(t_env **mini_env);
 
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 
@@ -120,7 +125,8 @@ int	is_command(char *cmd);
 /* MINISHELL */
 char	*get_path_and_check(char **split_cmd, char **env);
 char	**copy_tab(char **envp);
-char	*return_var_from_env(char *str, char **mini_env);
+// char	*return_var_from_env(char *str, char **mini_env);
+char	*return_var_from_env(char *str, t_env **chained_env);
 
 void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
@@ -128,7 +134,8 @@ int	ft_error_int(char *str, PARSER *node);
 void	ft_error_exit(char *str, int exit_c);
 void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str);
 void	check_open(int fd);
-void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
+// void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
+void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes);
 void	safe_close(int *fd);
 void	get_lines(char *delimiter, int *fd_heredoc);
 int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
@@ -151,7 +158,8 @@ int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
 int	no_envp(char **tab);
-int		env_var_exists(char **env, char *var);
+// int		env_var_exists(char **env, char *var);
+int		env_var_exists(t_env **nodes_env, char *var);
 int	handle_input(PARSER **nodes, t_pipex *p);
 int	ft_here_doc(PARSER *nodes);
 int	handle_input_redirection(t_pipex *p, PARSER *current, char *heredoc);
@@ -163,7 +171,8 @@ void	print_nodes_list(PARSER **nodes);
 void	add_new_node(PARSER **nodes, PARSER *new_node);
 
 /* NODES */
-int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code);
+int	create_nodes(t_token **tokens, PARSER **nodes, t_env **chained_env, int exit_code);
+// int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code);
 
 /* BUILTINS */
 int	ft_echo(char **cmd);
@@ -172,10 +181,10 @@ int	ft_env(PARSER *current, char **mini_env);
 // int	ft_exit(char **cmd, t_pipex *p, PARSER *node);
 int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout);
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
-char **ft_unset(PARSER *current, char **env);
-int	ft_export(PARSER *current, char **env);
-void	print_sorted_env(char **env);
-int		env_var_exists(char **env, char *var);
+// char **ft_unset(PARSER *current, char **env);
+t_env	**ft_unset(PARSER *current, t_env **env_nodes);
+int	ft_export(PARSER *current, t_env **env_nodes);
+void	print_sorted_env(t_env **env_nodes);
 
 /* ALLOC AND FREE */
 void	ft_free_tab(char **tab);

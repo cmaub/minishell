@@ -12,13 +12,41 @@
 
 #include "minishell.h"
 
-
-int	lstsize_t_env(t_env *lst)
+t_env	*ft_lst_env_last(t_env *lst)
 {
-	t_list	*temp;
+	t_env	*temp;
+
+	if (!lst)
+		return (NULL);
+	temp = lst;
+	while (temp->next != NULL)
+	{
+		temp = temp->next;
+	}
+	return (temp);
+}
+
+void	ft_lstadd_env_back(t_env **lst, t_env *new)
+{
+	t_env	*temp;
+
+	if (!lst || !new)
+		return ;
+	if (! (*lst))
+	{
+		*lst = new;
+		return ;
+	}
+	temp = ft_lst_env_last(*lst);
+	temp->next = new;
+}
+
+int	lstsize_t_env(t_env **lst)
+{
+	t_env	*temp;
 	int		size;
 
-	temp = lst;
+	temp = *lst;
 	size = 0;
 	while (temp != NULL)
 	{
@@ -134,7 +162,7 @@ char	**copy_tab(char **tab)
 
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes)
 {
-	p->mini_env = copy_tab(env);
+	// p->mini_env = copy_tab(env);
 	// p->mini_env = env;
 	p->env_nodes = chained_env;
 	p->nb_cmd = ft_size_list(&nodes);

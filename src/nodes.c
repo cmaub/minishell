@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/06 18:02:05 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:00:46 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ char	*return_var_from_env(char *str/*char **mini_env*/, t_env **chained_env)
 	str = ft_strjoin(str, "=");
 	if (!str)
 		return (NULL);
-	while (temp && ft_strnstr(temp->var, str, ft_strlen(str) == NULL))
+	while (temp && ft_strnstr(temp->var, str, ft_strlen(str)) == NULL)
 	{
 			temp = temp-> next;
 	}
@@ -190,7 +190,7 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 	return (ft_strdup(""));
 }
 
-char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env *chained_env)
+char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_env)
 {
 	char	*result;
 	char	*tmp_result;

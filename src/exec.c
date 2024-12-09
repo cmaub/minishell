@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 18:18:19 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/09 12:44:13 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,10 @@ int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 	if (ft_strncmp(current->command[0], "cd", 3) == 0)
 		return (ft_cd(current->command, p, current));
 	if (ft_strncmp(current->command[0], "export", 7) == 0)
-		return (ft_export(current, p->mini_env));
+		return (ft_export(current, p->env_nodes));
 	if (ft_strncmp(current->command[0], "unset", 6) == 0)
 	{
-		p->mini_env = ft_unset(current, p->mini_env);
+		p->env_nodes = ft_unset(current, p->env_nodes);
 		return (TRUE);
 	}
 	return (FALSE);
@@ -114,12 +114,18 @@ int	copy_list_in_str(char **str_env, t_env **env_nodes)
 	int		i;
 
 	temp = *env_nodes;
+	str_env = try_malloc(sizeof(char*) * lstsize_t_env(env_nodes));
+	if (!str_env)
+		return (FALSE);
 	i = 0;
 	while (temp)
 	{
 		str_env[i] = ft_strdup((*env_nodes)->var);
+		if (!str_env[i])
+			return (FALSE); 
 		i++;
 	}
+	return (TRUE);
 }
 
 int	execute(PARSER *current, t_pipex *p)
@@ -131,28 +137,26 @@ int	execute(PARSER *current, t_pipex *p)
 	
 	tmp_cmd = NULL;
 	tmp_minienv = NULL;
+	str_env = NULL;
 	if (is_builtin(current) == 1)
 	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
-		reset_node(&current);
-		free_pipex(&p);
-		exit(EXIT_SUCCESS);
+	// 	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// 	exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
+	// 	reset_node(&current);
+	// 	free_pipex(&p);
+	// 	exit(EXIT_SUCCESS);
 	}
 	else
 	{
-		str_env = try_malloc(sizeof(char*) * lstsize_t_env(p->env_nodes));
-		if (!str_env)
+		if (!copy_list_in_str(str_env, p->env_nodes))
 			return (-1);
-		copy_list_in_str(str_env, p->env_nodes);
-		
 		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		tmp_cmd = copy_tab(current->command);
-		if (!no_envp(p->mini_env))
-			tmp_minienv = copy_tab(p->mini_env);
+		// if (!no_envp(p->mini_env))
+			// tmp_minienv = copy_tab(p->mini_env);
 		free_pipex(&p);
 		reset_node(&current);
-		if (ft_strchr(tmp_cmd[0], '/') || no_envp(tmp_minienv))
+		if (ft_strchr(tmp_cmd[0], '/') || no_envp(str_env))
 		{
 			if (access(tmp_cmd[0], F_OK) == 0)
 			{
@@ -160,7 +164,7 @@ int	execute(PARSER *current, t_pipex *p)
 				{
 					perror(tmp_cmd[0]);
 					free(tmp_cmd);
-					free(tmp_minienv);
+					free(str_env);
 					// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 					exit(126);
 				}
@@ -169,14 +173,14 @@ int	execute(PARSER *current, t_pipex *p)
 			{
 				perror(tmp_cmd[0]);
 				free(tmp_cmd);
-				free(tmp_minienv);
+				free(str_env);
 				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				exit(127);
 			}
-			if (!no_envp(tmp_minienv))
+			if (!no_envp(str_env))
 			{
 				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-				execve(tmp_cmd[0], tmp_cmd, tmp_minienv);
+				execve(tmp_cmd[0], tmp_cmd, str_env);
 			}
 			else
 			{
@@ -184,15 +188,15 @@ int	execute(PARSER *current, t_pipex *p)
 				execve(tmp_cmd[0], tmp_cmd, NULL);
 			}
 		}
-		else if (!ft_strchr(tmp_cmd[0], '/') && !no_envp(tmp_minienv))
+		else if (!ft_strchr(tmp_cmd[0], '/') && !no_envp(str_env))
 		{	
 			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-			path = get_path_and_check(&tmp_cmd[0], tmp_minienv);
+			path = get_path_and_check(&tmp_cmd[0], str_env);
 			// dprintf(2, "path = %s\n", path);
 			// // dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
-			if (execve(path, tmp_cmd, tmp_minienv) == -1)
-				return (free(tmp_cmd), free(path), free(tmp_minienv), -1);
+			if (execve(path, tmp_cmd, str_env) == -1)
+				return (free(tmp_cmd), free(path), free(str_env), -1);
 		}
 	}
 	return (-1);
@@ -553,8 +557,8 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 	PARSER		*current;
 	
 	current = (*nodes);
-	if (current && current->next == NULL && is_builtin(current))
-		return (handle_simple_process(current, p), 0);
+	// if (current && current->next == NULL && is_builtin(current))
+	// 	return (handle_simple_process(current, p), 0);
 	while (p->i < p->nb_cmd)
 	{
 		if(p->nb_cmd > 1 && p->i < p->nb_cmd - 1)

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 18:07:58 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/09 13:18:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,17 +51,19 @@ void	add_new_var(t_env **mini_env, t_env *new_var)
 {
 	t_env	*current;
 
-	if (!mini_env || !new_var)
+	if (!new_var)
 	{
 		return ;
 	}
-	if (!(*mini_env))
+	if (!(*mini_env) || !mini_env)
 	{
 		*mini_env = new_var;
+		// dprintf(2, "mini_env->var = %s\n", (*mini_env)->var);
 		return ;
 	}
 	else
 	{
+		// dprintf(2, "new_var->var = %s\n", new_var->var);
 		current = *mini_env;
 		while (current->next != NULL)
 			current = current->next;
@@ -69,7 +71,7 @@ void	add_new_var(t_env **mini_env, t_env *new_var)
 	}
 }
 
-void	copy_env_list(t_env **mini_env, char **env)
+t_env	**copy_env_list(t_env **mini_env, char **env)
 {
 	t_env	*new_env;
 	t_env	*new_var_pwd;
@@ -81,6 +83,9 @@ void	copy_env_list(t_env **mini_env, char **env)
 	new_env = NULL;
 	
 	i = 0;
+	mini_env = try_malloc(sizeof(t_env **));
+	if (!mini_env)
+		return (NULL);
 	if (!env || !(*env))
 	{
 		new_var_pwd = try_malloc(sizeof(t_env));
@@ -99,19 +104,26 @@ void	copy_env_list(t_env **mini_env, char **env)
 		{
 			new_env = try_malloc(sizeof(t_env));
 			new_env->var = ft_strdup(env[i]);
+			new_env->next = NULL;
 			add_new_var(mini_env, new_env);
 			i++;
-		}	
+		}
+		
 	}
+	return (mini_env);
+}
 
-	// test_env = new_env;
-	// while (test_env != NULL)
-	// {
-	// 	dprintf(2, "coucou\n");
-	// 	dprintf(2, "mini_env->var = %s\n", test_env->var);
-	// 	test_env = test_env->next;
-	// }
+void	print_t_env(t_env **mini_env)
+{
+	t_env	*current;
 	
+	current = *mini_env;
+	// dprintf(2, "mini_env->var = %s\n", current->var);
+	while (current != NULL)
+	{
+		dprintf(2, "mini_env->var = %s\n", current->var);
+		current = current->next;
+	}
 }
 
 int		main(int argc, char **argv, char **env)
@@ -122,14 +134,13 @@ int		main(int argc, char **argv, char **env)
 	t_token		*tokens = NULL;
 	PARSER		*nodes = NULL;
 	t_pipex	*p = NULL;
-	char		**mini_env;
-	t_env		*chained_env;
+	t_env		**chained_env;
 	int			exit_code = 0;
 	
-	mini_env = copy_tab(env);
 
 	chained_env = NULL;
-	copy_env_list(&chained_env, env);
+	chained_env = copy_env_list(chained_env, env);
+	print_t_env(chained_env);
 	if (argc >= 1)
 	{
 		while (1)
@@ -173,6 +184,8 @@ int		main(int argc, char **argv, char **env)
 			{
 				if (create_nodes(&tokens, &nodes, chained_env, exit_code) == 0)
 				{
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					
 					// print_tokens_list(&tokens);
 					free_tokens(&tokens);	
 					if (tokens == NULL)
@@ -182,7 +195,11 @@ int		main(int argc, char **argv, char **env)
 					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, chained_env, nodes);
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					print_t_env(p->env_nodes);
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					handle_input(&nodes, p);
+					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 
 					chained_env = p->env_nodes; //faire plutot copie
 					// mini_env = copy_tab(p->mini_env);
