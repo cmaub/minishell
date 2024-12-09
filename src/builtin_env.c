@@ -6,31 +6,28 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 14:35:01 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/06 12:22:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	ft_env(PARSER *current, t_env **env)
+int	ft_env(PARSER *current, char **mini_env)
 {
-	t_env	*curr;
-
-	curr = *env;
 	if (current->command[1])
 	{
 		ft_putstr_fd("Too many arguments\n", 2);
 		current->exit_code = 2;
 		return (FALSE);
 	}
-	while (curr)
+	while (*mini_env)
 	{
-		if (ft_strchr(curr->var, '='))
+		if (ft_strchr(*mini_env, '='))
 		{
-			ft_putstr_fd(curr->var, 1);
+			ft_putstr_fd(*mini_env, 1);
 			write(1, "\n", 1);
 		}
-		curr = curr->next;
+		mini_env++;
 	}
 	return (TRUE);
 }

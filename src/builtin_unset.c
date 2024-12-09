@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 16:32:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/09 18:29:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ int		count_env_var(char **list)
 	len = 0;
 	while (list[len] != NULL)
 	{
+		// //dprintf(2, "list[len] dans count env var = %s\n", list[len]);
 		len++;
 	}
 	return (len);
@@ -41,6 +42,7 @@ char	**suppress_var(char **env, int index)
 	int		j;
 
 	new_size = count_env_var(env) - 1;
+	//dprintf(2, "new_size = %d\n", new_size);
 	new_env = try_malloc((new_size + 1)* sizeof(char *));
 	if (!new_env)
 	{
@@ -80,10 +82,9 @@ t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 	t_env	*saved;
 
 	i = 1;
-	temp = *env_nodes;
+	saved = NULL;
 	if (!current->command[1])
 		return (env_nodes);
-	
 	if (current->command[1] && current->command[1][0] == '-')
 	{
 		ft_putstr_fd("unset: ", 2);
@@ -92,32 +93,38 @@ t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 		current->exit_code = 2;
 		return (env_nodes);
 	}
-	while (current->command[i])
+	while (current->command[i] != NULL)
 	{
 		index = env_var_exists(env_nodes, current->command[i]);
-		j = 0;
-		//dprintf(2, "index = %d\n", index);
 		if (index >= 0)
 		{
-			//dprintf(2, "i = %d\n", i);
-			// //dprintf(2, "nb de var d'env = %d\n", count_env_var(env));
-			// new_env = suppress_var(env, index);
-			// //dprintf(2, "new_env = %s (%s, %d)\n", new_env[0], __FILE__, __LINE__);
-			while (temp && temp->next != NULL && j < index - 1)
-				temp = temp->next;
-			saved = temp->next;
-			if (temp->next->next != NULL)
-				temp = temp->next->next;
+			temp = *env_nodes;
+			j = 0;
+			if (index == 0)
+			{
+				*env_nodes = temp->next;
+				free(temp->var);
+				free(temp);
+			}
 			else
-				temp->next = NULL;
-			free(saved);
+			{
+				while (temp && j < index)
+				{
+					saved = temp;
+					temp = temp->next;
+					j++;
+				}
+				if (!temp)
+				{
+					return (env_nodes);
+				}
+				saved->next = temp->next;
+				free(temp->var);
+				free(temp);
+			}
 		}
-		else
-			i++;
+		i++;
 	}
-	// if (!new_env)
-	// 	return (env);
-	// //dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
 	return (env_nodes);
 }
 
