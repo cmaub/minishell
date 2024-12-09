@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 17:56:03 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/09 18:29:52 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 	if (ft_strncmp(current->command[0], "pwd", 4) == 0)
 		return (ft_pwd(current));
 	if (ft_strncmp(current->command[0], "env", 4) == 0)
-		return (ft_env(current, p->env_nodes));
+		return (ft_env(current, p->mini_env));
 	if (ft_strncmp(current->command[0], "exit", 5) == 0)
 		return (ft_exit(current->command, p, current, cpy_stdin, cpy_stdout));
 	if (ft_strncmp(current->command[0], "cd", 3) == 0)
@@ -115,51 +115,24 @@ int	is_builtin(PARSER *current)
 	}
 	return (FALSE);
 }
-// int	copy_list_in_str(char **str_env, t_env **env_nodes)
-// {
-// 	t_env	*temp;
-// 	int		i;
-
-// 	temp = *env_nodes;
-// 	str_env = try_malloc(sizeof(char *) * (lstsize_t_env(env_nodes) + 1));
-// 	if (!str_env)
-// 		return (FALSE);
-// 	i = 0;
-// 	while (temp)
-// 	{
-// 		str_env[i] = ft_strdup(temp->var);
-// 		// dprintf(2, "str_env[%d] = %s\n", i, str_env[i]);
-// 		if (!str_env[i])
-// 			return (FALSE); 
-// 		i++;
-// 		temp = temp->next;
-// 	}
-// 	str_env[i] = NULL;
-// 	return (TRUE);
-// }
-
-char	**copy_list_in_str(t_env **env_nodes)
+int	copy_list_in_str(char **str_env, t_env **env_nodes)
 {
 	t_env	*temp;
-	char	**str_env;
 	int		i;
 
 	temp = *env_nodes;
-	str_env = try_malloc(sizeof(char *) * (lstsize_t_env(env_nodes) + 1));
+	str_env = try_malloc(sizeof(char*) * lstsize_t_env(env_nodes));
 	if (!str_env)
-		return (NULL);
+		return (FALSE);
 	i = 0;
 	while (temp)
 	{
-		str_env[i] = ft_strdup(temp->var);
-		// dprintf(2, "str_env[%d] = %s\n", i, str_env[i]);
+		str_env[i] = ft_strdup((*env_nodes)->var);
 		if (!str_env[i])
-			return (NULL); 
+			return (FALSE); 
 		i++;
-		temp = temp->next;
 	}
-	str_env[i] = NULL;
-	return (str_env);
+	return (TRUE);
 }
 
 void	print_tab(char **tab)
@@ -191,18 +164,20 @@ int	execute(PARSER *current, t_pipex *p)
 	str_env = NULL;
 	if (is_builtin(current) == 1)
 	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
-		reset_node(&current);
-		free_pipex(&p);
-		exit(EXIT_SUCCESS);
+	// 	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// 	exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
+	// 	reset_node(&current);
+	// 	free_pipex(&p);
+	// 	exit(EXIT_SUCCESS);
 	}
 	else
 	{
-		str_env = copy_list_in_str(p->env_nodes);
-		tmp_cmd = copy_tab(current->command);
-		if (!tmp_cmd)
+		if (!copy_list_in_str(str_env, p->env_nodes))
 			return (-1);
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		tmp_cmd = copy_tab(current->command);
+		// if (!no_envp(p->mini_env))
+			// tmp_minienv = copy_tab(p->mini_env);
 		free_pipex(&p);
 		reset_node(&current);
 		if (ft_strchr(tmp_cmd[0], '/') || no_envp(str_env))
@@ -607,8 +582,8 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 	PARSER		*current;
 	
 	current = (*nodes);
-	if (current && current->next == NULL && is_builtin(current))
-		return (handle_simple_process(current, p), 0);
+	// if (current && current->next == NULL && is_builtin(current))
+	// 	return (handle_simple_process(current, p), 0);
 	while (p->i < p->nb_cmd)
 	{
 		if(p->nb_cmd > 1 && p->i < p->nb_cmd - 1)

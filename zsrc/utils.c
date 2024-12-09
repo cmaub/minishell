@@ -32,16 +32,13 @@ void	ft_lstadd_env_back(t_env **lst, t_env *new)
 
 	if (!lst || !new)
 		return ;
-	if (!(*lst))
+	if (! (*lst))
 	{
 		*lst = new;
-		// dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
 	temp = ft_lst_env_last(*lst);
-	// dprintf(2, "*** (%s, %d) : temp->var = %s\n", __FILE__, __LINE__, temp->var);
 	temp->next = new;
-	// dprintf(2, "*** (%s, %d) : temp->next->var = %s\n", __FILE__, __LINE__, temp->next->var);
 }
 
 int	lstsize_t_env(t_env **lst)

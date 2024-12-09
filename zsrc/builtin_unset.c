@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 17:47:50 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/09 18:29:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ int		count_env_var(char **list)
 	len = 0;
 	while (list[len] != NULL)
 	{
+		// //dprintf(2, "list[len] dans count env var = %s\n", list[len]);
 		len++;
 	}
 	return (len);
@@ -41,6 +42,7 @@ char	**suppress_var(char **env, int index)
 	int		j;
 
 	new_size = count_env_var(env) - 1;
+	//dprintf(2, "new_size = %d\n", new_size);
 	new_env = try_malloc((new_size + 1)* sizeof(char *));
 	if (!new_env)
 	{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 16:29:35 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/09 11:44:45 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,7 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 	{
 		if (chdir(cmd[1]) == -1)
 		{
+			//dprintf(2, "chdir echoue");
 			return (ft_error_int("cd", node));
 		}
 	}
