@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 13:00:19 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/09 16:19:44 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,8 +115,10 @@ typedef struct s_pipe_fds_heredoc
 // ENV
 int	lstsize_t_env(t_env **lst);
 void	ft_lstadd_env_back(t_env **lst, t_env *new);
+// void	add_new_var(t_env **mini_env, t_env *new_var);
 void	add_new_var(t_env **mini_env, t_env *new_var);
 void	print_t_env(t_env **mini_env);
+t_env	**copy_t_env(t_env **env);
 
 int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
 
@@ -177,13 +179,14 @@ int	create_nodes(t_token **tokens, PARSER **nodes, t_env **chained_env, int exit
 /* BUILTINS */
 int	ft_echo(char **cmd);
 int	ft_pwd(PARSER *current);
-int	ft_env(PARSER *current, char **mini_env);
+int	ft_env(PARSER *current, t_env **env);
 // int	ft_exit(char **cmd, t_pipex *p, PARSER *node);
 int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout);
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
 // char **ft_unset(PARSER *current, char **env);
 t_env	**ft_unset(PARSER *current, t_env **env_nodes);
-int	ft_export(PARSER *current, t_env **env_nodes);
+// int	ft_export(PARSER *current, t_env **env_nodes);
+t_env	**ft_export(PARSER *current, t_env **env_nodes);
 void	print_sorted_env(t_env **env_nodes);
 
 /* ALLOC AND FREE */

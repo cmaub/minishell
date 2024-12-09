@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 13:18:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/09 16:34:36 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,26 +49,37 @@ void handle_c_signal(int signum)
 
 void	add_new_var(t_env **mini_env, t_env *new_var)
 {
-	t_env	*current;
+	// t_env	*current;
 
-	if (!new_var)
+	if (!new_var || !mini_env)
 	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
-	if (!(*mini_env) || !mini_env)
-	{
-		*mini_env = new_var;
-		// dprintf(2, "mini_env->var = %s\n", (*mini_env)->var);
-		return ;
-	}
-	else
-	{
-		// dprintf(2, "new_var->var = %s\n", new_var->var);
-		current = *mini_env;
-		while (current->next != NULL)
-			current = current->next;
-		current->next = new_var;
-	}
+	ft_lstadd_env_back(mini_env, new_var);
+	// print_t_env(mini_env);
+	// if (!(*mini_env))
+	// {
+	// 	*mini_env = *new_var;
+	// 	(*new_var)->next = NULL;
+	// 	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// 	// dprintf(2, "mini_env->var = %s\n", (*mini_env)->var);
+	// 	return ;
+	// }
+	// else
+	// {
+	// 	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// 	current = *mini_env;
+	// 	dprintf(2, "mini_env->var dans add_new_var = %s\n", (*mini_env)->var);
+	// 	while (current->next != NULL)
+	// 	{
+	// 		current = current->next;
+	// 		dprintf(2, "current->var dans add_new_var = %s\n", current->var);
+	// 	}
+	// 	current->next = *new_var;
+	// 	dprintf(2, "new_var->var dans add_new_var = %s\n", (*new_var)->var);
+	// }
+	// current = *mini_env;
 }
 
 t_env	**copy_env_list(t_env **mini_env, char **env)
@@ -88,13 +99,13 @@ t_env	**copy_env_list(t_env **mini_env, char **env)
 		return (NULL);
 	if (!env || !(*env))
 	{
-		new_var_pwd = try_malloc(sizeof(t_env));
+		new_var_pwd = try_malloc(sizeof(t_env *));
 		new_var_pwd->var = ft_strjoin("PWD=", getcwd(NULL, 0));
 		add_new_var(mini_env, new_var_pwd);
-		new_var_shlvl = try_malloc(sizeof(t_env));
+		new_var_shlvl = try_malloc(sizeof(t_env *));
 		new_var_shlvl->var = ft_strdup("SHLVL=1");;
 		add_new_var(mini_env, new_var_shlvl);		
-		new_var_ = try_malloc(sizeof(t_env));
+		new_var_ = try_malloc(sizeof(t_env *));
 		new_var_->var = ft_strdup("_=./minishell");
 		add_new_var(mini_env, new_var_);		
 	}
@@ -102,7 +113,7 @@ t_env	**copy_env_list(t_env **mini_env, char **env)
 	{
 		while (env[i] && env[i] != NULL)
 		{
-			new_env = try_malloc(sizeof(t_env));
+			new_env = try_malloc(sizeof(t_env *));
 			new_env->var = ft_strdup(env[i]);
 			new_env->next = NULL;
 			add_new_var(mini_env, new_env);
@@ -140,7 +151,6 @@ int		main(int argc, char **argv, char **env)
 
 	chained_env = NULL;
 	chained_env = copy_env_list(chained_env, env);
-	print_t_env(chained_env);
 	if (argc >= 1)
 	{
 		while (1)
@@ -185,7 +195,6 @@ int		main(int argc, char **argv, char **env)
 				if (create_nodes(&tokens, &nodes, chained_env, exit_code) == 0)
 				{
 					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
-					
 					// print_tokens_list(&tokens);
 					free_tokens(&tokens);	
 					if (tokens == NULL)
@@ -195,13 +204,15 @@ int		main(int argc, char **argv, char **env)
 					// print_nodes_list(&nodes);
 					p = try_malloc(sizeof(*p));
 					ft_init_struct(p, chained_env, nodes);
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
-					print_t_env(p->env_nodes);
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					// print_t_env(p->env_nodes);
+					// dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					// print_t_env(p->env_nodes);
+					// dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 					handle_input(&nodes, p);
-					dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
+					// print_t_env(p->env_nodes);
+					// dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 
-					chained_env = p->env_nodes; //faire plutot copie
+					chained_env = copy_t_env(p->env_nodes); //faire plutot copie
 					// mini_env = copy_tab(p->mini_env);
 					
 					
