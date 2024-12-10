@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 17:48:02 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 12:19:54 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,8 @@ void	print_sorted_env(t_env **env_nodes)
 	t_env *current;
 
 	i = 0;
+	if (!*env_nodes || !env_nodes)
+		return ;
 	current = *env_nodes;
 	while (current != NULL)
 	{
@@ -112,7 +114,10 @@ void	print_sorted_env(t_env **env_nodes)
 		else if (current && current->var)
 		{
 			write_var(current->var);
-			current = current->next;
+			if (current->next)
+				current = current->next;
+			else
+				break ;
 		}			
 	}
 }
@@ -146,11 +151,11 @@ t_env	**copy_t_env(t_env **env)
 	int	count;
 	
 	current = *env;
-	sorted_env = try_malloc(sizeof(t_env **));
+	sorted_env = try_malloc(sizeof(t_env *));
 	count = lstsize_t_env(&current);
 	while (current != NULL)
 	{
-		new_var = try_malloc(sizeof(t_env *));
+		new_var = try_malloc(sizeof(t_env));
 		if (!new_var)
 			return (env);
 		new_var->var = ft_strdup(current->var);
@@ -162,6 +167,7 @@ t_env	**copy_t_env(t_env **env)
 	}
 	return (sorted_env);
 }
+
 void	copy_and_sort_env(t_env **env)
 {
 	t_env	**sorted_env;
@@ -170,7 +176,7 @@ void	copy_and_sort_env(t_env **env)
 	
 	sort_tab_ascii(sorted_env);
 	print_sorted_env(sorted_env);
-	// free_array(sorted_env); // free la liste
+	free_t_env(sorted_env); // free la liste
 }
 
 int	check_name(char *name)
@@ -255,7 +261,7 @@ t_env	**handle_variable_without_value(char *cmd, PARSER *current, t_env **env_no
 	index = env_var_exists(env_nodes, cmd);
 	if (index < 0)
 	{
-		new_var = try_malloc(sizeof(t_env *));
+		new_var = try_malloc(sizeof(t_env));
 		new_var->var = ft_strdup(cmd);
 		new_var->next = NULL; 
 		add_new_var(env_nodes, new_var);

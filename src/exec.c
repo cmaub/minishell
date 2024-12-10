@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 17:56:03 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 12:20:28 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,12 +138,30 @@ int	is_builtin(PARSER *current)
 // 	return (TRUE);
 // }
 
+void	print_tab(char **tab)
+{
+	int	i;
+
+	i = 0;
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+	// dprintf(2, "avant boucle while tab[%d] = %s\n", i, tab[i]);
+	while (tab[i] != NULL)
+	{
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		dprintf(2, "tab[%d] = %s\n", i, tab[i]);
+		i++;			
+	}
+	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+}
+
 char	**copy_list_in_str(t_env **env_nodes)
 {
 	t_env	*temp;
 	char	**str_env;
 	int		i;
 
+	if (!env_nodes || !*env_nodes)
+		return (NULL);
 	temp = *env_nodes;
 	str_env = try_malloc(sizeof(char *) * (lstsize_t_env(env_nodes) + 1));
 	if (!str_env)
@@ -156,28 +174,16 @@ char	**copy_list_in_str(t_env **env_nodes)
 		if (!str_env[i])
 			return (NULL); 
 		i++;
-		temp = temp->next;
+		if (temp->next)
+			temp = temp->next;
+		else
+			break ;
 	}
 	str_env[i] = NULL;
+	// dprintf(2, "sous forme de tab\n");
+	// print_tab(str_env);
 	return (str_env);
 }
-
-void	print_tab(char **tab)
-{
-	int	i;
-
-	i = 0;
-	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-	// dprintf(2, "avant boucle while tab[%d] = %s\n", i, tab[i]);
-	while (tab[i] != NULL)
-	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-		// dprintf(2, "tab[%d] = %s\n", i, tab[i]);
-		i++;			
-	}
-	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-}
-
 
 int	execute(PARSER *current, t_pipex *p)
 {
@@ -203,6 +209,7 @@ int	execute(PARSER *current, t_pipex *p)
 		tmp_cmd = copy_tab(current->command);
 		if (!tmp_cmd)
 			return (-1);
+		free_t_env(p->env_nodes);
 		free_pipex(&p);
 		reset_node(&current);
 		if (ft_strchr(tmp_cmd[0], '/') || no_envp(str_env))
@@ -213,7 +220,7 @@ int	execute(PARSER *current, t_pipex *p)
 				{
 					perror(tmp_cmd[0]);
 					free(tmp_cmd);
-					free(str_env);
+					free_array(str_env);
 					// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 					exit(126);
 				}
@@ -222,7 +229,7 @@ int	execute(PARSER *current, t_pipex *p)
 			{
 				perror(tmp_cmd[0]);
 				free(tmp_cmd);
-				free(str_env);
+				free_array(str_env);
 				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				exit(127);
 			}
@@ -245,7 +252,7 @@ int	execute(PARSER *current, t_pipex *p)
 			// // dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
 			if (execve(path, tmp_cmd, str_env) == -1)
-				return (free(tmp_cmd), free(path), free(str_env), -1);
+				return (free(tmp_cmd), free(path), free_array(str_env), -1);
 		}
 	}
 	return (-1);
@@ -458,7 +465,7 @@ void	create_process(t_pipex *p, PARSER **nodes)
 	{
 		// exit_status = 0;
 		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_IGN);
+		signal(SIGQUIT, SIG_DFL);
 		if (p->i == 0)
 			first_child(p, nodes);
 		else if (p->i < p->nb_cmd - 1)

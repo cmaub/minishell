@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/09 13:00:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/10 12:24:48 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -481,6 +481,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)	
 	loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]);
 	safe_close(&new_node->fd_heredoc[*d][1]);
+
 	new_node->redir_type[*f] = current->type;
 	signal(SIGINT, SIG_DFL); //
 	if (dup2(fd, STDIN_FILENO) == -1)

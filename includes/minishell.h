@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 16:19:44 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 11:43:30 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,7 @@ void	free_new_node(PARSER *new_node);
 void	reset_node(PARSER **node);
 void	free_tokens(t_token **tokens);
 void check_and_free_new_node(PARSER *new_node);
+void	free_t_env(t_env **mini_env);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

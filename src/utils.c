@@ -56,6 +56,7 @@ int	lstsize_t_env(t_env **lst)
 		size++;
 		temp = temp->next;
 	}
+	dprintf(2, "size dans size of t_env = %d\n", size);
 	return (size);
 }
 
