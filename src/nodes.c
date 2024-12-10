@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/10 17:33:35 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 18:12:56 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -537,7 +537,8 @@ int	create_nodes(t_mega_struct *mini)
 				if (create_heredoc(new_node, current, &f, &d) == -1)
 				{
 					safe_close(&new_node->fd_heredoc[d][0]);
-					reset_node(&new_node);
+					// reset_node(&new_node);
+					reset_node_mini(mini);
 					return (-1);
 
 				}

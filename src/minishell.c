@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 18:00:38 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 18:26:49 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -190,7 +190,7 @@ int		main(int argc, char **argv, char **env)
 	(void)argv;
 	t_mega_struct	*mini;
 	char		*str;
-	
+
 	if (argc < 1)
 		return (0);
 	mini = try_malloc(sizeof(t_mega_struct));
@@ -201,8 +201,6 @@ int		main(int argc, char **argv, char **env)
 	mini->chained_env = copy_env_list(mini->chained_env, env);
 	while (1)
 	{
-		// mini->tokens = NULL;
-		// mini->nodes = NULL;
 		if (!loop_readline_main(&mini->L_input, &str))
 			break ;
 		if (!fill_list_of_tokens(mini, str))
@@ -212,12 +210,12 @@ int		main(int argc, char **argv, char **env)
 		{
 			if (create_nodes(mini) == 0)
 				free_exec_input(mini);
-			reset_node(&mini);
+			reset_node_mini(mini);
 			free(str);
 		}
 	}
 	free_t_env(mini->chained_env);
-	free(mini);	
+	free(mini);
 	return (0);
 }
 

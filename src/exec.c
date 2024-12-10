@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 17:27:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 18:27:09 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,7 +359,6 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
 			{
-				// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				// reset_node(nodes);
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);//rajouter fd heredoc
 			}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 17:58:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 18:17:06 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -206,6 +206,8 @@ void	ft_free_tab(char **tab);
 char	**copy_tab_free(char **envp);
 void	free_new_node(PARSER *new_node);
 void	reset_node(PARSER **node);
+// void	reset_node(t_mega_struct *mini);
+void	reset_node_mini(t_mega_struct *mini);
 void	free_tokens(t_token **tokens);
 void check_and_free_new_node(PARSER *new_node);
 void	free_t_env(t_env **mini_env);

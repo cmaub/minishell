@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 15:39:37 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 18:15:17 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,51 @@ void	close_heredoc(PARSER *current)
 	}
 }
 
+void	reset_node_mini(t_mega_struct *mini)
+{
+	PARSER	*current;
+	PARSER *temp;
+
+	current = mini->nodes;
+	if (!mini->nodes/* || !(*node)*/)
+	{
+		return ;
+	}
+	while (current)
+	{
+		temp = current->next;
+		if (current->file)
+		{
+			free_array_and_close_fds(current->file);
+			current->file = NULL;
+		}
+		if (current->command)
+		{
+			free_array(current->command);
+			current->command = NULL;
+		}
+		if (current->delimiter)
+		{
+			free_array(current->delimiter);
+			current->delimiter = NULL;
+		}
+		if (current->redir_type)
+		{
+			free(current->redir_type);
+		}
+		if (current->fd_heredoc)
+		{
+			close_heredoc(current);
+			free_array_int(current->fd_heredoc, current);
+		}
+		if (current)
+			free(current);
+		current = temp;
+	}
+	mini->nodes = NULL;
+	mini->p = NULL;
+}
+
 void	reset_node(PARSER **node)
 {
 	PARSER	*current;
@@ -178,4 +223,5 @@ void	reset_node(PARSER **node)
 	}
 	*node = NULL;
 }
+
 
