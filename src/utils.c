@@ -69,6 +69,8 @@ void	free_pipex(t_pipex **p)
 	// 	(*p)->mini_env = NULL;
 	// 	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	// }
+	if (!p || !*p)
+		return ;
 	free(*p);
 	*p = NULL;
 }
@@ -81,7 +83,7 @@ void	ft_error_exit(char *str, int exit_c)
 
 int	ft_error_int(char *str, PARSER *node)
 {
-	perror(str);
+	ft_putendl_fd(str, 2);
 	node->exit_code = 1;
 	return (-1);
 }
@@ -166,8 +168,6 @@ char	**copy_tab(char **tab)
 
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes)
 {
-	// p->mini_env = copy_tab(env);
-	// p->mini_env = env;
 	p->env_nodes = chained_env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
@@ -272,7 +272,6 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		return (0);
 	while ((waited_pid = wait(&status)) != -1)
 	{
-		// dprintf(2, "exit_status = %d, (*nodes)->exit_code = %d, status_code = %d\n", exit_status, (*nodes)->exit_code, status_code);
 		//dprintf(2, "WAITED_PID = %d\n", waited_pid);
 		if (current && current->next)
 			current = current->next;
@@ -281,11 +280,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 		if (waited_pid == last_pid)
 		{
 			if (WIFEXITED(status))
-			{
-				
 				status_code = WEXITSTATUS(status);
-				// exit_status = 0;
-			}
 			if (g_signal != 0)
 			{
 				// dprintf(2, "g_signal = %d\n", g_signal);
@@ -294,7 +289,6 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 			}
 		}
 	}		
-	// dprintf(2, "apres boucle wait ** exit_status = %d, (*nodes)->exit_code = %d, status_code = %d\n", exit_status, (*nodes)->exit_code, status_code);
 	
 	// if (*nodes && (*nodes)->exit_code != 0)
 	// 	status_code = (*nodes)->exit_code;

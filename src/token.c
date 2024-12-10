@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/05 17:04:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:58:51 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,14 +42,17 @@ Cette fonction permet de changer la nature du token identifie en supprimant celu
 // 	}
 // }
 
-int	fill_list_of_tokens(LEXER *L_input, t_token **list)
+int	fill_list_of_tokens(t_mega_struct *mini, char *str)
 {
-	if (!expr(L_input, list) || !parserHasReachEnd(L_input))
+	if (!expr(mini->L_input, &mini->tokens) || !parserHasReachEnd(mini->L_input))
 	{
-		free(L_input);
+		ft_putendl_fd("syntax error", 2);
+		mini->exit_code = 2;
+		free(str);
+		free(mini->L_input);
 		return (FALSE);
 	}
-	free(L_input);
+	free(mini->L_input);
 	return (TRUE);
 }
 

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 11:43:30 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:58:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@
 
 # define FALSE 0
 # define TRUE 1
+
+
 
 typedef struct PARSER
 {
@@ -111,6 +113,15 @@ typedef struct s_pipe_fds_heredoc
 	int	fd[2];
 }t_pipe_fds_heredoc;
 
+typedef struct s_mega_struct
+{
+	PARSER *nodes;
+	t_token *tokens;
+	LEXER	*L_input;
+	t_env	**chained_env;
+	t_pipex *p;
+	int	exit_code;
+} t_mega_struct;
 
 // ENV
 int	lstsize_t_env(t_env **lst);
@@ -136,7 +147,6 @@ int	ft_error_int(char *str, PARSER *node);
 void	ft_error_exit(char *str, int exit_c);
 void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str);
 void	check_open(int fd);
-// void	ft_init_struct(t_pipex *p, char **envp, PARSER *nodes);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes);
 void	safe_close(int *fd);
 void	get_lines(char *delimiter, int *fd_heredoc);
@@ -155,7 +165,8 @@ int parserHasReachEnd(LEXER *input) ;
 
 /* TOKENS */
 int	give_type_to_token(t_token *token);
-int	fill_list_of_tokens(LEXER *L_input, t_token **list);
+// int	fill_list_of_tokens(LEXER *L_input, t_token **list, int *code, char *str);
+int	fill_list_of_tokens(t_mega_struct *mini, char *str);
 int		ft_size_list(PARSER **nodes);
 int	is_str(char *str);
 int	simple_cmd(t_pipex *p, char *heredoc, PARSER *current, PARSER *nodes);
@@ -173,7 +184,8 @@ void	print_nodes_list(PARSER **nodes);
 void	add_new_node(PARSER **nodes, PARSER *new_node);
 
 /* NODES */
-int	create_nodes(t_token **tokens, PARSER **nodes, t_env **chained_env, int exit_code);
+int	create_nodes(t_mega_struct *mini);
+// int	create_nodes(t_token **tokens, PARSER **nodes, t_env **chained_env, int exit_code);
 // int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code);
 
 /* BUILTINS */
@@ -237,6 +249,5 @@ int command(LEXER *input, t_token **list);
 int expr(LEXER *input, t_token **list);
 int start(LEXER *input);
 
-extern int	exit_status;
 extern int	g_signal;
 #endif

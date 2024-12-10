@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 17:54:10 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:10:26 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p, int *cpy_stdin, int *cp
 			safe_close(cpy_stdin);
 			safe_close(cpy_stdout);
 			reset_node(&node);
+			free_t_env(p->env_nodes);
+			free_pipex(&p);
 			exit(2);
 		}
 		j++;
@@ -93,6 +95,7 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdou
 	int	exit_code;
 
 	i = 1;
+	dprintf(2, "entree dans exit (%s, %d)\n", __FILE__, __LINE__);
 	if (cmd[i])
 	{
 		check_exit_arg(cmd[i], node, p, cpy_stdin, cpy_stdout);
@@ -102,6 +105,8 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdou
 			safe_close(cpy_stdin);
 			safe_close(cpy_stdout);
 			reset_node(&node);
+			free_t_env(p->env_nodes);
+			free_pipex(&p);
 			exit(2);
 		}
 		i++;
@@ -110,14 +115,17 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdou
 		too_many(p, node);
 	else
 	{
+		dprintf(2, "entree dans exit (%s, %d)\n", __FILE__, __LINE__);
 		input_ok(p, cmd[1], node);
 		safe_close(cpy_stdin);
 		safe_close(cpy_stdout);
 		exit_code = node->exit_code;
 		reset_node(&node);
+		if (!node)
+			dprintf(2, "nodes est null\n");
+		free_t_env(p->env_nodes);
 		free_pipex(&p);
-		exit(exit_code);
-		
+		exit(exit_code);		
 	}
 	return (TRUE);
 }

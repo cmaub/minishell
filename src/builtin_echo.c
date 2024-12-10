@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/06 14:23:20 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:30:49 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,14 @@ int	ft_echo(char **cmd)
 	i = 1;
 	is_n = 0;
 	if (!cmd[i])
-	{
 		return (TRUE);
-	}
 	while (ft_strncmp(cmd[i], "-n", 2) == 0 && all_n(cmd[i]))
 	{
 		i++;
 		is_n = 1;
 	}
 	if (!cmd[i])
-	{
 		return (TRUE);
-	}
 	if (cmd[i][0] != '-' || !all_n(cmd[i]))
 	{
 		while (cmd[i])

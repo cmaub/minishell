@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 12:20:28 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:27:46 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -463,7 +463,6 @@ void	create_process(t_pipex *p, PARSER **nodes)
 	
 	if (p->pid == 0)
 	{
-		// exit_status = 0;
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		if (p->i == 0)

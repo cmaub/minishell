@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/05 17:04:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:39:37 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,11 +99,28 @@ void	free_array(char **array)
 		// //dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 		// //dprintf(2, "array[%d] = %s\n", i, array[i]);
 		free(array[i]);
-		array[i] = NULL;
 		i++;
 	}
 	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	free(array);
+	array = NULL;
+}
+
+void	free_array_int(int **array, PARSER *current)
+{
+	int i;
+
+	if (!array || !*array)
+		return;
+	i = 0;
+	while (i < current->nb_heredoc)
+	{
+		if (array[i])
+			free(array[i]);
+		i++;
+	}
+	free(array);
+	array = NULL;
 }
 
 void	close_heredoc(PARSER *current)
@@ -133,41 +150,32 @@ void	reset_node(PARSER **node)
 		temp = current->next;
 		if (current->file)
 		{
-			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			free_array_and_close_fds(current->file);
 			current->file = NULL;
 		}
 		if (current->command)
 		{
-			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			free_array(current->command);
 			current->command = NULL;
 		}
 		if (current->delimiter)
 		{
-			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			free_array(current->delimiter);
 			current->delimiter = NULL;
 		}
 		if (current->redir_type)
 		{
-			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			free(current->redir_type);
-			// current->redir_type = NULL;
 		}
 		if (current->fd_heredoc)
 		{
-			//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 			close_heredoc(current);
-			free(current->fd_heredoc);
-			// current->fd_heredoc[2] = NULL;		
+			free_array_int(current->fd_heredoc, current);
 		}
-		//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 		if (current)
 			free(current);
 		current = temp;
 	}
-	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	*node = NULL;
 }
 
