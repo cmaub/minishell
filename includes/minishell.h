@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 18:17:06 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/11 12:00:16 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,6 +121,7 @@ typedef struct s_mega_struct
 	t_env	**chained_env;
 	t_pipex *p;
 	int	exit_code;
+	char	*str;
 } t_mega_struct;
 
 // ENV
@@ -240,6 +241,7 @@ int	STAR(LEXER *input);
 int	TAB_H(LEXER *input);
 int	TAB_V(LEXER *input);
 int HASHTAG(LEXER *input);
+int	DOTS(LEXER *input);
 
 int ows(LEXER *input);
 int squote(LEXER *input);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/10 18:12:56 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/11 15:20:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,28 +104,24 @@ void	calloc_tab_of_node(PARSER *new_node)
 char	*return_var_from_env(char *str/*char **mini_env*/, t_env **chained_env)
 {
 	char	*new_var;
+	char	*temp_str;
 	t_env	*temp;
 
 	temp = *chained_env;
 	new_var = NULL;
-	str = ft_strjoin(str, "=");
-	if (!str)
+	temp_str = ft_strjoin(str, "=");
+	if (!temp_str)
 		return (NULL);
-	while (temp && ft_strnstr(temp->var, str, ft_strlen(str)) == NULL)
+	while (temp && ft_strnstr(temp->var, temp_str, ft_strlen(temp_str)) == NULL)
 	{
 			temp = temp-> next;
 	}
 	if (temp == NULL)
 		return (NULL);
-	new_var = ft_strdup(temp->var - 1 + (ft_strlen(str) + 1));
-	// while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
-	// 	mini_env++;
-	// if (*mini_env == NULL)
-	// 	return (NULL);
-	// new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
+	new_var = ft_strdup(temp->var - 1 + (ft_strlen(temp_str) + 1));
 	if (!new_var)
-		return (free(str), NULL);
-	free(str);
+		return (free(temp_str), NULL);
+	free(temp_str);
 	return (new_var);
 }
 
@@ -159,28 +155,39 @@ char	*join_char(char c, char *tmp)
 char	*print_exit_code(PARSER *new_node, int *index)
 {
 	char	*expand_result;
+	char	*itoa_result;
 
 	if (g_signal != 2)
 	{
-		expand_result = ft_strdup(ft_itoa(new_node->exit_code));
+		itoa_result = ft_itoa(new_node->exit_code);
+		if (!itoa_result)
+			return (NULL);
+		expand_result = ft_strdup(itoa_result);
+		if (!expand_result)
+			return (free(itoa_result), NULL);			
 	}
 	else
 	{
-		expand_result = ft_strdup(ft_itoa(130));
+		itoa_result = ft_itoa(130);
+		if (!itoa_result)
+			return (NULL);
+		expand_result = ft_strdup(itoa_result);
+		if (!expand_result)
+			return (free(itoa_result), NULL);
 		g_signal = 0;
 	}
 	new_node->exit_code = 0;
 	*index += 2;
-	
-	// return (ft_strjoin(result, expand_result));
-	return (expand_result);
+	return (free(itoa_result), expand_result);
 }
 
 char	*print_expand(char *str, int *index, t_env **chained_env)
 {
 	char	*expand_expr;
 	char	*expand_result;
+	char	*empty;
 
+	empty = ft_strdup("");
 	expand_expr = isolate_expand(str, *index + 1);
 	expand_result = return_var_from_env(expand_expr, chained_env);
 	// if (!expand_expr)
@@ -188,8 +195,9 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 	*index += ft_strlen(expand_expr) + 1;
 	free(expand_expr);
 	if (expand_result != NULL)
-		return (ft_strdup(expand_result));
-	return (ft_strdup(""));
+		// return (ft_strdup(expand_result));
+		return (free(empty), expand_result);
+	return (empty);
 }
 
 char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_env)
@@ -224,7 +232,9 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 			}
 			tmp_result = ft_strjoin(result, expand);
 			free(tmp);
+			free(expand);
 			tmp = NULL;
+			expand = NULL;
 			if (!tmp_result)
 				return(free(result), NULL);
 			free (result);
@@ -237,7 +247,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 			if (!tmp)
 				return (free(result), NULL);
 			free(result);
-			result = tmp;
+			result = tmp; // attention double free
 			if (result[ft_strlen(result) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
 				result[ft_strlen(result) - 1] = '\0';
 			(*index)++;
@@ -291,37 +301,32 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **cha
 			if (str[(*index) + 1] && str[(*index) + 1] == '?')
 			{
 				expand = print_exit_code(new_node, index);
-				// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
 				if (!expand)
 					return (NULL);
 			}
 			else
 			{
 				expand = print_expand(str, &(*index), chained_env);
-				// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
 				if (!expand)
 					return (NULL);
 			}
 			tmp_result = ft_strjoin(result, expand);
-			// tmp_result = ft_strdup(tmp);
-			// dprintf(2, "**** result = %s, tmp_result = %s a la line = %d\n", result, tmp_result, __LINE__);
+			free(expand);
+			expand = NULL;
 			free(tmp);
 			tmp = NULL;
 			if (!tmp_result)
 				return (free(result), NULL);
 			free(result);
 			result = tmp_result;
-			// dprintf(2, "**** result = %s a la line = %d\n", result, __LINE__);
 		}
 		else
 		{
 			tmp = join_char(str[*index], result);
-			// dprintf(2, "**** tmp = %s a la line = %d\n", tmp, __LINE__);
 			if (!tmp)
 				return (free(result), NULL);
 			free(result);
 			result = tmp;
-			// dprintf(2, "**** result = %s a la line = %d\n", result, __LINE__);
 			// free(tmp);
 			tmp = NULL;
 			(*index)++;

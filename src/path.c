@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/06 14:24:39 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:33:55 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ char	**find_path_line(char **env)
 
 	while (*env && ft_strnstr(*env, "PATH", 4) == 0)
 		env++;
+	if (!*env)
+		return (NULL);
 	new_path = ft_split(*env + 5, ':');
 	if (!new_path)
 	{
@@ -52,6 +54,8 @@ char	*get_path(char *cmd, char **env)
 	filename = NULL;
 	i = 0;
 	path = find_path_line(env);
+	if (!path)
+		return (NULL);
 	while (path[i])
 	{
 		tmp_filename = create_tmp_filename(path[i], cmd);

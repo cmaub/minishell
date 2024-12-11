@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 18:26:49 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:23:54 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,39 +183,39 @@ void	init_mega_struct(t_mega_struct *mini)
 	mini->tokens = NULL;
 	mini->chained_env = NULL;
 	mini->exit_code = 0;
+	mini->str = NULL;
 }
 
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
+	(void)argc;
 	t_mega_struct	*mini;
-	char		*str;
+	// char		*str;
 
-	if (argc < 1)
-		return (0);
 	mini = try_malloc(sizeof(t_mega_struct));
 	if (!mini)
 		return (FALSE);
 	init_mega_struct(mini);
-	str = NULL;
+	// str = NULL;
 	mini->chained_env = copy_env_list(mini->chained_env, env);
 	while (1)
 	{
-		if (!loop_readline_main(&mini->L_input, &str))
+		// dprintf(2, "mini->str = %s\n", mini->str);
+		if (!loop_readline_main(&mini->L_input, &mini->str))
 			break ;
-		if (!fill_list_of_tokens(mini, str))
+		if (!fill_list_of_tokens(mini, mini->str))
 		{
 		}
 		else
 		{
 			if (create_nodes(mini) == 0)
 				free_exec_input(mini);
-			reset_node_mini(mini);
-			free(str);
+			// reset_node_mini(mini);
+			reset_node(&mini->nodes);
+			free(mini->str);
 		}
 	}
-	free_t_env(mini->chained_env);
-	free(mini);
-	return (0);
+	return (free_t_env(mini->chained_env), free(mini), 0);
 }
 

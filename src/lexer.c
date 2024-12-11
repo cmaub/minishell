@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/05 17:04:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 12:00:32 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,6 +191,11 @@ int	STAR(LEXER *input)
 	return (eat(input, '*'));
 }
 
+int	DOTS(LEXER *input)
+{
+	return (eat(input, ':'));
+}
+
 int	PRINTABLE_SQUOTE(LEXER *input)
 {
 	int	i;
@@ -290,7 +295,7 @@ int	arg(LEXER *input)
 
 	i = 0;
 	start = input->head;
-	while  (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
+	while  (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input) || DOTS(input)
 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
 		i++;
 	if (i < 1)

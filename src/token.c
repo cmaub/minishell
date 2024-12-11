@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/10 17:58:51 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 11:22:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,9 @@ int	fill_list_of_tokens(t_mega_struct *mini, char *str)
 		mini->exit_code = 2;
 		free(str);
 		free(mini->L_input);
+		free_tokens(&mini->tokens);
+		str = NULL;
+		mini->L_input = NULL;
 		return (FALSE);
 	}
 	free(mini->L_input);

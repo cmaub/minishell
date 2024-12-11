@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 15:30:21 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 14:41:56 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,38 +28,65 @@ permet de recuperer le chemin absolu du repertoire courant
 - size : la taille du bloc de mémoire passé en premier paramètre.
 */
 
+void	create_new_var(t_env **node, char *str)
+{
+	t_env	*new;
+
+	new = try_malloc(sizeof(t_env));
+	if (!new)
+		return ;
+	new->var = ft_strdup(str);
+	new->next = NULL; 
+	if (!new->var)
+		return ;
+	ft_lstadd_env_back(node, new);
+}
+
 int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 {	
 	t_env 	*temp;
+	char	*dest_tmp;
+	char	*new_var;
+	
 
 	temp = *env_nodes;
-	dest = ft_strjoin(dest, "=");
-	if (!dest)
+	dest_tmp = ft_strjoin(dest, "=");
+	if (!dest_tmp)
 		return (-1);
-	while (temp && ft_strnstr(temp->var, dest, ft_strlen(dest)) == NULL)
+	while (temp && temp->next && temp->var)
+	{
+		if (ft_strncmp(temp->var, dest_tmp, ft_strlen(dest_tmp)) == 0)
+			break ;
 		temp = temp->next;
+	}
 	if (temp->var == NULL)
 	{
-		if (ft_strncmp(dest, "OLDPWD=", 6) == 0)
+		if (ft_strncmp(dest_tmp, src, 6) == 0)
 		{
-			temp->var = try_malloc(sizeof(char *));
-			temp->var = ft_strjoin(dest, ft_strdup(src));
-			if (!temp->var)
-				return (free(dest), -1);
+			new_var = ft_strjoin(dest_tmp, src);
+			if (!temp)
+				return (free(dest_tmp), -1);
+			create_new_var(env_nodes, new_var);
+			free(new_var);
 		}
 		else
 			return (-1);
 	}
-	temp->var = ft_strjoin(dest, ft_strdup(src));
+	free(temp->var);
+	temp->var = NULL;
+	temp->var = ft_strjoin(dest_tmp, src);
 	if (!temp->var)
-		return (free(dest), -1);
-	return (0);
+		return (free(dest_tmp), -1);
+	return (free(dest_tmp), 0);
 }
+
+
 
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 {
 	char	*old_pwd;
 	char	*new_pwd;
+	char	*pwd_var;
 
 	if (!cmd[1])
 		return(ft_error_int("cd: no directory specified", node));
@@ -71,8 +98,15 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 			return (ft_error_int("cd: error", node));
 	}
 	if (env_var_exists(p->env_nodes, "PWD") == -1)
-		return(ft_error_int("cd: path not found", node));
-	old_pwd = ft_strdup(return_var_from_env("PWD", p->env_nodes));
+	{
+		new_pwd = getcwd(NULL, 0);
+		pwd_var = ft_strjoin("PWD=", new_pwd);
+		free(new_pwd);
+		create_new_var(p->env_nodes, pwd_var);
+		free(pwd_var);
+	}
+	// return(ft_error_int("cd: path not found", node));
+	old_pwd = return_var_from_env("PWD", p->env_nodes);
 	if (!old_pwd)
 		return (ft_error_int("cd: error", node));
 	if (ft_setenv("OLDPWD", old_pwd, p->env_nodes) == -1)
