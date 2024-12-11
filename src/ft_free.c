@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 18:15:17 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/11 17:39:16 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,8 +115,11 @@ void	free_array_int(int **array, PARSER *current)
 	i = 0;
 	while (i < current->nb_heredoc)
 	{
+		dprintf(2, "i = %d\n", i);
 		if (array[i])
+		{
 			free(array[i]);
+		}
 		i++;
 	}
 	free(array);
@@ -139,6 +142,8 @@ void	reset_node_mini(t_mega_struct *mini)
 {
 	PARSER	*current;
 	PARSER *temp;
+	dprintf(2, "entree reset_node_mini\n");
+	// dprintf(2, "current->nb_heredoc = %d\n", mini->nodes->nb_heredoc);
 
 	current = mini->nodes;
 	if (!mini->nodes/* || !(*node)*/)
@@ -167,8 +172,10 @@ void	reset_node_mini(t_mega_struct *mini)
 		{
 			free(current->redir_type);
 		}
-		if (current->fd_heredoc)
+		if (current->nb_heredoc)
 		{
+			dprintf(2, "nb_heredoc\n");
+			dprintf(2, "current->fd_heredoc[0] = %d", current->fd_heredoc[0][0]);
 			close_heredoc(current);
 			free_array_int(current->fd_heredoc, current);
 		}
@@ -222,6 +229,49 @@ void	reset_node(PARSER **node)
 		current = temp;
 	}
 	*node = NULL;
+}
+
+void	reset_one_node(PARSER **node)
+{
+	if (!node || !*node)
+	{
+		return ;
+	}
+	if ((*node)->file)
+	{
+		free_array_and_close_fds((*node)->file);
+		(*node)->file = NULL;
+	}
+	if ((*node)->command)
+	{
+		free_array((*node)->command);
+		(*node)->command = NULL;
+	}
+	if ((*node)->delimiter)
+	{
+		free_array((*node)->delimiter);
+		(*node)->delimiter = NULL;
+	}
+	if ((*node)->redir_type)
+	{
+		free((*node)->redir_type);
+	}
+	if ((*node)->fd_heredoc)
+	{
+		dprintf(2, "one ** nb_heredoc\n");
+		// dprintf(2, "one ** current->fd_heredoc[0] = %d\n", (*node)->fd_heredoc[0][0]);
+		close_heredoc((*node));
+		free_array_int((*node)->fd_heredoc, (*node));
+		// dprintf(2, "one ** current->fd_heredoc[0] = %d\n", (*node)->fd_heredoc[0][0]);
+		// dprintf(2, "one ** current->fd_heredoc[1] = %d\n", (*node)->fd_heredoc[0][1]);
+
+
+	}
+	if ((*node))
+		free((*node));
+	(*node) = NULL;
+	// free (node);
+	node = NULL;
 }
 
 

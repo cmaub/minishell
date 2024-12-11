@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 15:30:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 18:09:26 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ int	ft_echo(char **cmd)
 	{
 		while (cmd[i])
 		{
-			ft_putstr_fd(cmd[i], 1);
+			if (ft_putstr_fd(cmd[i], 1) == -1)
+				return (FALSE);
 			if (cmd[i + 1])
 				write(1, " ", 1);
 			i++;

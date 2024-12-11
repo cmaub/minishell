@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/11 15:20:43 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 18:32:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,15 @@ void	print_nodes_list(PARSER **nodes)
 	int	d;
 	PARSER	*tmp;
 	
-	if (!(*nodes) || !nodes)
+	dprintf(2, "entree dans print_nodes_list\n");
+	if (!nodes)
 	{
 		dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
+		return ;
+	}
+	if (!(*nodes)/* || !nodes*/)
+	{
+		dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
 	tmp = (*nodes);
@@ -410,6 +416,8 @@ PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 
 	cur = current;
 	new_node = try_malloc(sizeof(PARSER));
+	if (!new_node)
+		return (NULL);
 	new_node->exit_code = exit_code;
 	while (cur && cur->type != PIPEX)
 	{
@@ -488,6 +496,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)	
 	if (loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]) == -1)
 	{
+		dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		if (dup2(fd, STDIN_FILENO) == -1)
 			return (perror ("dup"), 0);
 		safe_close(&fd);
@@ -520,10 +529,7 @@ int	create_nodes(t_mega_struct *mini)
 		f = 0;
 		new_node = alloc_new_node(current, mini->chained_env, mini->exit_code);
 		if (!new_node)
-		{
-			// free_tokens(*tokens);
 			return (-1);
-		}
 		while (current && current->type != PIPEX)
 		{
 			if (current->type == REDIRECT_IN)
@@ -543,9 +549,28 @@ int	create_nodes(t_mega_struct *mini)
 				{
 					safe_close(&new_node->fd_heredoc[d][0]);
 					// reset_node(&new_node);
+					// free_array_int(&new_node->fd_heredoc[d], new_node);
+					reset_one_node(&new_node);
 					reset_node_mini(mini);
+					free(mini->nodes);
+					mini->nodes = NULL;
+					free(new_node);
+					new_node = NULL;
+					if (mini->nodes)
+					{
+						dprintf(2, "mini->nodes n'est pas free **1%p\n", mini->nodes);
+						// return (-1);
+					}
+					if (new_node)
+					{
+						dprintf(2, "new_node n'est pas free **1%p\n", new_node);
+						// return (-1);
+					}
+					// reset_node(&mini->nodes);
+					print_nodes_list(&mini->nodes);
+					print_nodes_list(&new_node);
+					free_tokens(&mini->tokens);
 					return (-1);
-
 				}
 				f++;
 				d++;

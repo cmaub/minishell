@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 11:23:54 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 16:55:49 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,8 +211,8 @@ int		main(int argc, char **argv, char **env)
 		{
 			if (create_nodes(mini) == 0)
 				free_exec_input(mini);
-			// reset_node_mini(mini);
-			reset_node(&mini->nodes);
+			reset_node_mini(mini);
+			// reset_node(&mini->nodes);
 			free(mini->str);
 		}
 	}

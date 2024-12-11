@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 12:00:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 17:58:42 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,10 +108,10 @@ typedef struct s_sig
 	
 }t_sig;
 
-typedef struct s_pipe_fds_heredoc
-{
-	int	fd[2];
-}t_pipe_fds_heredoc;
+// typedef struct s_pipe_fds_heredoc
+// {
+// 	int	fd[2];
+// }t_pipe_fds_heredoc;
 
 typedef struct s_mega_struct
 {
@@ -146,7 +146,7 @@ void	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
 int	ft_error_int(char *str, PARSER *node);
 void	ft_error_exit(char *str, int exit_c);
-void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str);
+void	ft_close_error_no_exit(int *fd, t_pipex *p, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes);
 void	safe_close(int *fd);
@@ -212,6 +212,8 @@ void	reset_node_mini(t_mega_struct *mini);
 void	free_tokens(t_token **tokens);
 void check_and_free_new_node(PARSER *new_node);
 void	free_t_env(t_env **mini_env);
+void	free_array_int(int **array, PARSER *current);
+void	reset_one_node(PARSER **node);
 
 /* LEXER */
 int PIPE(LEXER *input, t_token **list);

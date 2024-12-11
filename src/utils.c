@@ -247,15 +247,15 @@ void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int ex
 	exit(exit_c);
 }
 
-void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str)
+void	ft_close_error_no_exit(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
 		safe_close(fd);
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
-	free_pipex(&p);
-	reset_node(nodes);//pas ici
+	// free_pipex(&p);
+	// reset_node(nodes);//pas ici
 }
 
 int ft_wait(pid_t last_pid, PARSER **nodes)

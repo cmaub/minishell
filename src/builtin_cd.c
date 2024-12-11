@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 14:41:56 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 17:50:53 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,7 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 		return (free(old_pwd), FALSE);
 	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)
-		return (free(old_pwd), ft_error_int("getcwd", node));
+		return (free(old_pwd), ft_error_int("cd: error", node));
 	if (ft_setenv("PWD", new_pwd, p->env_nodes) == -1)
 		return (free(new_pwd), free(old_pwd), FALSE);
 	return (free(new_pwd), free(old_pwd), TRUE);			

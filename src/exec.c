@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 18:27:09 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/11 18:20:25 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,14 +41,14 @@ int	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out)
 		fd_out = open((*nodes)->file[(*nodes)->f], O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1)
 	{
-		ft_close_error_no_exit(NULL, p, nodes, (*nodes)->file[(*nodes)->f]);
+		ft_close_error_no_exit(NULL, p, (*nodes)->file[(*nodes)->f]);
 		return (FALSE);
 	}
 	dprintf(2, "fd_out = %d\n", fd_out);
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
 	{
 		//dprintf(2, "dupe de stdout a fail\n");
-		ft_close_error_no_exit(&fd_out, p, nodes, (*nodes)->file[(*nodes)->f]);
+		ft_close_error_no_exit(&fd_out, p, (*nodes)->file[(*nodes)->f]);
 		return (FALSE);
 	}
 	safe_close(&fd_out);
@@ -206,9 +206,10 @@ int	execute(PARSER *current, t_pipex *p)
 	else
 	{
 		str_env = copy_list_in_str(p->env_nodes);
-		tmp_cmd = copy_tab(current->command);
+		if (current->command)
+			tmp_cmd = copy_tab(current->command);
 		if (!tmp_cmd)
-			return (-1);
+			return (free_array(str_env), -1);
 		free_t_env(p->env_nodes);
 		free_pipex(&p);
 		reset_node(&current);
@@ -306,6 +307,8 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 			{
+				free_pipex(&p);
+				reset_node(nodes);
 				exit(1) ;
 			}
 			flag_output = 1;
@@ -323,7 +326,11 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		safe_close(&p->pipefd[1]);
 	}
 	if (execute((*nodes), p) == -1)
+	{
+		ft_putstr_fd((*nodes)->command[0], 2);
+		ft_putendl_fd(": not executable", 2);
 		exit(126);
+	}
 }
 
 void	inter_child(t_pipex *p, PARSER **nodes)
@@ -368,7 +375,11 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
+			{
+				free_pipex(&p);
+				reset_node(nodes);
 				exit(1);
+			}
 			flag_output = 1;
 		}
 		(*nodes)->f++;
@@ -380,7 +391,11 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 	}
 	safe_close(&p->pipefd[1]);
 	if (execute((*nodes), p) == -1)
+	{
+		ft_putstr_fd((*nodes)->command[0], 2);
+		ft_putendl_fd(": not executable", 2);
 		exit(126);
+	}
 }
 
 void	last_child(t_pipex *p, PARSER **nodes)
@@ -427,6 +442,8 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 			{
+				free_pipex(&p);
+				reset_node(nodes);
 				exit(1);
 			}
 		}
@@ -434,6 +451,8 @@ void	last_child(t_pipex *p, PARSER **nodes)
 	}
 	if (execute((*nodes), p) == -1)
 	{
+		ft_putstr_fd((*nodes)->command[0], 2);
+		ft_putendl_fd(": not executable", 2);
 		exit(126);
 	}
 }
@@ -594,17 +613,15 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		current->f++;
 	}
 	
-	if (exec_builtin(current, p, &cpy_stdin, &cpy_stdout))
+	if (!exec_builtin(current, p, &cpy_stdin, &cpy_stdout))
+		current->exit_code = 1;
+	if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
 	{
-		if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
-		{
-			// //dprintf(2, "yoooo et apres pause\n");
-			current->exit_code = 1;
-			return ;
-		}
-		if (p->exit == 1)
-			exit(EXIT_SUCCESS);
+		current->exit_code = 1;
+		return ;
 	}
+	if (p->exit == 1)
+		exit(EXIT_SUCCESS);
 }
 
 int	handle_input(PARSER **nodes, t_pipex *p)
