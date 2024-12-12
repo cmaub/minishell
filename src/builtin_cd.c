@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 17:50:53 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 11:57:47 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,6 @@ int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 }
 
 
-
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 {
 	char	*old_pwd;
@@ -105,7 +104,6 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 		create_new_var(p->env_nodes, pwd_var);
 		free(pwd_var);
 	}
-	// return(ft_error_int("cd: path not found", node));
 	old_pwd = return_var_from_env("PWD", p->env_nodes);
 	if (!old_pwd)
 		return (ft_error_int("cd: error", node));

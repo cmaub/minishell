@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 18:09:26 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 11:58:04 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,20 @@ int		all_n(char *str)
 	return (TRUE);
 }
 
+int	check_args(char **cmd, int *i, int *is_n)
+{
+	if (!cmd[*i])
+		return (-1);
+	while (ft_strncmp(cmd[*i], "-n", 2) == 0 && all_n(cmd[*i]))
+	{
+		(*i)++;
+		*is_n = 1;
+	}
+	if (!cmd[*i])
+		return (-1);
+	else
+		return (0);
+}
 
 int	ft_echo(char **cmd)
 {
@@ -34,14 +48,7 @@ int	ft_echo(char **cmd)
 
 	i = 1;
 	is_n = 0;
-	if (!cmd[i])
-		return (TRUE);
-	while (ft_strncmp(cmd[i], "-n", 2) == 0 && all_n(cmd[i]))
-	{
-		i++;
-		is_n = 1;
-	}
-	if (!cmd[i])
+	if (check_args(cmd, &i, &is_n) < 0)
 		return (TRUE);
 	if (cmd[i][0] != '-' || !all_n(cmd[i]))
 	{

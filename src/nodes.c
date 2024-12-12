@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/11 18:32:06 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 16:43:24 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ char	*return_var_from_env(char *str/*char **mini_env*/, t_env **chained_env)
 			temp = temp-> next;
 	}
 	if (temp == NULL)
-		return (NULL);
+		return (free(temp_str), NULL);
 	new_var = ft_strdup(temp->var - 1 + (ft_strlen(temp_str) + 1));
 	if (!new_var)
 		return (free(temp_str), NULL);
@@ -138,24 +138,28 @@ char	*isolate_expand(char *str, int index)
 	i = 0;
 	while (str[index + i] != '\0')
 	{
-		if (str[index + i] == 39 || str[index + i] == 34 || str[index + i] == 32)
-			break;
+		// if (str[index + i] == 39 || str[index + i] == 34 || str[index + i] == 32)
+		// 	break;
+		if (!ft_isalnum(str[index + i]) && str[index + i] != '_')
+			break ;
+		
 		i++;
 	}
 	return (ft_substr(str, index, i));
 }
 
-char	*join_char(char c, char *tmp)
+char	*join_char(char c, char *result)
 {
 	char	single_char[2];
-	char	*result;
+	char	*tmp;
 
 	single_char[0] = c;
 	single_char[1] = '\0';
-	result = ft_strjoin(tmp, single_char);
-	if (!result)
+	tmp = ft_strjoin(result, single_char);
+	free(result);
+	if (!tmp)
 		return (NULL);
-	return (result);
+	return (tmp);
 }
 
 char	*print_exit_code(PARSER *new_node, int *index)
@@ -163,25 +167,25 @@ char	*print_exit_code(PARSER *new_node, int *index)
 	char	*expand_result;
 	char	*itoa_result;
 
-	if (g_signal != 2)
-	{
+	// if (g_signal != 2)
+	// {
 		itoa_result = ft_itoa(new_node->exit_code);
 		if (!itoa_result)
 			return (NULL);
 		expand_result = ft_strdup(itoa_result);
 		if (!expand_result)
 			return (free(itoa_result), NULL);			
-	}
-	else
-	{
-		itoa_result = ft_itoa(130);
-		if (!itoa_result)
-			return (NULL);
-		expand_result = ft_strdup(itoa_result);
-		if (!expand_result)
-			return (free(itoa_result), NULL);
-		g_signal = 0;
-	}
+	// }
+	// else
+	// {
+	// 	itoa_result = ft_itoa(130);
+	// 	if (!itoa_result)
+	// 		return (NULL);
+	// 	expand_result = ft_strdup(itoa_result);
+	// 	if (!expand_result)
+	// 		return (free(itoa_result), NULL);
+	// 	g_signal = 0;
+	// }
 	new_node->exit_code = 0;
 	*index += 2;
 	return (free(itoa_result), expand_result);
@@ -216,6 +220,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
+	// result = "";
 	tmp_result = NULL;
 	tmp = NULL;
 	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
@@ -237,25 +242,21 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 					return (NULL); //free result ?
 			}
 			tmp_result = ft_strjoin(result, expand);
-			free(tmp);
 			free(expand);
-			tmp = NULL;
 			expand = NULL;
 			if (!tmp_result)
 				return(free(result), NULL);
-			free (result);
-			result = tmp_result;			
+			free(result);
+			result = tmp_result;
 		}
 		else
 		{
-			
 			tmp = join_char(str[*index], result);
 			if (!tmp)
-				return (free(result), NULL);
-			free(result);
-			result = tmp; // attention double free
-			if (result[ft_strlen(result) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
-				result[ft_strlen(result) - 1] = '\0';
+				return (/*free(result), */NULL);
+			result = tmp; 
+			if (tmp[ft_strlen(tmp) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
+				tmp[ft_strlen(tmp) - 1] = '\0';
 			(*index)++;
 		}
 	}
@@ -277,7 +278,7 @@ char	*process_single_quotes(char *str, int *index)
 		tmp = join_char(str[*index], result);
 		if (!tmp)
 			return (free(result), NULL);
-		free(result);
+		// free(result);
 		result = tmp;
 		(*index)++;
 	}
@@ -298,7 +299,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **cha
 		return (NULL);
 	tmp_result = NULL;
 	tmp = NULL;
-	(*index)++; // Passer quote ouvrante
+	(*index)++;
 	while (str[*index] != 34 && str[*index] != '\0')
 	{
 		if (str[*index] == '$' 
@@ -319,8 +320,6 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **cha
 			tmp_result = ft_strjoin(result, expand);
 			free(expand);
 			expand = NULL;
-			free(tmp);
-			tmp = NULL;
 			if (!tmp_result)
 				return (free(result), NULL);
 			free(result);
@@ -331,10 +330,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **cha
 			tmp = join_char(str[*index], result);
 			if (!tmp)
 				return (free(result), NULL);
-			free(result);
 			result = tmp;
-			// free(tmp);
-			tmp = NULL;
 			(*index)++;
 		}
 	}
@@ -362,17 +358,19 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 		else
 			tmp = process_unquoted(new_node, str, &start, chained_env);
 		if (!tmp)
-			return (free(result), NULL);
-		
+			return (free(result), free(tmp_result), NULL);
 		tmp_result = ft_strjoin(result, tmp);
 		free(tmp);
+		tmp = NULL ;
 		if (!tmp_result)
 			return (free(result), NULL);
 		free(result);
-		result = tmp_result;	
+		result = NULL;
+		result = tmp_result;
+		tmp_result = NULL;
 	}
 	if (!result || !*result)
-		return (NULL);
+		return (free(result), NULL);
 	return (result);
 }
 
@@ -390,6 +388,7 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 		{
 			tmp = ft_strdup(cur->value);
 			free(cur->value);
+			cur->value = NULL;
 			cur->value = withdraw_quotes(new_node, tmp, chained_env);
 			free(tmp);
 			if (!cur->value)
@@ -401,6 +400,7 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 	{
 		tmp = ft_strdup(cur->value);
 		free(cur->value);
+		cur->value = NULL;
 		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
 		free(tmp);
 		if (!cur->value || !*cur->value)
@@ -454,6 +454,7 @@ int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifi
 {
 	char	*input;
 
+	g_signal = 0;
 	signal(SIGINT, handle_c_signal_heredoc);
 	while (g_signal == 0)
 	{
@@ -567,9 +568,9 @@ int	create_nodes(t_mega_struct *mini)
 						// return (-1);
 					}
 					// reset_node(&mini->nodes);
-					print_nodes_list(&mini->nodes);
-					print_nodes_list(&new_node);
 					free_tokens(&mini->tokens);
+					if (g_signal == 2)
+						mini->exit_code = g_signal + 128;
 					return (-1);
 				}
 				f++;

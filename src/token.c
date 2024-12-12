@@ -6,15 +6,14 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/11 11:22:06 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 14:48:33 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*
-Cette fonction permet de changer la nature du token identifie en supprimant celui qui vient d'etre ajoute s'il peut etre precise
-*/
+// ***** RETIRER ?
+
 // void	replace_prev_token(t_token **list, t_token *new)
 // {
 // 	t_token	*current;
@@ -46,7 +45,9 @@ int	fill_list_of_tokens(t_mega_struct *mini, char *str)
 {
 	if (!expr(mini->L_input, &mini->tokens) || !parserHasReachEnd(mini->L_input))
 	{
+		// dprintf(2, "str = %s\n", str);
 		ft_putendl_fd("syntax error", 2);
+		g_signal = 0;
 		mini->exit_code = 2;
 		free(str);
 		free(mini->L_input);
@@ -93,10 +94,7 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 	len = end - start;
 	new = try_malloc(sizeof(t_token));
 	if (new->value)
-	{
-		//dprintf(2, "NOOOOON ne m'ecrase pas\n");
 		free(new->value);
-	}
 	new->value = ft_substr(input->data, start, len);
 	if (!new->value)
 	{
@@ -109,16 +107,18 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 	return (new);
 }
 
-int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type)
-{
-    t_token *new_node;
+// ***** RETIRER ?
 
-    new_node = create_new_token(input, start, end, type);
-    if (!new_node)
-        return (FALSE);
-    add_new_token(list, new_node);
-    return (TRUE);
-}
+// int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type)
+// {
+//     t_token *new_node;
+
+//     new_node = create_new_token(input, start, end, type);
+//     if (!new_node)
+//         return (FALSE);
+//     add_new_token(list, new_node);
+//     return (TRUE);
+// }
 
 
 void	print_tokens_list(t_token **list)

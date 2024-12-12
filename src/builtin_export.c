@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 12:19:54 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 18:19:47 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,7 +173,6 @@ void	copy_and_sort_env(t_env **env)
 	t_env	**sorted_env;
 
 	sorted_env = copy_t_env(env);
-	
 	sort_tab_ascii(sorted_env);
 	print_sorted_env(sorted_env);
 	free_t_env(sorted_env); // free la liste

@@ -6,13 +6,13 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 16:55:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 18:12:40 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int g_signal = 0;
+int g_signal = -1;
 
 int parserHasReachEnd(LEXER *input) 
 {
@@ -34,7 +34,19 @@ LEXER	*ft_init_lexer_input()
 
 void handle_c_signal(int signum)
 {
+	// dprintf(2, "signal mis a jour dans parent\n");
 	g_signal = signum;
+	// dprintf(2, "(%s, %d) ** signum = %d\n", __FILE__, __LINE__, signum);
+	ft_putstr_fd("\n", 2);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
+}
+
+void handle_c_signal_wait(int signum)
+{
+	g_signal = signum;
+	// dprintf(2, "(%s, %d) ** signum = %d\n", __FILE__, __LINE__, signum);
 	ft_putstr_fd("\n", 2);
 	rl_on_new_line();
 	rl_replace_line("", 0);
@@ -53,9 +65,13 @@ void	free_t_env(t_env **mini_env)
 	t_env	*next;
 	
 	if (!mini_env || !(*mini_env))
+	{
+		dprintf(2, "mini_env dans free_t_env est null\n");
 		return ;
+	}
 	while (*mini_env)
 	{
+		dprintf(2, "mini_env\n");
 		next = (*mini_env)->next;
 		if ((*mini_env)->var)
 		{
@@ -67,6 +83,19 @@ void	free_t_env(t_env **mini_env)
 	}
 	free(mini_env);
 }
+void	print_t_env(t_env **mini_env)
+{
+	t_env	*current;
+	
+	if (!mini_env || !*mini_env)
+		dprintf(2, "mini_env est null\n");
+	current = *mini_env;
+	while (current != NULL)
+	{
+		dprintf(2, "mini_env->var = %s\n", current->var);
+		current = current->next;
+	}
+}
 
 t_env	**copy_env_list(t_env **mini_env, char **env)
 {
@@ -75,12 +104,10 @@ t_env	**copy_env_list(t_env **mini_env, char **env)
 	t_env	*new_var_shlvl;
 	t_env	*new_var_;
 	int	i;
-
-	// t_env *test_env = NULL;
 	new_env = NULL;
 	
 	i = 0;
-	mini_env = try_malloc(sizeof(t_env *));
+	mini_env = try_malloc(sizeof(t_env));
 	if (!mini_env)
 		return (NULL);
 	if (!env || !(*env))
@@ -114,22 +141,11 @@ t_env	**copy_env_list(t_env **mini_env, char **env)
 			i++;
 		}		
 	}
+	dprintf(2, "taille t_env = %d\n", lstsize_t_env(mini_env));
 	return (mini_env);
 }
 
-void	print_t_env(t_env **mini_env)
-{
-	t_env	*current;
-	
-	if (!mini_env || !*mini_env)
-		dprintf(2, "mini_env est null\n");
-	current = *mini_env;
-	while (current != NULL)
-	{
-		dprintf(2, "mini_env->var = %s\n", current->var);
-		current = current->next;
-	}
-}
+
 
 int	loop_readline_main(LEXER **L_input, char **str)
 {
@@ -171,6 +187,7 @@ void	free_exec_input(t_mega_struct *mini)
 		handle_input(&mini->nodes, mini->p);
 		if (mini->nodes)
 			mini->exit_code = mini->nodes->exit_code;
+		// dprintf(2, "*** (%s, %d) mini->exit_code = %d, mini->nodes->exit_code = %d\n",__FILE__, __LINE__, mini->exit_code, mini->nodes->exit_code);
 		free_pipex(&mini->p);
 	}
 }
@@ -186,22 +203,39 @@ void	init_mega_struct(t_mega_struct *mini)
 	mini->str = NULL;
 }
 
+void	restore_g_signal()
+{
+	static int	nb_input =0;
+	
+	dprintf(2, "*** (%s, %d) nb_input = %d, g_signal = %d\n", __FILE__, __LINE__, nb_input, g_signal);
+	if (nb_input == 1)
+	{
+		g_signal = 0;
+		nb_input = 0;
+	}
+	if (g_signal == 2)
+		nb_input++;
+	dprintf(2, "*** (%s, %d) nb_input = %d, g_signal = %d\n", __FILE__, __LINE__, nb_input, g_signal);
+}
+
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
 	(void)argc;
 	t_mega_struct	*mini;
-	// char		*str;
+	// int	nb_input;
 
+	// nb_input = 0;
 	mini = try_malloc(sizeof(t_mega_struct));
 	if (!mini)
 		return (FALSE);
 	init_mega_struct(mini);
-	// str = NULL;
 	mini->chained_env = copy_env_list(mini->chained_env, env);
 	while (1)
 	{
-		// dprintf(2, "mini->str = %s\n", mini->str);
+		// dprintf(2, "*** (%s, %d), g_signal = %d\n", __FILE__, __LINE__, g_signal);
+		// restore_g_signal();
+		// dprintf(2, "*** (%s, %d), g_signal = %d\n", __FILE__, __LINE__, g_signal);
 		if (!loop_readline_main(&mini->L_input, &mini->str))
 			break ;
 		if (!fill_list_of_tokens(mini, mini->str))
@@ -212,7 +246,6 @@ int		main(int argc, char **argv, char **env)
 			if (create_nodes(mini) == 0)
 				free_exec_input(mini);
 			reset_node_mini(mini);
-			// reset_node(&mini->nodes);
 			free(mini->str);
 		}
 	}

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 18:20:25 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 17:10:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,6 @@ char	**copy_list_in_str(t_env **env_nodes)
 	while (temp)
 	{
 		str_env[i] = ft_strdup(temp->var);
-		// dprintf(2, "str_env[%d] = %s\n", i, str_env[i]);
 		if (!str_env[i])
 			return (NULL); 
 		i++;
@@ -180,8 +179,6 @@ char	**copy_list_in_str(t_env **env_nodes)
 			break ;
 	}
 	str_env[i] = NULL;
-	// dprintf(2, "sous forme de tab\n");
-	// print_tab(str_env);
 	return (str_env);
 }
 
@@ -191,13 +188,15 @@ int	execute(PARSER *current, t_pipex *p)
 	char	**tmp_cmd;
 	char	**tmp_minienv;
 	char	**str_env;
+	char	*curr_dir;
+	char	*dir_cmd;
 	
 	tmp_cmd = NULL;
 	tmp_minienv = NULL;
 	str_env = NULL;
+	curr_dir = "./";
 	if (is_builtin(current) == 1)
 	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
 		reset_node(&current);
 		free_pipex(&p);
@@ -213,47 +212,55 @@ int	execute(PARSER *current, t_pipex *p)
 		free_t_env(p->env_nodes);
 		free_pipex(&p);
 		reset_node(&current);
-		if (ft_strchr(tmp_cmd[0], '/') || no_envp(str_env))
+		if (ft_strchr(tmp_cmd[0], '/') || !find_path_line(str_env))
 		{
 			if (access(tmp_cmd[0], F_OK) == 0)
 			{
 				if (access(tmp_cmd[0], R_OK) == -1)
 				{
 					perror(tmp_cmd[0]);
-					free(tmp_cmd);
+					free_array(tmp_cmd);
 					free_array(str_env);
-					// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 					exit(126);
 				}
 			}
 			else
 			{
-				perror(tmp_cmd[0]);
-				free(tmp_cmd);
-				free_array(str_env);
-				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-				exit(127);
+				dir_cmd = ft_strjoin(curr_dir, tmp_cmd[0]);
+				if (access(dir_cmd, F_OK) == 0)
+				{
+					if (access(dir_cmd, R_OK) == -1)
+					{
+						perror(dir_cmd);
+						free_array(tmp_cmd);
+						free_array(str_env);
+						free(dir_cmd);
+						exit(126);
+					}
+					if (find_path_line(str_env))
+						execve(dir_cmd, tmp_cmd, str_env);
+					else
+						execve(dir_cmd, tmp_cmd, NULL);
+				}
+				else
+				{
+					perror(tmp_cmd[0]);
+					free_array(tmp_cmd);
+					free_array(str_env);
+					exit(127);
+				}
 			}
-			if (!no_envp(str_env))
-			{
-				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			if (find_path_line(str_env))
 				execve(tmp_cmd[0], tmp_cmd, str_env);
-			}
 			else
-			{
-				// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 				execve(tmp_cmd[0], tmp_cmd, NULL);
-			}
 		}
-		else if (!ft_strchr(tmp_cmd[0], '/') && !no_envp(str_env))
+		else if (!ft_strchr(tmp_cmd[0], '/') && find_path_line(str_env))
 		{	
-			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			path = get_path_and_check(&tmp_cmd[0], str_env);
-			// dprintf(2, "path = %s\n", path);
-			// // dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
 			if (execve(path, tmp_cmd, str_env) == -1)
-				return (free(tmp_cmd), free(path), free_array(str_env), -1);
+				return (free_array(tmp_cmd), free(path), free_array(str_env), -1);
 		}
 	}
 	return (-1);
@@ -274,7 +281,6 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	safe_close(&p->pipefd[0]);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		// //dprintf(2, "(*nodes)->redir_type[%d] = %d\n", (*nodes)->f, (*nodes)->redir_type[(*nodes)->f]);
 		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
 		if (fd_in == -1 && (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
@@ -285,21 +291,14 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		{
 			dprintf(2, "fd_in = %d\n", fd_in);
 			if (dup2(fd_in, STDIN_FILENO) == -1)
-			{
-				// reset_node(nodes);
 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-			}
 			safe_close(&fd_in);
 		}
 		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
 		{
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
-			{
-				// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-				// reset_node(nodes); //deja free avec le close_error
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);//rajouter fd heredoc
-			}
 			safe_close(&(*nodes)->fd_heredoc[d][0]);
 			d++;
 		}
@@ -314,15 +313,11 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			flag_output = 1;
 		}
 		(*nodes)->f++;
-
 	}
 	if (flag_output == 0 && (*nodes)->next)
 	{
 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
-		{
-			//dprintf(2, "c'est ici le pb\n");
 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-		}
 		safe_close(&p->pipefd[1]);
 	}
 	if (execute((*nodes), p) == -1)
@@ -365,10 +360,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 		{
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
-			{
-				// reset_node(nodes);
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);//rajouter fd heredoc
-			}
 			safe_close(&(*nodes)->fd_heredoc[d][0]);
 			d++;
 		}
@@ -409,7 +401,6 @@ void	last_child(t_pipex *p, PARSER **nodes)
 	(*nodes)->f = 0;
 	d = 0;
 	safe_close(&p->pipefd[1]);
-	// p->pipefd[1] = -1;
 	if (dup2(p->prev_fd, STDIN_FILENO) == -1)
 		close_error_and_free(NULL, p, nodes, "pipe", 1);
 	close_pipefds(p);
@@ -430,11 +421,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		{
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
-			{
-				// //dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-				// reset_node(nodes);
 				close_error_and_free(&(*nodes)->fd_heredoc[d][0], p, nodes, (*nodes)->file[(*nodes)->f], 1);
-			}
 			safe_close(&(*nodes)->fd_heredoc[d][0]);
 			d++;
 		}
@@ -475,12 +462,23 @@ void	parent_process(t_pipex *p)
 			safe_close(&p->pipefd[0]);
 	}
 }
+void handle_c_signal_child(int signum)
+{
+	// dprintf(2, "signal mis a jour dans enfant\n");
+	g_signal = signum;
+	// dprintf(2, "(%s, %d) ** signum = %d\n", __FILE__, __LINE__, signum);
+	ft_putstr_fd("\n", 2);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	// rl_redisplay();
+}
 
 void	create_process(t_pipex *p, PARSER **nodes)
 {
 	
 	if (p->pid == 0)
 	{
+		// signal(SIGINT, SIG_IGN);
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		if (p->i == 0)
@@ -522,7 +520,6 @@ int	restore_std(int *cpy_stdin, int *cpy_stdout)
 		{
 			perror("STDOUT");
 			// safe_close(*cpy_stdin);
-			// return (FALSE);
 		}
 		safe_close(cpy_stdout);
 		*cpy_stdout = -1;
@@ -539,8 +536,6 @@ int	restore_std(int *cpy_stdin, int *cpy_stdout)
 	}
 	if (*cpy_stdout != -1)
 		return (FALSE);
-	// //dprintf(2, "cpy_stdin = %d et cpy_stdout = %d\n", *cpy_stdin, *cpy_stdout);
-	// //dprintf(2, "stdin = %d et stdout = %d\n", STDIN_FILENO, STDOUT_FILENO);
 	return (TRUE);
 }
 
@@ -617,11 +612,20 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		current->exit_code = 1;
 	if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
 	{
+		dprintf(2, "**** (%s, %d): restore std echoue\n", __FILE__, __LINE__);
 		current->exit_code = 1;
 		return ;
 	}
+	dprintf(2, "**** (%s, %d): restore std success\n", __FILE__, __LINE__);
 	if (p->exit == 1)
 		exit(EXIT_SUCCESS);
+}
+void	handle_quit_child(int signum)
+{
+	g_signal = signum;
+	// ft_putstr_fd("\n", 2);
+	rl_on_new_line();
+	rl_replace_line("", 0);
 }
 
 int	handle_input(PARSER **nodes, t_pipex *p)
@@ -643,6 +647,8 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 			}
 		}
 		signal(SIGINT, SIG_IGN);
+		signal(SIGINT, handle_c_signal_child);
+		signal(SIGQUIT, handle_quit_child);
 		p->pid = fork();
 		if (p->pid == -1)
 		{
@@ -657,7 +663,7 @@ int	handle_input(PARSER **nodes, t_pipex *p)
 		p->i++;
 		current = current->next;
 		if (p->i == p->nb_cmd)
-			break;	
+			break;
 	}
 	
 	return (close_pipefds(p), ft_wait(p->last_pid, nodes));

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 17:39:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 11:36:27 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,23 +31,25 @@ void check_and_free_new_node(PARSER *new_node)
 	}
 }
 
-void	free_new_node(PARSER *new_node)
-{
-	if (new_node)
-    {
-		if ((new_node->file && new_node->nb_file > 0))
-			free(new_node->file);
-		if (new_node->command && new_node->nb_command > 0)
-			free(new_node->command);
-		if (new_node->delimiter && new_node->nb_heredoc > 0)
-			free(new_node->delimiter);
-		if (new_node->redir_type && new_node->nb_file > 0)
-			free(new_node->redir_type);
-		if (new_node->fd_heredoc && new_node->nb_heredoc > 0)
-			free(new_node->fd_heredoc);
-		free(new_node);
-	}
-}
+// **** RETIRER ?
+
+// void	free_new_node(PARSER *new_node)
+// {
+// 	if (new_node)
+//     {
+// 		if ((new_node->file && new_node->nb_file > 0))
+// 			free(new_node->file);
+// 		if (new_node->command && new_node->nb_command > 0)
+// 			free(new_node->command);
+// 		if (new_node->delimiter && new_node->nb_heredoc > 0)
+// 			free(new_node->delimiter);
+// 		if (new_node->redir_type && new_node->nb_file > 0)
+// 			free(new_node->redir_type);
+// 		if (new_node->fd_heredoc && new_node->nb_heredoc > 0)
+// 			free(new_node->fd_heredoc);
+// 		free(new_node);
+// 	}
+// }
 
 void	free_tokens(t_token **tokens)
 {
@@ -60,7 +62,6 @@ void	free_tokens(t_token **tokens)
 		next = (*tokens)->next;
 		if ((*tokens)->value)
 		{
-			// printf("Freeing token with value: %s\n", (*tokens)->value);
 			free((*tokens)->value);
 			(*tokens)->value = NULL;
 		}
@@ -96,12 +97,9 @@ void	free_array(char **array)
 	i = 0;
 	while (array[i])
 	{
-		// //dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
-		// //dprintf(2, "array[%d] = %s\n", i, array[i]);
 		free(array[i]);
 		i++;
 	}
-	//dprintf(2, "*** ici = (%s, %d)\n", __FILE__, __LINE__);
 	free(array);
 	array = NULL;
 }
@@ -115,7 +113,6 @@ void	free_array_int(int **array, PARSER *current)
 	i = 0;
 	while (i < current->nb_heredoc)
 	{
-		dprintf(2, "i = %d\n", i);
 		if (array[i])
 		{
 			free(array[i]);
@@ -142,14 +139,10 @@ void	reset_node_mini(t_mega_struct *mini)
 {
 	PARSER	*current;
 	PARSER *temp;
-	dprintf(2, "entree reset_node_mini\n");
-	// dprintf(2, "current->nb_heredoc = %d\n", mini->nodes->nb_heredoc);
 
 	current = mini->nodes;
-	if (!mini->nodes/* || !(*node)*/)
-	{
+	if (!mini->nodes)
 		return ;
-	}
 	while (current)
 	{
 		temp = current->next;
@@ -174,8 +167,6 @@ void	reset_node_mini(t_mega_struct *mini)
 		}
 		if (current->nb_heredoc)
 		{
-			dprintf(2, "nb_heredoc\n");
-			dprintf(2, "current->fd_heredoc[0] = %d", current->fd_heredoc[0][0]);
 			close_heredoc(current);
 			free_array_int(current->fd_heredoc, current);
 		}
@@ -194,9 +185,7 @@ void	reset_node(PARSER **node)
 
 	current = *node;
 	if (!node || !(*node))
-	{
 		return ;
-	}
 	while (current)
 	{
 		temp = current->next;
@@ -234,9 +223,7 @@ void	reset_node(PARSER **node)
 void	reset_one_node(PARSER **node)
 {
 	if (!node || !*node)
-	{
 		return ;
-	}
 	if ((*node)->file)
 	{
 		free_array_and_close_fds((*node)->file);
@@ -253,25 +240,17 @@ void	reset_one_node(PARSER **node)
 		(*node)->delimiter = NULL;
 	}
 	if ((*node)->redir_type)
-	{
 		free((*node)->redir_type);
-	}
 	if ((*node)->fd_heredoc)
 	{
-		dprintf(2, "one ** nb_heredoc\n");
-		// dprintf(2, "one ** current->fd_heredoc[0] = %d\n", (*node)->fd_heredoc[0][0]);
 		close_heredoc((*node));
 		free_array_int((*node)->fd_heredoc, (*node));
-		// dprintf(2, "one ** current->fd_heredoc[0] = %d\n", (*node)->fd_heredoc[0][0]);
-		// dprintf(2, "one ** current->fd_heredoc[1] = %d\n", (*node)->fd_heredoc[0][1]);
-
-
 	}
-	if ((*node))
-		free((*node));
+	// if ((*node))
+	// 	free((*node));
 	(*node) = NULL;
 	// free (node);
-	node = NULL;
+	// node = NULL;
 }
 
 

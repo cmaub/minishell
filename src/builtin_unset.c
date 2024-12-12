@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/09 17:47:50 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 18:19:13 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,11 +76,17 @@ t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 	int		i;
 	int		j;
 	int		index;
+	int		size_env;
 	t_env	*temp;
 	t_env	*saved;
 
 	i = 1;
 	saved = NULL;
+	if (!env_nodes || !*env_nodes)
+	{	
+		dprintf(2, "env_nodes n'existe pas");
+		return (NULL);
+	}
 	if (!current->command[1])
 		return (env_nodes);
 	if (current->command[1] && current->command[1][0] == '-')
@@ -96,6 +102,12 @@ t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 		index = env_var_exists(env_nodes, current->command[i]);
 		if (index >= 0)
 		{
+			size_env = lstsize_t_env(env_nodes);
+			if (size_env == 1)
+			{
+				ft_putendl_fd("empty envp not allowed\n", 2);
+				break ;
+			}
 			temp = *env_nodes;
 			j = 0;
 			if (index == 0)

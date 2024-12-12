@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/11 14:42:28 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 11:56:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,14 @@ void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p, int *cpy_stdin, int *cp
 	}
 }
 
+void	free_exit(t_pipex *p, PARSER *nodes, int exit_c)
+{
+	reset_node(&nodes);
+	free_t_env(p->env_nodes);
+	free_pipex(&p);
+	exit(exit_c);
+}
+
 int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout)
 {
 	int	i;
@@ -101,12 +109,8 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdou
 		if (is_arg_too_big(cmd[1]))
 		{
 			not_a_num(p, node);
-			safe_close(cpy_stdin);
-			safe_close(cpy_stdout);
-			reset_node(&node);
-			free_t_env(p->env_nodes);
-			free_pipex(&p);
-			exit(2);
+			restore_std(cpy_stdin, cpy_stdout);
+			free_exit(p, node, 2);
 		}
 		i++;
 	}
@@ -115,15 +119,9 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdou
 	else
 	{
 		input_ok(p, cmd[1], node);
-		safe_close(cpy_stdin);
-		safe_close(cpy_stdout);
+		restore_std(cpy_stdin, cpy_stdout);
 		exit_code = node->exit_code;
-		reset_node(&node);
-		if (!node)
-			dprintf(2, "nodes est null\n");
-		free_t_env(p->env_nodes);
-		free_pipex(&p);
-		exit(exit_code);		
+		free_exit(p, node, exit_code);		
 	}
 	return (TRUE);
 }
