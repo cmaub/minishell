@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 12:41:21 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 14:29:40 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,21 +89,7 @@ void	free_array_and_close_fds(char **array)
 	free(array);
 }
 
-void	free_array(char **array)
-{
-	int i;
 
-	if (!array || !*array)
-		return;
-	i = 0;
-	while (array[i])
-	{
-		free(array[i]);
-		i++;
-	}
-	free(array);
-	array = NULL;
-}
 
 void	free_array_int(int **array, PARSER *current)
 {
@@ -135,38 +121,61 @@ void	close_heredoc(PARSER *current)
 		i++;
 	}
 }
+
+void	free_array(char **array)
+{
+	int i;
+
+	if (!array)
+		return ;
+	if (!*array)
+	{
+		if (array)
+		{
+			free(array);
+			array = NULL;
+		}
+		return ;
+	}
+	i = 0;
+	while (array[i])
+	{
+		free(array[i]);
+		i++;
+	}
+	free(array);
+	array = NULL;
+}
+
 void	reset_one_node(PARSER **node)
 {
-	if (!node || !*node)
+	if (!node)
 		return ;
+	if (!*node)
+	{
+		if (node)
+		{
+			free(node);
+			node = NULL;
+		}
+		return ;
+	}
 	if ((*node)->file)
-	{
 		free_array_and_close_fds((*node)->file);
-		(*node)->file = NULL;
-	}
 	if ((*node)->command)
-	{
 		free_array((*node)->command);
-		(*node)->command = NULL;
-	}
 	if ((*node)->delimiter)
-	{
 		free_array((*node)->delimiter);
-		(*node)->delimiter = NULL;
-	}
 	if ((*node)->redir_type)
 		free((*node)->redir_type);
 	if ((*node)->fd_heredoc)
-	{
-		close_heredoc((*node));
-		free_array_int((*node)->fd_heredoc, (*node));
-	}
-	// if ((*node))
-	// 	free((*node));
+		(close_heredoc((*node)), free_array_int((*node)->fd_heredoc, (*node)));
+	if ((*node))
+		free((*node));
 	(*node) = NULL;
-	// free (node);
-	// node = NULL;
+	node = NULL;
 }
+
 void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 {
 	PARSER	*current;
@@ -186,6 +195,7 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 		}
 		if (current->command)
 		{
+			dprintf(2, "** %s, %d\n", __FILE__, __LINE__);
 			free_array(current->command);
 			current->command = NULL;
 		}
@@ -207,6 +217,8 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 			free(current);
 		current = temp;
 	}
+	// free(*node);
+	// free(mini->nodes);
 	mini->nodes = NULL;
 	mini->p = NULL;
 }

@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 11:54:42 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 14:41:36 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,7 @@ int	execute(PARSER *current, t_pipex *p)
 			{
 				if (access(tmp_cmd[0], R_OK) == -1)
 				{
-					perror(tmp_cmd[0]);
+					perror(tmp_cmd[0]); // sur meme ligne dans parentheses
 					free_array(tmp_cmd);
 					free_array(str_env);
 					exit(126);
@@ -225,16 +225,13 @@ int	execute(PARSER *current, t_pipex *p)
 			else
 			{
 				dir_cmd = ft_strjoin(curr_dir, tmp_cmd[0]);
+				if (!dir_cmd)
+					(free_array(tmp_cmd), free_array(str_env), exit(1));
 				if (access(dir_cmd, F_OK) == 0)
 				{
 					if (access(dir_cmd, R_OK) == -1)
-					{
-						perror(dir_cmd);
-						free_array(tmp_cmd);
-						free_array(str_env);
-						free(dir_cmd);
-						exit(126);
-					}
+						(perror(dir_cmd), free_array(tmp_cmd),
+							free_array(str_env), free(dir_cmd), exit(126));
 					if (find_path_line(str_env))
 						execve(dir_cmd, tmp_cmd, str_env);
 					else

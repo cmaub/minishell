@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 12:24:24 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 14:34:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,8 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 	{
 		new_pwd = getcwd(NULL, 0);
 		pwd_var = ft_strjoin("PWD=", new_pwd);
+		if (!pwd_var)
+			return(free(new_pwd), FALSE);
 		free(new_pwd);
 		create_new_var(p->env_nodes, pwd_var);
 		free(pwd_var);
