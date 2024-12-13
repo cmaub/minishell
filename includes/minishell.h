@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 15:53:35 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 17:30:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,7 +233,7 @@ int	redir(LEXER *input, t_token **list);
 int	command(LEXER *input, t_token **list);
 int	expr(LEXER *input, t_token **list);
 int	start(LEXER *input);
-int	parserHasReachEnd(LEXER *input);
+int	parser_has_reach_end(LEXER *input);
 
 extern int	g_signal;
 #endif
