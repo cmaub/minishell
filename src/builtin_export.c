@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 16:50:21 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 17:26:49 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,34 +205,58 @@ void	print_error_msg(char *str, PARSER *current, char *error_msg)
 // 	return (TRUE);
 // }
 
+int	ft_add_new_var(t_env **nodes_env, char *cmd)
+{
+	t_env	*new;
+	
+	new = try_malloc(sizeof(t_env));
+	if (!new)
+		return (FALSE);
+	new->var = ft_strdup(cmd);
+	if (!new->var)
+		return (free(new), FALSE);
+	new->next = NULL;
+	ft_lstadd_env_back(nodes_env, new);
+	return (TRUE);
+}
+
 int	check_value_and_add(t_env **nodes_env, char *cmd, int index)
 {
 	t_env	*temp;
-	t_env	*new;
+	// t_env	*new;
 	int	j;
 	
 	temp = *nodes_env;
-	new = NULL;
+	// new = NULL;
 	j = -1;
+	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	if (index >= 0)
 	{
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		while (temp && j++ < index)
 			temp = temp->next;
-		free(temp->var);
-		temp->var = ft_strdup(cmd);
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		if (temp)
+		{
+			free(temp->var);
+			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+			temp->var = ft_strdup(cmd);
+		}
+		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		if (!temp->var)
 			return (FALSE);
 	}
 	else
 	{
-		new = try_malloc(sizeof(t_env));
-		if (!new)
-			return (FALSE);
-		new->var = ft_strdup(cmd);
-		if (!new->var)
-			return (free(new), FALSE);
-		new->next = NULL;
-		ft_lstadd_env_back(nodes_env, new);
+		return (ft_add_new_var(nodes_env, cmd));
+		// new = try_malloc(sizeof(t_env));
+		// if (!new)
+		// 	return (FALSE);
+		// new->var = ft_strdup(cmd);
+		// if (!new->var)
+		// 	return (free(new), FALSE);
+		// new->next = NULL;
+		// ft_lstadd_env_back(nodes_env, new);
 	}
 	return (TRUE);
 }
@@ -250,6 +274,7 @@ void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
 		return (print_error_msg(name, current, "': not a valid identifier"));
 	index = env_var_exists(nodes_env, name);
 	*equal = '=';
+	dprintf(2, "cmd = %s\n", cmd);
 	if (!check_value_and_add(nodes_env, cmd, index))
 		return ;
 }
