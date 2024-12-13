@@ -3,25 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 11:50:41 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:16:37 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // Supprime une ou des variable d'environnement
-// Gerer la sppression multiple
 // Si une variable n'existe pas, unset ne doit pas provoquer la fin du programme
-// faut-il permettre la suppression de variable protégees ?
-
-//parcourir env, trouver la variable
-// copier une copie de env sans la variable a supprimer
-// a priori pas de message d'erreur
 
 #include "minishell.h"
 
-int		count_env_var(char **list)
+int	count_env_var(char **list)
 {
 	int	len;
 
@@ -33,32 +27,63 @@ int		count_env_var(char **list)
 	return (len);
 }
 
-t_env	**ft_unset(PARSER *current, t_env **env_nodes)
+int	check_args_unset(PARSER *current, t_env **env_nodes)
 {
-	int		i;
+	if (!env_nodes || !*env_nodes)
+	{
+		env_nodes = NULL;
+		return (FALSE);
+	}
+	if (!current->command[1])
+		return (FALSE);
+	if (current->command[1] && current->command[1][0] == '-')
+	{
+		(ft_putstr_fd("unset: ", 2), ft_putstr_fd(current->command[1], 2),
+			ft_putendl_fd(": invalid option", 2));
+		current->exit_code = 2;
+		return (FALSE);
+	}
+	return (TRUE);
+}
+
+int	browse_env_and_unset_var(t_env **env_nodes, int index)
+{
 	int		j;
-	int		index;
-	int		size_env;
 	t_env	*temp;
 	t_env	*saved;
 
-	i = 1;
+	j = -1;
+	temp = *env_nodes;
 	saved = NULL;
-	if (!env_nodes || !*env_nodes)
-	{	
-		dprintf(2, "env_nodes n'existe pas");
-		return (NULL);
-	}
-	if (!current->command[1])
-		return (env_nodes);
-	if (current->command[1] && current->command[1][0] == '-')
+	if (index == 0)
 	{
-		ft_putstr_fd("unset: ", 2);
-		ft_putstr_fd(current->command[1], 2);
-		ft_putendl_fd(": invalid option", 2);
-		current->exit_code = 2;
-		return (env_nodes);
+		*env_nodes = temp->next;
+		(free(temp->var), free(temp));
 	}
+	else
+	{
+		while (temp && j++ < index)
+		{
+			saved = temp;
+			temp = temp->next;
+		}
+		if (!temp)
+			return (FALSE);
+		saved->next = temp->next;
+		(free(temp->var), free(temp));
+	}
+	return (TRUE);
+}
+
+t_env	**ft_unset(PARSER *current, t_env **env_nodes)
+{
+	int		i;
+	int		index;
+	int		size_env;
+
+	i = 1;
+	if (!check_args_unset(current, env_nodes))
+		return (env_nodes);
 	while (current->command[i] != NULL)
 	{
 		index = env_var_exists(env_nodes, current->command[i]);
@@ -70,33 +95,10 @@ t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 				ft_putendl_fd("empty envp not allowed\n", 2);
 				break ;
 			}
-			temp = *env_nodes;
-			j = 0;
-			if (index == 0)
-			{
-				*env_nodes = temp->next;
-				free(temp->var);
-				free(temp);
-			}
-			else
-			{
-				while (temp && j < index)
-				{
-					saved = temp;
-					temp = temp->next;
-					j++;
-				}
-				if (!temp)
-				{
-					return (env_nodes);
-				}
-				saved->next = temp->next;
-				free(temp->var);
-				free(temp);
-			}
+			if (!browse_env_and_unset_var(env_nodes, index))
+				return (env_nodes);
 		}
 		i++;
 	}
 	return (env_nodes);
 }
-

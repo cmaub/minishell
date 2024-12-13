@@ -3,28 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 12:26:12 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:50:21 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 // export rend une variable d'environnement accessible aux processus enfants.
-// il permet de rajouter une ou plusieurs variables d'environnement, en les initialisant ou non
-// il faut donc verifier si elles existent deja avant de les creer
-// si elles existent deja, il est possible de changer la valeur de la variable d'env deja existante
-// si export sans arg on affiche les variables d'environnement dans l'ordre ascii
+// il permet de rajouter une ou plusieurs variables d'environnement
+// si elles existent deja, il est possible de changer leur valeur
+// si export sans arg on affiche les variables d'env dans l'ordre ascii
 // verifier la syntaxe des noms de variables + des valeurs possibles
 // gerer les guillemet et les "export" ecrits avant
 
-int		env_var_exists(t_env **nodes_env, char *var)
+int	env_var_exists(t_env **nodes_env, char *var)
 {
-	int	i;
-	int	size;
-	int	sizeofvar;
+	int		i;
+	int		size;
+	int		sizeofvar;
 	t_env	*temp;
 
 	i = 0;
@@ -37,10 +36,10 @@ int		env_var_exists(t_env **nodes_env, char *var)
 		return (-1);
 	while (temp && i < size)
 	{
-		if (ft_strncmp(temp->var, var, sizeofvar) == 0 && (temp->var[sizeofvar] == '\0' 
-			|| temp->var[sizeofvar] == '='))
+		if (ft_strncmp(temp->var, var, sizeofvar) == 0
+			&& (temp->var[sizeofvar] == '\0'
+				|| temp->var[sizeofvar] == '='))
 			return (i);
-		
 		i++;
 		temp = temp->next;
 	}
@@ -49,8 +48,8 @@ int		env_var_exists(t_env **nodes_env, char *var)
 
 void	sort_tab_ascii(t_env **env)
 {
-	char *temp;
-	t_env *current;
+	char	*temp;
+	t_env	*current;
 	t_env	*head;
 
 	head = *env;
@@ -72,7 +71,7 @@ void	sort_tab_ascii(t_env **env)
 
 void	write_var(char *sorted_env)
 {
-	int	j;
+	int		j;
 	char	*tmp;
 
 	j = 0;
@@ -94,29 +93,36 @@ void	write_var(char *sorted_env)
 		write(1, "\n", 1);
 }
 
+int	is_ignored_var(char *var)
+{
+	if (!var)
+		return (0);
+	return (var[0] == '_' && (var[1] == '\0' || var[1] == '='));
+}
+
 void	print_sorted_env(t_env **env_nodes)
 {
-	int	i;
-	t_env *current;
+	int		i;
+	t_env	*cur;
 
 	i = 0;
 	if (!*env_nodes || !env_nodes)
 		return ;
-	current = *env_nodes;
-	while (current != NULL)
+	cur = *env_nodes;
+	while (cur != NULL)
 	{
-		if (current->var && current->var[0] == '_' && (current->var[1] == '\0' || current->var[1] == '='))
+		if (is_ignored_var(cur->var))
 		{
-			if (current->next)
-				current = current->next;
+			if (cur->next)
+				cur = cur->next;
 			else
 				break ;
 		}
-		else if (current && current->var)
+		else if (cur && cur->var)
 		{
-			write_var(current->var);
-			if (current->next)
-				current = current->next;
+			write_var(cur->var);
+			if (cur->next)
+				cur = cur->next;
 			else
 				break ;
 		}			
@@ -125,11 +131,11 @@ void	print_sorted_env(t_env **env_nodes)
 
 t_env	**copy_t_env(t_env **env)
 {
-	t_env	**sorted_env = NULL;
+	t_env	**sorted_env;
 	t_env	*new_var;
 	t_env	*current;
-	int	count;
-	
+	int		count;
+
 	current = *env;
 	sorted_env = try_malloc(sizeof(t_env *));
 	if (!sorted_env)
@@ -157,7 +163,7 @@ void	copy_and_sort_env(t_env **env)
 	sorted_env = copy_t_env(env);
 	sort_tab_ascii(sorted_env);
 	print_sorted_env(sorted_env);
-	free_t_env(sorted_env); // free la liste
+	free_t_env(sorted_env);
 }
 
 int	check_name(char *name)
@@ -176,7 +182,6 @@ int	check_name(char *name)
 	return (TRUE);
 }
 
-
 void	print_error_msg(char *str, PARSER *current, char *error_msg)
 {
 	ft_putstr_fd("export: '", 2);
@@ -185,56 +190,74 @@ void	print_error_msg(char *str, PARSER *current, char *error_msg)
 	current->exit_code = 1;
 }
 
-void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
+// int	create_and_add_new_var_to_env(t_env **nodes_env, char *var)
+// {
+// 	t_env	*new;
+	
+// 	new = try_malloc(sizeof(t_env));
+// 	if (!new)
+// 		return (FALSE);
+// 	new->var = ft_strdup(var);
+// 	if (!new->var)
+// 		return (free(new), FALSE);
+// 	new->next = NULL;
+// 	ft_lstadd_env_back(nodes_env, new);
+// 	return (TRUE);
+// }
+
+int	check_value_and_add(t_env **nodes_env, char *cmd, int index)
 {
-	int		index;
-	char	*equal;
-	char	*name;
-	int		j;
 	t_env	*temp;
 	t_env	*new;
-
-	equal = ft_strchr(cmd, '=');
-	*equal = '\0';
-	name = cmd;
-	j = 0;
-	new = NULL;
-	if (!check_name(name))
-		return (print_error_msg(name, current, "': not a valid identifier"));
-	index = env_var_exists(nodes_env, name);
-	*equal = '=';
+	int	j;
+	
 	temp = *nodes_env;
+	new = NULL;
+	j = -1;
 	if (index >= 0)
 	{
-		while (temp && j < index)
-		{
+		while (temp && j++ < index)
 			temp = temp->next;
-			j++;
-		}
 		free(temp->var);
 		temp->var = ft_strdup(cmd);
 		if (!temp->var)
-			return ;
+			return (FALSE);
 	}
 	else
 	{
 		new = try_malloc(sizeof(t_env));
 		if (!new)
-			return ;
+			return (FALSE);
 		new->var = ft_strdup(cmd);
 		if (!new->var)
-			return (free(new));
-		new->next = NULL; 
+			return (free(new), FALSE);
+		new->next = NULL;
 		ft_lstadd_env_back(nodes_env, new);
 	}
+	return (TRUE);
 }
 
-
-
-t_env	**handle_variable_without_value(char *cmd, PARSER *current, t_env **env_nodes)
+void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
 {
-	int index;
-	int j;
+	int		index;
+	char	*equal;
+	char	*name;
+
+	equal = ft_strchr(cmd, '=');
+	*equal = '\0';
+	name = cmd;
+	if (!check_name(name))
+		return (print_error_msg(name, current, "': not a valid identifier"));
+	index = env_var_exists(nodes_env, name);
+	*equal = '=';
+	if (!check_value_and_add(nodes_env, cmd, index))
+		return ;
+}
+
+t_env	**handle_var_wo_value(char *cmd, PARSER *current, t_env **env_nodes)
+{
+	int		index;
+	int		j;
 	t_env	*new_var;
 
 	j = 0;
@@ -253,12 +276,11 @@ t_env	**handle_variable_without_value(char *cmd, PARSER *current, t_env **env_no
 		new_var->var = ft_strdup(cmd);
 		if (!new_var->var)
 			return (free(new_var), env_nodes);
-		new_var->next = NULL; 
+		new_var->next = NULL;
 		add_new_var(env_nodes, new_var);
 	}
 	return (env_nodes);
 }
-
 
 t_env	**ft_export(PARSER *current, t_env **env_nodes)
 {
@@ -282,7 +304,7 @@ t_env	**ft_export(PARSER *current, t_env **env_nodes)
 		if (ft_strchr(current->command[i], '=') != NULL)
 			handle_value(current->command[i], current, env_nodes);
 		else
-			handle_variable_without_value(current->command[i], current, env_nodes);
+			handle_var_wo_value(current->command[i], current, env_nodes);
 		i++;
 	}
 	return (env_nodes);

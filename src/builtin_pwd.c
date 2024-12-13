@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/10 15:09:09 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:16:58 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 int	ft_pwd(PARSER *current)
 {
 	char	*new_var;
-	
+
 	new_var = NULL;
 	if (current->command[1] && current->command[1][0] == '-')
 	{
