@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 11:57:47 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:24:24 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,18 +28,19 @@ permet de recuperer le chemin absolu du repertoire courant
 - size : la taille du bloc de mémoire passé en premier paramètre.
 */
 
-void	create_new_var(t_env **node, char *str)
+int	create_new_var(t_env **node, char *str)
 {
 	t_env	*new;
 
 	new = try_malloc(sizeof(t_env));
 	if (!new)
-		return ;
+		return (FALSE);
 	new->var = ft_strdup(str);
-	new->next = NULL; 
 	if (!new->var)
-		return ;
+		return (FALSE);
+	new->next = NULL; 
 	ft_lstadd_env_back(node, new);
+	return (TRUE);
 }
 
 int	ft_setenv(char *dest, char *src, t_env **env_nodes)
@@ -52,7 +53,7 @@ int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 	temp = *env_nodes;
 	dest_tmp = ft_strjoin(dest, "=");
 	if (!dest_tmp)
-		return (-1);
+		return (FALSE);
 	while (temp && temp->next && temp->var)
 	{
 		if (ft_strncmp(temp->var, dest_tmp, ft_strlen(dest_tmp)) == 0)
@@ -66,18 +67,19 @@ int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 			new_var = ft_strjoin(dest_tmp, src);
 			if (!temp)
 				return (free(dest_tmp), -1);
-			create_new_var(env_nodes, new_var);
+			if (!create_new_var(env_nodes, new_var))
+				return (free(new_var), free(dest_tmp), FALSE);
 			free(new_var);
 		}
 		else
-			return (-1);
+			return (FALSE);
 	}
 	free(temp->var);
 	temp->var = NULL;
 	temp->var = ft_strjoin(dest_tmp, src);
 	if (!temp->var)
-		return (free(dest_tmp), -1);
-	return (free(dest_tmp), 0);
+		return (free(dest_tmp), FALSE);
+	return (free(dest_tmp), TRUE);
 }
 
 
@@ -88,15 +90,15 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 	char	*pwd_var;
 
 	if (!cmd[1])
-		return(ft_error_int("cd: no directory specified", node));
+		return(ft_error_int("cd: no directory specified", node), FALSE);
 	if (cmd[2])
-		return(ft_error_int("cd: too many arguments", node));
+		return(ft_error_int("cd: too many arguments", node), FALSE);
 	else
 	{
 		if (chdir(cmd[1]) == -1)
 			return (ft_error_int("cd: error", node));
 	}
-	if (env_var_exists(p->env_nodes, "PWD") == -1)
+	if (!env_var_exists(p->env_nodes, "PWD"))
 	{
 		new_pwd = getcwd(NULL, 0);
 		pwd_var = ft_strjoin("PWD=", new_pwd);
@@ -107,12 +109,12 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 	old_pwd = return_var_from_env("PWD", p->env_nodes);
 	if (!old_pwd)
 		return (ft_error_int("cd: error", node));
-	if (ft_setenv("OLDPWD", old_pwd, p->env_nodes) == -1)
+	if (!ft_setenv("OLDPWD", old_pwd, p->env_nodes))
 		return (free(old_pwd), FALSE);
 	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)
 		return (free(old_pwd), ft_error_int("cd: error", node));
-	if (ft_setenv("PWD", new_pwd, p->env_nodes) == -1)
+	if (!ft_setenv("PWD", new_pwd, p->env_nodes))
 		return (free(new_pwd), free(old_pwd), FALSE);
 	return (free(new_pwd), free(old_pwd), TRUE);			
 }

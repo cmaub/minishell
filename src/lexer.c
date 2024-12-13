@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/11 12:00:32 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:22:05 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,13 +56,11 @@ int	eatRange(LEXER *input, int start, int end)
 
 int	PIPE(LEXER *input, t_token **list)
 {
-	// DEBUG_S;
 	int	i;
 	int	start;
 	int	end;
 	t_token	*new_node;
 
-	// new_node = try_malloc(sizeof(t_token));
 	i = 0;
 	start = input->head;
 	end = start;
@@ -76,7 +74,10 @@ int	PIPE(LEXER *input, t_token **list)
 	if (end > start)
 	{
 		new_node = create_new_token(input, start, end, PIPEX);
-		add_new_token(list, new_node);
+		if (!new_node)
+			return (free_tokens(list), FALSE);
+		if (!add_new_token(list, new_node))
+			return (FALSE);
 	}
 	return (TRUE);
 }
@@ -332,7 +333,8 @@ int redir(LEXER *input, t_token **list)
 		input->head = save;
 		return (FALSE);
 	}
-	add_new_token(list, create_new_token(input, start, input->head, type));
+	if (!add_new_token(list, create_new_token(input, start, input->head, type)))
+		return (FALSE);
 	return (TRUE);
 }
 
@@ -354,7 +356,8 @@ int command(LEXER *input, t_token **list)
 			{
 				break;
 			}
-			add_new_token(list, create_new_token(input, start, input->head, ARGUMENT));
+			if (!add_new_token(list, create_new_token(input, start, input->head, ARGUMENT)))
+				return (FALSE);
 		}
 		ows(input);
 		i++;

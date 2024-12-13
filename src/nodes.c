@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/12 16:43:24 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:48:40 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,6 +198,8 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 	char	*empty;
 
 	empty = ft_strdup("");
+	if (!empty)
+		return (NULL);
 	expand_expr = isolate_expand(str, *index + 1);
 	expand_result = return_var_from_env(expand_expr, chained_env);
 	// if (!expand_expr)
@@ -348,6 +350,8 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 
 	start = 0;
 	result = ft_strdup("");
+	if (!result)
+		return (NULL);
 	tmp_result = NULL;
 	while (str[start] != '\0')
 	{
@@ -374,7 +378,7 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 	return (result);
 }
 
-void	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
+int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 {
 	char	*tmp;
 
@@ -387,26 +391,31 @@ void	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 		if (cur->type) // checker que next n'est pas un pb
 		{
 			tmp = ft_strdup(cur->value);
+			if (!tmp)
+				return (FALSE);
 			free(cur->value);
 			cur->value = NULL;
 			cur->value = withdraw_quotes(new_node, tmp, chained_env);
 			free(tmp);
 			if (!cur->value)
-				return ;	
+				return (FALSE);
 		}
 		new_node->nb_file++;
 	}
 	else if (cur->type == ARGUMENT)
 	{
 		tmp = ft_strdup(cur->value);
+		if (!tmp)
+			return (FALSE);
 		free(cur->value);
 		cur->value = NULL;
 		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
 		free(tmp);
 		if (!cur->value || !*cur->value)
-			return ;
+			return (FALSE);
 		new_node->nb_command++;
 	}
+	return (TRUE);
 }
 
 PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
@@ -421,7 +430,8 @@ PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 	new_node->exit_code = exit_code;
 	while (cur && cur->type != PIPEX)
 	{
-		calculate_size_of_tab(cur, new_node, chained_env);
+		if (!calculate_size_of_tab(cur, new_node, chained_env))
+			return (NULL);
 		cur = cur->next;
 	}
 	calloc_tab_of_node(new_node);
@@ -492,26 +502,26 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 
 	fd = dup(STDIN_FILENO);
 	if (fd == -1)
-		return (perror("dup"), 0);
+		return (perror("dup"), FALSE);
 	signal(SIGINT, SIG_IGN); //
-	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)	
+	new_node->delimiter[*d] = ft_strdup(current->value);
+	if (!new_node->delimiter[*d])
+		return (safe_close(&fd), FALSE);
 	if (loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]) == -1)
 	{
 		dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		if (dup2(fd, STDIN_FILENO) == -1)
-			return (perror ("dup"), 0);
+			return (perror ("dup"), FALSE);
 		safe_close(&fd);
-		// free(new_node->delimiter[*d]);
-		// new_node->delimiter[*d] = NULL;
-		return (-1);		
+		return (FALSE);		
 	}
 	safe_close(&new_node->fd_heredoc[*d][1]);
 	new_node->redir_type[*f] = current->type;
 	signal(SIGINT, SIG_DFL); //
 	if (dup2(fd, STDIN_FILENO) == -1)
-		return (perror ("dup"), 0);
+		return (perror ("dup"), FALSE);
 	safe_close(&fd);
-	return (0);
+	return (TRUE);
 }
 
 int	create_nodes(t_mega_struct *mini)
@@ -530,12 +540,14 @@ int	create_nodes(t_mega_struct *mini)
 		f = 0;
 		new_node = alloc_new_node(current, mini->chained_env, mini->exit_code);
 		if (!new_node)
-			return (-1);
+			return (FALSE);
 		while (current && current->type != PIPEX)
 		{
 			if (current->type == REDIRECT_IN)
 			{
 				new_node->file[f] = ft_strdup(current->value);
+				if (!new_node->file[f]){}
+					// return (reset)
 				new_node->redir_type[f++] = current->type;
 			}
 			else if (current->type == HEREDOC && current->value != NULL)
@@ -543,35 +555,22 @@ int	create_nodes(t_mega_struct *mini)
 				if (pipe(new_node->fd_heredoc[d]) == -1)
 				{
 					perror("pipe");
-					return (-1);
+					return (FALSE);
 				}
 				new_node->file[f] = ft_strdup("heredoc");
-				if (create_heredoc(new_node, current, &f, &d) == -1)
+				if (!create_heredoc(new_node, current, &f, &d))
 				{
 					safe_close(&new_node->fd_heredoc[d][0]);
-					// reset_node(&new_node);
-					// free_array_int(&new_node->fd_heredoc[d], new_node);
-					reset_one_node(&new_node);
-					reset_node_mini(mini);
+					// reset_one_node(&new_node);
+					reset_node_mini(mini, &new_node); // regarder si possible de mettre en une seule fonction
 					free(mini->nodes);
 					mini->nodes = NULL;
 					free(new_node);
 					new_node = NULL;
-					if (mini->nodes)
-					{
-						dprintf(2, "mini->nodes n'est pas free **1%p\n", mini->nodes);
-						// return (-1);
-					}
-					if (new_node)
-					{
-						dprintf(2, "new_node n'est pas free **1%p\n", new_node);
-						// return (-1);
-					}
-					// reset_node(&mini->nodes);
 					free_tokens(&mini->tokens);
 					if (g_signal == 2)
 						mini->exit_code = g_signal + 128;
-					return (-1);
+					return (FALSE);
 				}
 				f++;
 				d++;
@@ -601,5 +600,5 @@ int	create_nodes(t_mega_struct *mini)
 			current = current->next;
 		// check_and_free_new_node(new_node);
 	}
-	return (0);
+	return (TRUE);
 }

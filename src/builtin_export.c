@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 18:19:47 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:26:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ int		env_var_exists(t_env **nodes_env, char *var)
 		return (-1);
 	while (temp && i < size)
 	{
-		if (ft_strncmp(temp->var, var, sizeofvar) == 0 && (temp->var[sizeofvar] == '\0' || temp->var[sizeofvar] == '='))
+		if (ft_strncmp(temp->var, var, sizeofvar) == 0 && (temp->var[sizeofvar] == '\0' 
+			|| temp->var[sizeofvar] == '='))
 			return (i);
 		
 		i++;
@@ -121,27 +122,6 @@ void	print_sorted_env(t_env **env_nodes)
 		}			
 	}
 }
-// void	print_sorted_env(t_env **env_nodes)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	while (sorted_env[i] != NULL)
-// 	{
-// 		if (sorted_env[i] && sorted_env[i][0] == '_' && (sorted_env[i][1] == '\0' || sorted_env[i][1] == '='))
-// 		{
-// 			if (sorted_env[i + 1])
-// 				i++;
-// 			else
-// 				break ;
-// 		}
-// 		else if (*sorted_env && sorted_env[i])
-// 		{
-// 			write_var(sorted_env[i]);
-// 			i++;
-// 		}			
-// 	}
-// }
 
 t_env	**copy_t_env(t_env **env)
 {
@@ -152,6 +132,8 @@ t_env	**copy_t_env(t_env **env)
 	
 	current = *env;
 	sorted_env = try_malloc(sizeof(t_env *));
+	if (!sorted_env)
+		return (env);
 	count = lstsize_t_env(&current);
 	while (current != NULL)
 	{
@@ -194,11 +176,12 @@ int	check_name(char *name)
 	return (TRUE);
 }
 
-void	print_error_msg(char *str, PARSER *current)
+
+void	print_error_msg(char *str, PARSER *current, char *error_msg)
 {
-	ft_putstr_fd("minishell: export: '", 2);
+	ft_putstr_fd("export: '", 2);
 	ft_putstr_fd(str, 2);
-	ft_putstr_fd("': not a valid identifier\n", 2);
+	ft_putendl_fd(error_msg, 2);
 	current->exit_code = 1;
 }
 
@@ -217,7 +200,7 @@ void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
 	j = 0;
 	new = NULL;
 	if (!check_name(name))
-		return (print_error_msg(name, current));
+		return (print_error_msg(name, current, "': not a valid identifier"));
 	index = env_var_exists(nodes_env, name);
 	*equal = '=';
 	temp = *nodes_env;
@@ -236,13 +219,17 @@ void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
 	else
 	{
 		new = try_malloc(sizeof(t_env));
-		new->var = ft_strdup(cmd);
-		new->next = NULL; 
-		if (!new->var)
+		if (!new)
 			return ;
+		new->var = ft_strdup(cmd);
+		if (!new->var)
+			return (free(new));
+		new->next = NULL; 
 		ft_lstadd_env_back(nodes_env, new);
 	}
 }
+
+
 
 t_env	**handle_variable_without_value(char *cmd, PARSER *current, t_env **env_nodes)
 {
@@ -254,19 +241,24 @@ t_env	**handle_variable_without_value(char *cmd, PARSER *current, t_env **env_no
 	new_var = NULL;
 	if (!check_name(cmd))
 	{
-		print_error_msg(cmd, current);
+		print_error_msg(cmd, current, "': not a valid identifier");
 		return (env_nodes);
 	}
 	index = env_var_exists(env_nodes, cmd);
 	if (index < 0)
 	{
 		new_var = try_malloc(sizeof(t_env));
+		if (!new_var)
+			return (env_nodes);
 		new_var->var = ft_strdup(cmd);
+		if (!new_var->var)
+			return (free(new_var), env_nodes);
 		new_var->next = NULL; 
 		add_new_var(env_nodes, new_var);
 	}
 	return (env_nodes);
 }
+
 
 t_env	**ft_export(PARSER *current, t_env **env_nodes)
 {
@@ -279,9 +271,7 @@ t_env	**ft_export(PARSER *current, t_env **env_nodes)
 	{
 		if (current->command[i] && current->command[i][0] == '-')
 		{
-			ft_putstr_fd("export:", 2);
-			ft_putstr_fd(current->command[i], 2);
-			ft_putendl_fd(": invalid option", 2);
+			print_error_msg(current->command[i], current, ": invalid option");
 			current->exit_code = 1;
 			if (i == 1)
 			{

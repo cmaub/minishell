@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 17:39:14 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:42:33 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,7 @@ int	handle_input(PARSER **nodes, t_pipex *p);
 int	ft_here_doc(PARSER *nodes);
 int	execute(PARSER *current, t_pipex *p);
 int    ft_wait(pid_t last_pid, PARSER **nodes);
-void	add_new_token(t_token **list, t_token *new);
+int	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
 t_token	*create_new_token(LEXER *input, int start, int end, int type);
 // int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type);
@@ -175,7 +175,7 @@ void	ft_free_tab(char **tab);
 char	**copy_tab_free(char **envp);
 void	free_new_node(PARSER *new_node);
 void	reset_node(PARSER **node);
-void	reset_node_mini(t_mega_struct *mini);
+void	reset_node_mini(t_mega_struct *mini, PARSER **node);
 void	free_tokens(t_token **tokens);
 void	check_and_free_new_node(PARSER *new_node);
 void	free_t_env(t_env **mini_env);

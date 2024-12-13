@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/12 14:48:33 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:36:47 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,16 +60,16 @@ int	fill_list_of_tokens(t_mega_struct *mini, char *str)
 	return (TRUE);
 }
 
-void	add_new_token(t_token **list, t_token *new)
+int	add_new_token(t_token **list, t_token *new)
 {
 	t_token	*current;
 
 	if (!list || !new)
-		return ;
+		return (FALSE);
 	if (*list == NULL)
 	{
 		*list = new;
-		return ;
+		return (TRUE);
 	}
 	else
 	{
@@ -78,10 +78,10 @@ void	add_new_token(t_token **list, t_token *new)
 		{
 			current = current->next;
 		}
-
 		current->next = new;
 		new->prev = current;
 	}
+	return (TRUE);
 }
 
 t_token	*create_new_token(LEXER *input, int start, int end, int type)
@@ -90,21 +90,18 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 	int		len;
 
 	if (!input || !input->data || start < 0 || end < 0 || start > end)
-       	return NULL;
+       	return (NULL);
 	len = end - start;
 	new = try_malloc(sizeof(t_token));
-	if (new->value)
-		free(new->value);
+	if (!new)
+		return (NULL);
 	new->value = ft_substr(input->data, start, len);
 	if (!new->value)
-	{
-		free(new);
-		return (NULL);
-	}
+		return (free_tokens(&new), NULL);
 	new->type = type;
 	new->prev = NULL;
 	new->next = NULL;
-	return (new);
+	return(new);
 }
 
 // ***** RETIRER ?

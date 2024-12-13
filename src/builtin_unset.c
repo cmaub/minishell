@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 18:19:13 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:50:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,44 +31,6 @@ int		count_env_var(char **list)
 		len++;
 	}
 	return (len);
-}
-
-char	**suppress_var(char **env, int index)
-{
-	char	**new_env;
-	int		new_size;
-	int		i;
-	int		j;
-
-	new_size = count_env_var(env) - 1;
-	new_env = try_malloc((new_size + 1)* sizeof(char *));
-	if (!new_env)
-	{
-		return (NULL);
-	}
-	i = 0;
-	j = 0;
-	while (i <= new_size)
-	{
-		if (i != index)
-		{
-			new_env[j] = ft_strdup(env[i]);
-			free(env[i]);
-			// env[i] = NULL;
-			j++;
-		}
-		else
-		{
-			//dprintf(2, "env[%d]= %s\n", i, env[i]);
-			free(env[i]);
-			env[i] = NULL;
-		}
-		i++;
-	}
-	new_env[j] = NULL;
-	//dprintf(2, "size de new_env apres alloc = %d\n", count_env_var(new_env));
-	free(env);
-	return (new_env);
 }
 
 t_env	**ft_unset(PARSER *current, t_env **env_nodes)

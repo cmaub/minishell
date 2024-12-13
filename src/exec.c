@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 17:10:09 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:54:42 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,15 +143,11 @@ void	print_tab(char **tab)
 	int	i;
 
 	i = 0;
-	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-	// dprintf(2, "avant boucle while tab[%d] = %s\n", i, tab[i]);
 	while (tab[i] != NULL)
 	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		dprintf(2, "tab[%d] = %s\n", i, tab[i]);
 		i++;			
 	}
-	// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 }
 
 char	**copy_list_in_str(t_env **env_nodes)
@@ -205,10 +201,12 @@ int	execute(PARSER *current, t_pipex *p)
 	else
 	{
 		str_env = copy_list_in_str(p->env_nodes);
+		if (!str_env)
+			return (FALSE);
 		if (current->command)
 			tmp_cmd = copy_tab(current->command);
 		if (!tmp_cmd)
-			return (free_array(str_env), -1);
+			return (free_array(str_env), FALSE);
 		free_t_env(p->env_nodes);
 		free_pipex(&p);
 		reset_node(&current);
@@ -260,10 +258,10 @@ int	execute(PARSER *current, t_pipex *p)
 			path = get_path_and_check(&tmp_cmd[0], str_env);
 			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
 			if (execve(path, tmp_cmd, str_env) == -1)
-				return (free_array(tmp_cmd), free(path), free_array(str_env), -1);
+				return (free_array(tmp_cmd), free(path), free_array(str_env), FALSE);
 		}
 	}
-	return (-1);
+	return (FALSE);
 }
 
 void	first_child(t_pipex *p, PARSER **nodes)
@@ -320,7 +318,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 		safe_close(&p->pipefd[1]);
 	}
-	if (execute((*nodes), p) == -1)
+	if (!execute((*nodes), p))
 	{
 		ft_putstr_fd((*nodes)->command[0], 2);
 		ft_putendl_fd(": not executable", 2);
@@ -382,7 +380,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 			close_error_and_free(&fd_in, p, nodes, "pipe", 1);
 	}
 	safe_close(&p->pipefd[1]);
-	if (execute((*nodes), p) == -1)
+	if (!execute((*nodes), p))
 	{
 		ft_putstr_fd((*nodes)->command[0], 2);
 		ft_putendl_fd(": not executable", 2);
@@ -436,7 +434,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		}
 		(*nodes)->f++;
 	}
-	if (execute((*nodes), p) == -1)
+	if (!execute((*nodes), p))
 	{
 		ft_putstr_fd((*nodes)->command[0], 2);
 		ft_putendl_fd(": not executable", 2);

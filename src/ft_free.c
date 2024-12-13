@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 11:36:27 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:41:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,20 @@
 void check_and_free_new_node(PARSER *new_node)
 {
 	if (!new_node)
-       	return;
+	   	return;
 	if ((!new_node->file && new_node->nb_file > 0) ||
-        (!new_node->command && new_node->nb_command > 0) ||
-        (!new_node->delimiter && new_node->nb_heredoc > 0) ||
-        (!new_node->redir_type && new_node->nb_file > 0) ||
-        (!new_node->fd_heredoc && new_node->nb_heredoc > 0))
+		(!new_node->command && new_node->nb_command > 0) ||
+		(!new_node->delimiter && new_node->nb_heredoc > 0) ||
+		(!new_node->redir_type && new_node->nb_file > 0) ||
+		(!new_node->fd_heredoc && new_node->nb_heredoc > 0))
 	{
-    		free(new_node->file);
-    		free(new_node->command);
-    		free(new_node->delimiter);
-    		free(new_node->redir_type);
-    		free(new_node->fd_heredoc);
-    		free(new_node);
+			free(new_node->file);
+			free(new_node->command);
+			free(new_node->delimiter);
+			free(new_node->redir_type);
+			free(new_node->fd_heredoc);
+			free(new_node);
+			new_node = NULL;
 	}
 }
 
@@ -134,12 +135,44 @@ void	close_heredoc(PARSER *current)
 		i++;
 	}
 }
-
-void	reset_node_mini(t_mega_struct *mini)
+void	reset_one_node(PARSER **node)
+{
+	if (!node || !*node)
+		return ;
+	if ((*node)->file)
+	{
+		free_array_and_close_fds((*node)->file);
+		(*node)->file = NULL;
+	}
+	if ((*node)->command)
+	{
+		free_array((*node)->command);
+		(*node)->command = NULL;
+	}
+	if ((*node)->delimiter)
+	{
+		free_array((*node)->delimiter);
+		(*node)->delimiter = NULL;
+	}
+	if ((*node)->redir_type)
+		free((*node)->redir_type);
+	if ((*node)->fd_heredoc)
+	{
+		close_heredoc((*node));
+		free_array_int((*node)->fd_heredoc, (*node));
+	}
+	// if ((*node))
+	// 	free((*node));
+	(*node) = NULL;
+	// free (node);
+	// node = NULL;
+}
+void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 {
 	PARSER	*current;
 	PARSER *temp;
 
+	reset_one_node(node);
 	current = mini->nodes;
 	if (!mini->nodes)
 		return ;
@@ -220,37 +253,6 @@ void	reset_node(PARSER **node)
 	*node = NULL;
 }
 
-void	reset_one_node(PARSER **node)
-{
-	if (!node || !*node)
-		return ;
-	if ((*node)->file)
-	{
-		free_array_and_close_fds((*node)->file);
-		(*node)->file = NULL;
-	}
-	if ((*node)->command)
-	{
-		free_array((*node)->command);
-		(*node)->command = NULL;
-	}
-	if ((*node)->delimiter)
-	{
-		free_array((*node)->delimiter);
-		(*node)->delimiter = NULL;
-	}
-	if ((*node)->redir_type)
-		free((*node)->redir_type);
-	if ((*node)->fd_heredoc)
-	{
-		close_heredoc((*node));
-		free_array_int((*node)->fd_heredoc, (*node));
-	}
-	// if ((*node))
-	// 	free((*node));
-	(*node) = NULL;
-	// free (node);
-	// node = NULL;
-}
+
 
 

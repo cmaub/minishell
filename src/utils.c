@@ -147,6 +147,7 @@ char	**copy_tab(char **tab)
 				new_tab[i] = NULL;
 				i--;
 			}
+			return (NULL);
 		}
 		i++;
 	}
