@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/13 12:36:47 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 15:43:44 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@
 
 int	fill_list_of_tokens(t_mega_struct *mini, char *str)
 {
-	if (!expr(mini->L_input, &mini->tokens) || !parserHasReachEnd(mini->L_input))
+	if (!expr(mini->L_input, &mini->tokens) || !parser_has_reach_end(mini->L_input))
 	{
 		// dprintf(2, "str = %s\n", str);
 		ft_putendl_fd("syntax error", 2);

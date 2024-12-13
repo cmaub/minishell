@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 12:42:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 15:43:30 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,7 +224,7 @@ int	redir(LEXER *input, t_token **list);
 int	command(LEXER *input, t_token **list);
 int	expr(LEXER *input, t_token **list);
 int	start(LEXER *input);
-int	parserHasReachEnd(LEXER *input);
+int	parser_has_reach_end(LEXER *input);
 
 extern int	g_signal;
 #endif
