@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 12:32:16 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 10:24:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/10 15:09:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,5 +34,6 @@ int	ft_pwd(PARSER *current)
 	}
 	ft_putstr_fd(new_var, 1);
 	write(1, "\n", 1);
+	free(new_var);
 	return (TRUE);
 }

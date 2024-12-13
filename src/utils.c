@@ -12,17 +12,56 @@
 
 #include "minishell.h"
 
-void	free_pipex(t_pipex *p)
+t_env	*ft_lst_env_last(t_env *lst)
 {
-	// if (p->mini_env)
-	// {
-	// 	ft_free_tab(p->mini_env);
-	// 	p->mini_env = NULL;
-	// }
-	// if (p->mini_env == NULL)
-	// 	dprintf(2, "p->mini_env est free\n");
-	free(p);
-	p = NULL;
+	t_env	*temp;
+
+	if (!lst)
+		return (NULL);
+	temp = lst;
+	while (temp->next != NULL)
+	{
+		temp = temp->next;
+	}
+	return (temp);
+}
+
+void	ft_lstadd_env_back(t_env **lst, t_env *new)
+{
+	t_env	*temp;
+
+	if (!lst || !new)
+		return ;
+	if (!(*lst))
+	{
+		*lst = new;
+		return ;
+	}
+	temp = ft_lst_env_last(*lst);
+	temp->next = new;
+}
+
+int	lstsize_t_env(t_env **lst)
+{
+	t_env	*temp;
+	int		size;
+
+	temp = *lst;
+	size = 0;
+	while (temp != NULL)
+	{
+		size++;
+		temp = temp->next;
+	}
+	return (size);
+}
+
+void	free_pipex(t_pipex **p)
+{
+	if (!p || !*p)
+		return ;
+	free(*p);
+	*p = NULL;
 }
 
 void	ft_error_exit(char *str, int exit_c)
@@ -33,7 +72,7 @@ void	ft_error_exit(char *str, int exit_c)
 
 int	ft_error_int(char *str, PARSER *node)
 {
-	perror(str);
+	ft_putendl_fd(str, 2);
 	node->exit_code = 1;
 	return (-1);
 }
@@ -45,10 +84,7 @@ void	safe_close(int *fd)
 	if (*fd != -1)
 	{
 		if (close(*fd) == -1)
-		{
-			// perror("close2 AC");
 			return ;
-		}
 		*fd = -1;
 	}
 	else
@@ -70,39 +106,58 @@ int		ft_size_list(PARSER **nodes)
 	return (size);
 }
 
-char	**copy_tab(char **envp)
+// **** RETIRER ?
+
+// char	**copy_env()
+// {
+// 	char	**new_tab;
+// 	int	i;
+
+// 	i = 0;
+
+// 	new_tab = try_malloc(4 * sizeof(char *));
+// 	if (!new_tab)
+// 		return (NULL);
+// 	new_tab[0] = getcwd(NULL, 0);
+// 	new_tab[1] = NULL;
+// 	//dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
+// 	return (new_tab);
+// }
+
+char	**copy_tab(char **tab)
 {
-	char	**mini_env;
+	char	**new_tab;
 	int	i;
 
 	i = 0;
-	while (envp[i])
+	while (tab[i])
 		i++;
-	mini_env = try_malloc((i + 1) * sizeof(char *));
-	if (!mini_env)
+	new_tab = try_malloc((i + 1) * sizeof(char *));
+	if (!new_tab)
 		return (NULL);
 	i = 0;
-	while (envp[i])
+	while (tab[i])
 	{
-		mini_env[i] = ft_strdup(envp[i]);
-		if (!mini_env[i])
+		new_tab[i] = ft_strdup(tab[i]);
+		if (!new_tab[i])
 		{
 			while (i >= 0)
 			{
-				free(mini_env[i]);
+				free(new_tab[i]);
+				new_tab[i] = NULL;
 				i--;
 			}
+			return (NULL);
 		}
 		i++;
 	}
-	mini_env[i] = NULL;
-	return (mini_env);
+	new_tab[i] = NULL;
+	return (new_tab);
 }
 
-void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
+void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes)
 {
-	
-	p->mini_env = env;
+	p->env_nodes = chained_env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
 	p->prev_fd = -1;
@@ -114,31 +169,35 @@ void	ft_init_struct(t_pipex *p, char **env, PARSER *nodes)
 	p->pipefd[1] = -1;
 }
 
-int	is_str(char *str)
-{
-	int	i;
+// *** RETIRER ?
+// int	is_str(char *str)
+// {
+// 	int	i;
 
-	i = 0;
-	while (str[i] != '\0')
-	{
-		if (!ft_isalpha(str[i]))
-			return (0);
-		i++;
-	}
-	return (1);
-}
+// 	i = 0;
+// 	while (str[i] != '\0')
+// 	{
+// 		if (!ft_isalpha(str[i]))
+// 			return (0);
+// 		i++;
+// 	}
+// 	return (1);
+// }
 
 void	ft_free_tab(char **tab)
 {
 	int	i;
 
 	i = 0;
-	if (!tab)
+	if (!tab || !(*tab))
 		return;
-	while (tab[i])
+	while (tab[i] && tab[i] != NULL)
 	{
-		free(tab[i]);
-		tab[i] = NULL;
+		if (tab[i] != NULL)
+		{
+			free(tab[i]);
+			tab[i] = NULL;
+		}
 		i++;
 	}
 	free(tab);
@@ -161,6 +220,7 @@ int	no_envp(char **tab)
 	}
 	return (0);
 }
+
 void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)
 {
 	if (fd)
@@ -168,19 +228,20 @@ void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int ex
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
-	free_pipex(p);
+	free_pipex(&p);
 	reset_node(nodes);
 	exit(exit_c);
 }
-void	ft_close_error_no_exit(int *fd, t_pipex *p, PARSER **nodes, char *str)
+
+void	ft_close_error_no_exit(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
 		safe_close(fd);
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
-	free_pipex(p);
-	reset_node(nodes);
+	// free_pipex(&p);
+	// reset_node(nodes);//pas ici
 }
 
 int ft_wait(pid_t last_pid, PARSER **nodes)
@@ -190,32 +251,13 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	pid_t waited_pid;
 	PARSER *current;	
 
-	dprintf(2, "entree dans wait\n");
 	status_code = 0;
 	current = *nodes;
+	dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 	if (current == NULL)
 		return (0);
 	while ((waited_pid = wait(&status)) != -1)
 	{
-		dprintf(2, "WAITED_PID = %d\n", waited_pid);
-		// while (current && current->redir_type && current->redir_type[current->f] == 4)
-		// {
-		// 	unlink(current->file[current->f]);
-		// 	dprintf(2, "file dans wait %s\n", current->file[current->f]);
-		// 	current->f++;
-		// }
-		while (current && current->redir_type != NULL)
-		{
-			if (current && current->redir_type[current->f] == 4)
-			{
-				unlink(current->file[current->f]);
-				dprintf(2, "file dans wait %s\n", current->file[current->f]);
-			}
-			if (current && current->redir_type[current->f + 1])
-				current->f++;
-			else
-				break ;
-		}
 		if (current && current->next)
 			current = current->next;
 		else
@@ -225,39 +267,29 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 			if (WIFEXITED(status))
 			{
 				status_code = WEXITSTATUS(status);
-				exit_status = 0;
+				(*nodes)->exit_code = status_code;
+				dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
 			}
-			else if (WIFSIGNALED(status))
-		 		status_code = 128 + WTERMSIG(status);
+			else if (g_signal != -1)
+			{
+				dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
+		 		status_code = 128 + g_signal;
+				(*nodes)->exit_code = status_code;
+				g_signal = 0;
+			}
 		}
-	}	
+	}		
 	// if (*nodes && (*nodes)->exit_code != 0)
 	// 	status_code = (*nodes)->exit_code;
-	if (*nodes)
-		(*nodes)->exit_code = status_code;
-	return (signal(SIGINT, handle_c_signal), (*nodes)->exit_code);
+	// else
+	// {
+	// 	dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
+	// 	(*nodes)->exit_code = status_code;
+	// 	status_code = (*nodes)->exit_code;
+	// }
+	return (signal(SIGINT, handle_c_signal), status_code);
+	// return (signal(SIGINT, SIG_IGN), status_code);
+	// return (status_code);
+
 }
 
-		
-
-// void	get_lines(PARSER *nodes, int i, int d)
-// {
-// 	char	*str;
-// 	while (1)
-// 	{
-// 		write(1, "heredoc> ", 9);
-// 		str = get_next_line(0);
-// 		if (str == 0)
-// 			break ;
-// 		if (ft_strncmp(str, nodes->delimiter[d], ft_strlen(nodes->delimiter[d])) == 0
-// 			&& str[ft_strlen(nodes->delimiter[d])] == '\n')
-// 		{
-// 			free(str);
-// 			get_next_line(-42);
-// 			break ;
-// 		}
-// 		write(nodes->fd_heredoc[i], str, ft_strlen(str));
-// 		free(str);
-// 	}
-// 	safe_close(nodes->fd_heredoc[i]);
-// }

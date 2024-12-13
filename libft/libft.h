@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/22 08:19:38 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/20 12:18:16 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/11 18:08:47 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ void	*try_malloc(size_t size);
 
 
 // str
+int	ft_is_only_spaces(char *str);
 char	**ft_split(char const *s, char c);
 char	*ft_strchr(const char *s, int c);
 int		ft_strchr_occur(const char *s, int c);
@@ -88,7 +89,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 void	ft_putchar_fd(char c, int fd);
 void	ft_putendl_fd(char *s, int fd);
 void	ft_putnbr_fd(int n, int fd);
-void	ft_putstr_fd(char *s, int fd);
+int	ft_putstr_fd(char *s, int fd);
 
 // conversion type
 int		ft_atoi(const char *nptr);

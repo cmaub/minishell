@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/02 17:12:46 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:22:05 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,12 @@ int	eatRange(LEXER *input, int start, int end)
 }
 
 int	PIPE(LEXER *input, t_token **list)
-{DEBUG_S;
+{
 	int	i;
 	int	start;
 	int	end;
 	t_token	*new_node;
 
-	// new_node = try_malloc(sizeof(t_token));
 	i = 0;
 	start = input->head;
 	end = start;
@@ -75,7 +74,10 @@ int	PIPE(LEXER *input, t_token **list)
 	if (end > start)
 	{
 		new_node = create_new_token(input, start, end, PIPEX);
-		add_new_token(list, new_node);
+		if (!new_node)
+			return (free_tokens(list), FALSE);
+		if (!add_new_token(list, new_node))
+			return (FALSE);
 	}
 	return (TRUE);
 }
@@ -190,6 +192,11 @@ int	STAR(LEXER *input)
 	return (eat(input, '*'));
 }
 
+int	DOTS(LEXER *input)
+{
+	return (eat(input, ':'));
+}
+
 int	PRINTABLE_SQUOTE(LEXER *input)
 {
 	int	i;
@@ -282,16 +289,14 @@ int	squote(LEXER *input)
 }
 
 int	arg(LEXER *input)
-{DEBUG_S;
+{
+	// DEBUG_S;
 	int	i;
 	int	start;
-	// int	end;
-	// t_token	*new_node;
 
 	i = 0;
 	start = input->head;
-	// end = start;
-	while  (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
+	while  (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input) || DOTS(input)
 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
 		i++;
 	if (i < 1)
@@ -299,17 +304,12 @@ int	arg(LEXER *input)
 		input->head = start;
 		return (FALSE);
 	}
-	// end = input->head;
-	// if (end > start)
-	// {
-	// 	new_node = create_new_token(input, start, end, ARGUMENT);
-	// 	add_new_token(list, new_node);
-	// }
 	return (TRUE);
 }
 
 int redir(LEXER *input, t_token **list)
-{DEBUG_S;
+{
+	// DEBUG_S;
 	int save;
 	int start;
 	int type;
@@ -333,20 +333,21 @@ int redir(LEXER *input, t_token **list)
 		input->head = save;
 		return (FALSE);
 	}
-	add_new_token(list, create_new_token(input, start, input->head, type));
+	if (!add_new_token(list, create_new_token(input, start, input->head, type)))
+		return (FALSE);
 	return (TRUE);
 }
 
 
 int command(LEXER *input, t_token **list)
-{DEBUG_S;
+{
+	// DEBUG_S;
 	int save;
 	int start;
 	int i;
 
 	i = 0;
 	save = input->head;
-	dprintf(2, "COMMAND\n");
 	while (TRUE) {
 		if (!redir(input, list))
 		{
@@ -355,7 +356,8 @@ int command(LEXER *input, t_token **list)
 			{
 				break;
 			}
-			add_new_token(list, create_new_token(input, start, input->head, ARGUMENT));
+			if (!add_new_token(list, create_new_token(input, start, input->head, ARGUMENT)))
+				return (FALSE);
 		}
 		ows(input);
 		i++;
@@ -367,175 +369,10 @@ int command(LEXER *input, t_token **list)
 	}
 	return (TRUE);
 }
-// int command(LEXER *input, t_token **list)
-// {
-// 	int start = input->head;
-// 	ows(input);
-
-// 	if (!arg(input, list) && ows(input) && !redir(input, list))
-// 	{
-// 		input->head = start;
-// 		return (FALSE);
-// 	}
-// 	ows(input);
-// 	while (arg(input, list) || redir(input, list))
-// 	{
-// 		ows(input);
-// 	}
-// 	return (TRUE);
-// }
-
-// int	arg(LEXER *input, t_token **list)
-// {
-// 	int	i;
-// 	int	start;
-// 	int	end;
-// 	t_token	*new_node;
-
-// 	i = 0;
-// 	start = input->head;
-// 	end = start;
-// 	// new_node = try_malloc(sizeof(t_token));
-// 	ows(input);
-// 	while (LOW_ALPHA(input) || UP_ALPHA(input) || DOT(input) || squote(input) || DOLLAR(input) || QUESTION_M(input)
-// 		|| dquote(input) || DIGIT(input) || HAT(input) || SLASH(input) || MINUS(input) || PLUS(input) || STAR(input) || UNDERSCORE(input) || EQUAL(input))
-// 		i++;
-// 	if (i < 1)
-// 	{
-// 		input->head = start;
-// 		return (FALSE);
-// 	}
-// 	end = input->head;
-// 	if (end > start)
-// 	{
-// 		new_node = create_new_token(input, start, end, ARGUMENT);
-// 		add_new_token(list, new_node);
-// 	}
-// 	return (TRUE);
-// }
-
-// int handle_delimiter(LEXER *input, t_token **list, int start)
-// {
-// 	t_token	*new_node;
-// 	int		end;
-
-// 	// new_node = try_malloc(sizeof(t_token));
-// 	end = input->head;
-// 	if (!arg(input, list))
-// 		return (FALSE);
-// 	end = input->head;
-// 	if (end > start)
-// 	{
-// 		new_node = create_new_token(input, start, end, DELIMITER);
-// 		replace_prev_token(list, new_node);
-// 	}
-// 	return (TRUE);
-// }
-
-// int process_heredoc(LEXER *input, t_token **list, int start, int end)
-// {
-// 	t_token *new_node;
-
-// 	end = input->head;
-// 	if (end > start)
-// 	{
-// 		new_node = create_new_token(input, start, end, HEREDOC);
-// 		add_new_token(list, new_node);
-// 	}
-// 	ows(input);
-// 	start = end;
-// 	end = input->head;
-// 	if (!handle_delimiter(input, list, end))
-// 	{
-// 		input->head = start;
-// 		return (FALSE);
-// 	}
-// 	return (TRUE);
-// }
-
-// int handle_filename(LEXER *input, t_token **list, int start)
-// {
-// 	int end;
-// 	t_token *new_node;
-
-// 	end = input->head;
-// 	if (!arg(input, list))
-// 		return (FALSE);
-// 	end = input->head;
-// 	if (end > start)
-// 	{
-// 		new_node = create_new_token(input, start, end, FILENAME);
-// 		replace_prev_token(list, new_node);
-// 	}
-// 	return (TRUE);
-// }
-
-// int process_redirect(LEXER *input, t_token **list, int start, int end, int redirect_type)
-// {
-// 	t_token *new_node;
-
-// 	end = input->head;
-// 	if (end > start)
-// 	{
-// 		new_node = create_new_token(input, start, end, redirect_type);
-// 		add_new_token(list, new_node);
-// 	}
-// 	ows(input);
-// 	start = end;
-// 	end = input->head;
-// 	if (!handle_filename(input, list, end))
-// 	{
-// 		input->head = start;
-// 		return (FALSE);
-// 	}
-// 	return (TRUE);
-// }
-
-// int handle_redirect_out(LEXER *input, t_token **list)
-// {
-// 	int start;
-// 	int end;
-
-// 	start = input->head;
-// 	end = input->head;
-// 	if (R_ARROW(input))
-// 	{
-// 		if (R_ARROW(input)) // Double flèche (>>)
-// 			return (process_redirect(input, list, start, end, APPEND_OUT));
-// 		return (process_redirect(input, list, start, end, REDIRECT_OUT)); // Flèche simple (>)
-// 	}
-// 	return (FALSE);
-// }
-
-// int handle_redirect_in(LEXER *input, t_token **list)
-// {
-// 	int start;
-// 	int end;
-
-// 	start = input->head;
-// 	end = input->head;
-// 	if (L_ARROW(input))
-// 	{
-// 		if (L_ARROW(input)) // Double flèche (<<)
-// 			return (process_heredoc(input, list, start, end)); // creer tous les heredoc a ce moment la ?
-// 		return (process_redirect(input, list, start, end, REDIRECT_IN)); // Flèche simple (<)
-// 	}
-// 	return (FALSE);
-// }
-
-// int redir(LEXER *input, t_token **list)
-// {
-// 	int start = input->head;
-// 	if (handle_redirect_out(input, list) || handle_redirect_in(input, list))
-// 		return (TRUE);
-// 	input->head = start;
-// 	return (FALSE);
-// }
-
-
 
 int	expr(LEXER *input, t_token **list)
-{DEBUG_S;
+{
+	// DEBUG_S;
 	int	save;
 
 	save = input->head;
@@ -543,7 +380,7 @@ int	expr(LEXER *input, t_token **list)
 		return (TRUE);
 	if (!command(input, list))
 	{
-		dprintf(2, "invalide car pas de cmd ni espaces\n");
+		//dprintf(2, "invalide car pas de cmd ni espaces\n");
 		return (FALSE);
 	}
 	ows(input);

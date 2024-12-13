@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 17:18:36 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 14:34:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,69 +28,95 @@ permet de recuperer le chemin absolu du repertoire courant
 - size : la taille du bloc de mémoire passé en premier paramètre.
 */
 
+int	create_new_var(t_env **node, char *str)
+{
+	t_env	*new;
 
-int	ft_setenv(char *dest, char *src, char **mini_env)
+	new = try_malloc(sizeof(t_env));
+	if (!new)
+		return (FALSE);
+	new->var = ft_strdup(str);
+	if (!new->var)
+		return (FALSE);
+	new->next = NULL; 
+	ft_lstadd_env_back(node, new);
+	return (TRUE);
+}
+
+int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 {	
-	dest = ft_strjoin(dest, "=");
-	if (!dest)
-		return (-1);
-	while (*mini_env && ft_strnstr(*mini_env, dest, ft_strlen(dest)) == NULL)
-		mini_env++;
-	if (*mini_env == NULL)
+	t_env 	*temp;
+	char	*dest_tmp;
+	char	*new_var;
+	
+
+	temp = *env_nodes;
+	dest_tmp = ft_strjoin(dest, "=");
+	if (!dest_tmp)
+		return (FALSE);
+	while (temp && temp->next && temp->var)
 	{
-		if (ft_strncmp(dest, "OLDPWD=", 6) == 0)
+		if (ft_strncmp(temp->var, dest_tmp, ft_strlen(dest_tmp)) == 0)
+			break ;
+		temp = temp->next;
+	}
+	if (temp->var == NULL)
+	{
+		if (ft_strncmp(dest_tmp, src, 6) == 0)
 		{
-			*mini_env = try_malloc(sizeof(char *));
-			*mini_env = ft_strjoin(dest, ft_strdup(src));
-			if (!*mini_env)
-				return (free(dest), -1);
+			new_var = ft_strjoin(dest_tmp, src);
+			if (!temp)
+				return (free(dest_tmp), -1);
+			if (!create_new_var(env_nodes, new_var))
+				return (free(new_var), free(dest_tmp), FALSE);
+			free(new_var);
 		}
 		else
-			return (-1);
+			return (FALSE);
 	}
-	else if (*mini_env)
-	{
-		*mini_env = ft_strjoin(dest, ft_strdup(src));
-		if (!*mini_env)
-			return (free(dest), -1);
-	}
-	return (0);
+	free(temp->var);
+	temp->var = NULL;
+	temp->var = ft_strjoin(dest_tmp, src);
+	if (!temp->var)
+		return (free(dest_tmp), FALSE);
+	return (free(dest_tmp), TRUE);
 }
+
 
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 {
 	char	*old_pwd;
 	char	*new_pwd;
+	char	*pwd_var;
 
 	if (!cmd[1])
-	{
-		node->exit_code = 1;
-		return (ft_putstr_fd("cd: no directory specified\n", 2), -1);
-	}
+		return(ft_error_int("cd: no directory specified", node), FALSE);
 	if (cmd[2])
-		return (ft_error_int("cd", node));
+		return(ft_error_int("cd: too many arguments", node), FALSE);
 	else
 	{
 		if (chdir(cmd[1]) == -1)
-		{
-			dprintf(2, "chdir echoue");
-			return (ft_error_int("cd", node));
-		}
+			return (ft_error_int("cd: error", node));
 	}
-	if (env_var_exists(p->mini_env, "PWD") == -1)
+	if (!env_var_exists(p->env_nodes, "PWD"))
 	{
-		node->exit_code = 1;
-		ft_putstr_fd("path not found\n", 2);
-		return (-1);
+		new_pwd = getcwd(NULL, 0);
+		pwd_var = ft_strjoin("PWD=", new_pwd);
+		if (!pwd_var)
+			return(free(new_pwd), FALSE);
+		free(new_pwd);
+		create_new_var(p->env_nodes, pwd_var);
+		free(pwd_var);
 	}
-	old_pwd = ft_strdup(return_var_from_env("PWD", p->mini_env));
+	old_pwd = return_var_from_env("PWD", p->env_nodes);
 	if (!old_pwd)
-		return (ft_error_int("cd", node));
-	if (old_pwd)
-		ft_setenv("OLDPWD", old_pwd, p->mini_env);
+		return (ft_error_int("cd: error", node));
+	if (!ft_setenv("OLDPWD", old_pwd, p->env_nodes))
+		return (free(old_pwd), FALSE);
 	new_pwd = getcwd(NULL, 0);
-	if (new_pwd)
-		return (ft_setenv("PWD", new_pwd, p->mini_env), TRUE);
-	else
-		return (ft_error_int("getcwd", node));
+	if (!new_pwd)
+		return (free(old_pwd), ft_error_int("cd: error", node));
+	if (!ft_setenv("PWD", new_pwd, p->env_nodes))
+		return (free(new_pwd), free(old_pwd), FALSE);
+	return (free(new_pwd), free(old_pwd), TRUE);			
 }

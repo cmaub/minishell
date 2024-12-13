@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 18:23:14 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:42:14 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	exit_status = 0;
+int g_signal = -1;
 
 int parserHasReachEnd(LEXER *input) 
 {
@@ -21,583 +21,13 @@ int parserHasReachEnd(LEXER *input)
 	return (TRUE);
 }
 
-int	fill_list_of_tokens(LEXER *L_input, t_token **list)
-{
-	if (!expr(L_input, list) || !parserHasReachEnd(L_input))
-	{
-		free(L_input);
-		return (FALSE);
-	}
-	free(L_input);
-	return (TRUE);
-}
-
-void check_and_free_new_node(PARSER *new_node)
-{
-	if (!new_node)
-       	return;
-	if ((!new_node->file && new_node->nb_file > 0) ||
-        (!new_node->command && new_node->nb_command > 0) ||
-        (!new_node->delimiter && new_node->nb_heredoc > 0) ||
-        (!new_node->redir_type && new_node->nb_file > 0) ||
-        (!new_node->fd_heredoc && new_node->nb_heredoc > 0))
-	{
-    		free(new_node->file);
-    		free(new_node->command);
-    		free(new_node->delimiter);
-    		free(new_node->redir_type);
-    		free(new_node->fd_heredoc);
-    		free(new_node);
-	}
-}
-
-void	free_new_node(PARSER *new_node)
-{
-	if (new_node)
-    {
-		if ((new_node->file && new_node->nb_file > 0))
-			free(new_node->file);
-		if (new_node->command && new_node->nb_command > 0)
-			free(new_node->command);
-		if (new_node->delimiter && new_node->nb_heredoc > 0)
-			free(new_node->delimiter);
-		if (new_node->redir_type && new_node->nb_file > 0)
-			free(new_node->redir_type);
-		if (new_node->fd_heredoc && new_node->nb_heredoc > 0)
-			free(new_node->fd_heredoc);
-		free(new_node);
-	}
-}
-
-void	calloc_tab_of_node(PARSER *new_node)
-{
-	if (new_node->nb_file > 0)
-	{
-		new_node->file = try_malloc((new_node->nb_file + 1) * sizeof(char *));
-		new_node->redir_type = try_malloc((new_node->nb_file) * sizeof(int));
-	}
-	if (new_node->nb_command > 0)
-		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
-	if (new_node->nb_heredoc > 0)
-	{
-		new_node->delimiter = try_malloc((new_node->nb_heredoc + 1) * sizeof(char *));
-		new_node->fd_heredoc = try_malloc((new_node->nb_heredoc) * sizeof(int));
-	}
-}
-
-char	*return_var_from_env(char *str, char **mini_env)
-{
-	char	*new_var;
-
-	new_var = NULL;
-	str = ft_strjoin(str, "=");
-	if (!str)
-		return (NULL);
-	while (*mini_env && ft_strnstr(*mini_env, str, ft_strlen(str)) == NULL)
-		mini_env++;
-	if (*mini_env == NULL)
-		return (NULL);
-	new_var = ft_strdup(*mini_env - 1 + (ft_strlen(str) + 1));
-	if (!new_var)
-		return (free(str), NULL);
-	free(str);
-	return (new_var);
-}
-
-char	*isolate_expand(char *str, int index)
-{
-	int	i;
-
-	i = 0;
-	while (str[index + i] != '\0')
-	{
-		if (str[index + i] == 39 || str[index + i] == 34 || str[index + i] == 32)
-			break;
-		i++;
-	}
-	return (ft_substr(str, index, i));
-}
-
-
-
-int	search_closing_quote(char *str, char c)
-{
-	int	i;
-
-	i = 1;
-	while (str[i] != '\0')
-	{
-		if (str[i] == c)
-			return (i);
-		i++;
-	}
-	return (i);
-}
-
-char	*join_char(char c, char *tmp)
-{
-	char	single_char[2];
-	char	*result;
-
-	single_char[0] = c;
-	single_char[1] = '\0';
-	result = ft_strjoin(tmp, single_char);
-	if (!result)
-		return (NULL);
-	return (result);
-}
-
-char	*print_exit_code(char *result, PARSER *new_node, int *index)
-{
-	char	*expand_result;
-
-	if (exit_status != 130)
-	{
-		expand_result = ft_strdup(ft_itoa(new_node->exit_code));
-	}
-	else
-	{
-		expand_result = ft_strdup(ft_itoa(130));
-		exit_status = 0;
-	}
-	new_node->exit_code = 0;
-	*index += 2;
-	
-	return (ft_strjoin(result, expand_result));
-}
-
-char	*print_expand(char *str, int *index, char **mini_env)
-{
-	char	*expand_expr;
-	char	*expand_result;
-
-	expand_expr = isolate_expand(str, *index + 1);
-	expand_result = return_var_from_env(expand_expr, mini_env);
-	// if (!expand_expr)
-	// 	return (NULL);
-	*index += ft_strlen(expand_expr) + 1;
-	free(expand_expr);
-	if (expand_result != NULL)
-		return (ft_strdup(expand_result));
-	return (ft_strdup(""));
-}
-
-char	*process_unquoted(PARSER *new_node, char *str, int *index, char **mini_env)
-{
-	char	*result;
-	char	*tmp;
-
-	result = ft_strdup("");
-	tmp = NULL;
-	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
-	{
-		if (str[*index] == '$' 
-			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?' 
-			|| ((str[(*index) + 1]) == 39 && (str[(*index) + 2] == 39))))
-		{
-			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-			{
-				tmp = print_exit_code(result, new_node, index);
-				if (!tmp)
-					return (free(result), NULL);
-			}
-			else
-			{
-				tmp = print_expand(str, &(*index), mini_env);
-				if (!tmp)
-					return (free(result), NULL); //verifier retour ici
-			}
-			result = ft_strjoin(result, tmp);
-			if (!result)
-				return(free(result), free(tmp), NULL);
-			free(tmp);
-		}
-		else
-		{
-			
-			tmp = join_char(str[*index], result);
-			if (!tmp)
-				return (free(result), NULL);
-			free(result);
-			result = tmp;
-			if (result[ft_strlen(result) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
-				result[ft_strlen(result) - 1] = '\0';
-			(*index)++;
-		}
-	}
-	return (result);
-}
-
-char	*process_single_quotes(char *str, int *index)
-{
-	char	*result;
-	char	*tmp;
-
-	result = ft_strdup("");
-	tmp = NULL;
-	(*index)++; // passer quote ouvrante
-	while (str[*index] != 39 && str[*index] != '\0')
-	{
-		tmp = join_char(str[*index], result);
-		if (!tmp)
-			return (free(result), NULL);
-		free(result);
-		result = tmp;
-		(*index)++;
-	}
-	if (str[*index] == 39)
-		(*index)++;
-	return (result);
-}
-
-char	*process_double_quotes(PARSER *new_node, char *str, int *index, char **mini_env)
-{
-	char	*result;
-	char	*tmp;
-
-	result = ft_strdup("");
-	tmp = NULL;
-	(*index)++; // Passer quote ouvrante
-	while (str[*index] != 34 && str[*index] != '\0')
-	{
-		if (str[*index] == '$' 
-			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?'))
-		{
-			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-				tmp = print_exit_code(result, new_node, index);
-			else
-				tmp = print_expand(str, &(*index), mini_env);
-			result = ft_strjoin(result, tmp);
-			if (!result)
-				return (free(tmp), NULL);
-			free(tmp);
-		}
-		else
-		{
-			tmp = join_char(str[*index], result);
-			if (!tmp)
-				return (free(result), NULL);
-			free(result);
-			result = tmp;
-			(*index)++;
-		}
-	}
-	if (str[*index] == 34)
-		(*index)++;
-	return (result);
-}
-
-char	*withdraw_quotes(PARSER *new_node, char *str, char **mini_env)
-{
-	int	start;
-	char	*result;
-	char	*tmp;
-
-	start = 0;
-	result = "";
-	while (str[start] != '\0')
-	{
-		if (str[start] == 34)
-			tmp = process_double_quotes(new_node, str, &start, mini_env);
-		else if (str[start] == 39)
-			tmp = process_single_quotes(str, &start);
-		else
-			tmp = process_unquoted(new_node, str, &start, mini_env);
-		result = ft_strjoin(result, tmp);
-		if (!result)
-			return (free(tmp), NULL);
-		free(tmp);
-	}
-	return (result);
-}
-
-void	calculate_size_of_tab(t_token *cur, PARSER *new_node, char **mini_env)
-{
-	if (cur->type == REDIRECT_IN || cur->type == HEREDOC 
-		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
-	{
-		if (cur->type == HEREDOC)
-			new_node->nb_heredoc++;
-		if (cur->next != NULL)
-			cur->next->value = withdraw_quotes(new_node, cur->next->value, mini_env);
-		new_node->nb_file++;
-	}
-	else if (cur->type == ARGUMENT)
-	{
-		cur->value = withdraw_quotes(new_node, cur->value, mini_env);
-		new_node->nb_command++;
-	}
-}
-
-PARSER	*alloc_new_node(t_token *current, char **mini_env, int exit_code)
-{
-	t_token	*cur;
-	PARSER		*new_node;
-
-	cur = current;
-	new_node = try_malloc(sizeof(PARSER));
-	new_node->exit_code = exit_code;
-	while (cur && cur->type != PIPEX)
-	{
-		calculate_size_of_tab(cur, new_node, mini_env);
-		cur = cur->next;
-	}
-	calloc_tab_of_node(new_node);
-	check_and_free_new_node(new_node);
-	return (new_node);
-}
-
-void	handle_c_signal_heredoc(int signum)
-{
-	(void)signum;
-	exit_status = 130;
-	write(1, "\n", 1);
-	exit(130);
-	
-}
-int	loop_readline(char *delimiter, int *fd_heredoc)
-{
-	char	*input;
-
-	signal(SIGINT, SIG_DFL);
-	while (1)
-	{
-		input = readline("heredoc> ");
-		if (!input)
-		{
-			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-			safe_close(fd_heredoc);
-			return (0);
-		}
-		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0/* && input[ft_strlen(delimiter)] == '\n'*/)
-		{
-			safe_close(fd_heredoc);
-			free(input);
-			break;
-		}
-		else
-		{
-			ft_putendl_fd(input, *fd_heredoc);			
-		}
-		free(input);
-	}
-	// safe_close(fd_heredoc);
-	// dprintf(2, "fd_heredoc = %d\n", *fd_heredoc);
-	return (0);
-}
-
-int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
-{
-	int		index_heredoc;
-	int		random;
-	char	*name_heredoc;
-	int	save_fd_heredoc;
-	int	tmp_fd;
-	int	pid;
-	int status = 0;
-
-	name_heredoc = try_malloc(20 * sizeof(char)); // CALCULER TAILLE
-	ft_strlcpy(name_heredoc, "heredoc", 8);
-	dprintf(2, "name_heredoc apres ft_strlcpy = %s\n", name_heredoc);
-	index_heredoc = 0;
-	random = 1;
-	name_heredoc[7] = index_heredoc + '0';
-	name_heredoc[8] = '\0';
-	dprintf(2, "name_heredoc avant while = %s\n", name_heredoc);
-	while (access(name_heredoc, F_OK) == 0)
-	{
-		name_heredoc[7] = (index_heredoc + random) + '0';
-		name_heredoc[8] = '\0';
-		dprintf(2, "name_heredoc dans while = %s\n", name_heredoc);
-		random++;	
-	}
-	signal(SIGINT, SIG_IGN);
-	new_node->fd_heredoc[*f] = open(name_heredoc, O_WRONLY | O_CREAT | O_APPEND, 0644);
-	
-	if (new_node->fd_heredoc[*f] == -1)
-		perror("open");
-	save_fd_heredoc = dup(new_node->fd_heredoc[*f]);
-	safe_close(&new_node->fd_heredoc[*f]);
-	new_node->delimiter[*d] = ft_strdup(current->value); //ft_strdup(current->next->value)
-	pid = fork();
-	if (pid == -1)
-		return (perror("fork"), FALSE);
-	if (pid == 0)
-	{
-		// get_lines(new_node, *f, *d);
-		// loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*f]);
-		loop_readline(new_node->delimiter[*d], &save_fd_heredoc);
-		dprintf(2, "fd_heredoc apres loop = %d\n", save_fd_heredoc);
-		safe_close(&save_fd_heredoc);
-		exit(0);					
-	}
-	safe_close(&save_fd_heredoc);
-	new_node->file[*f] = ft_strdup(name_heredoc);
-	new_node->redir_type[*f] = current->type;
-	free(name_heredoc);
-	name_heredoc = ft_strdup("heredoc");
-	index_heredoc++;
-	// d++;
-	wait(&status);
-	signal(SIGINT, handle_c_signal_heredoc);
-	if (status + 128 == 130)
-	{
-		dprintf(2, "coucou\n");
-		tmp_fd = open(new_node->file[*f], O_WRONLY);
-		safe_close(&tmp_fd);
-		exit_status = 130;
-		unlink(new_node->file[*f]);
-		return (-1);
-	}
-	return (0);
-}
-
-void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
-{
-	if (f > 0)
-		new_node->file[f] = NULL;
-	if (d > 0)
-		new_node->delimiter[d] = NULL;
-	if (cmd > 0)
-		new_node->command[cmd] = NULL;
-}
-
-void	free_tokens(t_token *tokens)
-{
-	t_token	*next;
-	
-	while (tokens)
-	{
-		next = tokens->next;
-		if (tokens->value)
-		{
-			printf("Freeing token with value: %s\n", tokens->value);
-			free((tokens)->value);
-			tokens->value = NULL;
-		}
-		free(tokens);
-		tokens = next;
-	}
-}
-int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
-{
-	t_token	*current;
-	PARSER		*new_node;
-	int		cmd;
-	int		d;
-	int		f;
-
-	current = *tokens;
-	while (current)
-	{
-		cmd = 0;
-		d = 0;
-		f = 0;
-		new_node = alloc_new_node(current, mini_env, exit_code);
-		if (!new_node)
-		{
-			// free_tokens(*tokens);
-			return (-1);
-		}
-		while (current && current->type != PIPEX)
-		{
-			if (current->type == REDIRECT_IN)
-			{
-				new_node->file[f] = ft_strdup(current->value);
-				new_node->redir_type[f++] = current->type;
-			}
-			else if (current->type == HEREDOC && current->value != NULL)
-			{
-				dprintf(2, "avant create_heredoc f = %d\n", f);
-				if (create_heredoc(new_node, current, &f, &d) == -1)
-				{
-					dprintf(2, "create heredoc = -1\n");
-					// free_tokens(*tokens);
-					return (-1);
-				}
-				dprintf(2, "apres create_heredoc current->file[f] = %s et f = %d\n", new_node->file[f], f);
-				f++;
-				d++;
-				
-			}
-			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
-			{
-					new_node->file[f] = ft_strdup(current->value);
-					new_node->redir_type[f++] = current->type;
-			}
-			else if (current->type == ARGUMENT && current->value != NULL)
-					new_node->command[cmd++] = ft_strdup(current->value);
-			current = current->next;
-		}
-		add_null_to_tab(new_node, f, d, cmd);
-		add_new_node(nodes, new_node);
-		if (current && current->type == PIPEX)
-			current = current->next;
-		// check_and_free_new_node(new_node);
-	}
-	// free_tokens(*tokens);
-	return (0);
-}
-
-// int	create_nodes(t_token **tokens, PARSER **nodes, char **mini_env, int exit_code)
-// {
-// 	t_token	*current;
-// 	PARSER		*new_node;
-// 	int		cmd;
-// 	int		d;
-// 	int		f;
-
-// 	current = *tokens;
-// 	while (current)
-// 	{
-// 		cmd = 0;
-// 		d = 0;
-// 		f = 0;
-// 		new_node = alloc_new_node(current, mini_env, exit_code);
-// 		if (!new_node)
-// 		{
-// 			// free_tokens(*tokens);
-// 			return (-1);
-// 		}
-// 		while (current && current->type != PIPEX)
-// 		{
-// 			if (current->type == REDIRECT_IN && current->next->value != NULL)
-// 			{
-// 				new_node->file[f] = ft_strdup(current->next->value);
-// 				new_node->redir_type[f++] = current->type;
-// 			}
-// 			else if (current->type == HEREDOC && current->next->value != NULL)
-// 				if (create_heredoc(new_node, current, &f, &d) == -1)
-// 				{
-// 					dprintf(2, "create heredoc = -1\n");
-// 					// free_tokens(*tokens);
-// 					return (-1);
-// 				}
-// 			if ((current->type == REDIRECT_OUT || current->type == APPEND_OUT)
-// 					&& current->next->value != NULL)
-// 			{
-// 					new_node->file[f] = ft_strdup(current->next->value);
-// 					new_node->redir_type[f++] = current->type;
-// 			}
-// 			else if (current->type == ARGUMENT && current->value != NULL)
-// 					new_node->command[cmd++] = ft_strdup(current->value);
-// 			current = current->next;
-// 		}
-// 		add_null_to_tab(new_node, f, d, cmd);
-// 		add_new_node(nodes, new_node);
-// 		if (current && current->type == PIPEX)
-// 			current = current->next;
-// 		// check_and_free_new_node(new_node);
-// 	}
-// 	// free_tokens(*tokens);
-// 	return (0);
-// }
-
 LEXER	*ft_init_lexer_input()
 {
 	LEXER	*new_input;
-	
+
 	new_input = try_malloc(sizeof(LEXER));
+	if (!new_input)
+		return (NULL);
 	new_input->data = NULL;
 	new_input->len = 0;
 	new_input->head = 0;
@@ -606,115 +36,226 @@ LEXER	*ft_init_lexer_input()
 
 void handle_c_signal(int signum)
 {
-	(void)signum;
-	// dprintf(2, "handle signal dans parent\n");
+	// dprintf(2, "signal mis a jour dans parent\n");
+	g_signal = signum;
+	// dprintf(2, "(%s, %d) ** signum = %d\n", __FILE__, __LINE__, signum);
 	ft_putstr_fd("\n", 2);
-	 // // Réinitialise l'affichage de la ligne d'entrée
-	// Indique que la ligne doit être recalculée
 	rl_on_new_line();
 	rl_replace_line("", 0);
-	// rl_done = 1;
-	// // Affiche une nouvelle ligne et le prompt
-	rl_redisplay();	
-	exit_status = 130;
+	rl_redisplay();
+}
+
+void handle_c_signal_wait(int signum)
+{
+	g_signal = signum;
+	// dprintf(2, "(%s, %d) ** signum = %d\n", __FILE__, __LINE__, signum);
+	ft_putstr_fd("\n", 2);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
+}
+
+void	add_new_var(t_env **mini_env, t_env *new_var)
+{
+	if (!new_var || !mini_env)
+		return ;
+	ft_lstadd_env_back(mini_env, new_var);
+}
+
+void	free_t_env(t_env **mini_env)
+{
+	t_env	*next;
+	
+	if (!mini_env || !(*mini_env))
+	{
+		dprintf(2, "mini_env dans free_t_env est null\n");
+		return ;
+	}
+	while (*mini_env)
+	{
+		next = (*mini_env)->next;
+		if ((*mini_env)->var)
+		{
+			free((*mini_env)->var);
+			(*mini_env)->var = NULL;
+		}
+		free((*mini_env));
+		*mini_env = next;
+	}
+	free(mini_env);
+}
+void	print_t_env(t_env **mini_env)
+{
+	t_env	*current;
+	
+	if (!mini_env || !*mini_env)
+		dprintf(2, "mini_env est null\n");
+	current = *mini_env;
+	while (current != NULL)
+	{
+		dprintf(2, "mini_env->var = %s\n", current->var);
+		current = current->next;
+	}
+}
+
+t_env	**copy_env_list(t_env **mini_env, char **env)
+{
+	t_env	*new_env;
+	t_env	*new_var_pwd;
+	t_env	*new_var_shlvl;
+	t_env	*new_var_;
+	int	i;
+	new_env = NULL;
+	
+	i = 0;
+	mini_env = try_malloc(sizeof(t_env));
+	if (!mini_env)
+		return (NULL);
+	if (!env || !(*env))
+	{
+		new_var_pwd = try_malloc(sizeof(t_env));
+		if (!new_var_pwd)
+			return (free_t_env(mini_env), NULL);
+		new_var_pwd->var = ft_strjoin("PWD=", getcwd(NULL, 0));
+		if (!new_var_pwd->var)
+			return (free_t_env(mini_env), free_t_env(&new_var_pwd), NULL);
+		add_new_var(mini_env, new_var_pwd);
+		new_var_shlvl = try_malloc(sizeof(t_env));
+		if (!new_var_shlvl)
+			return (free_t_env(mini_env), NULL);
+		new_var_shlvl->var = ft_strdup("SHLVL=1");
+		if (!new_var_shlvl->var)
+			return (free_t_env(mini_env), free_t_env(&new_var_shlvl), NULL);
+		add_new_var(mini_env, new_var_shlvl);		
+		new_var_ = try_malloc(sizeof(t_env));
+		if (!new_var_)
+			return (free_t_env(mini_env), NULL);;
+		new_var_->var = ft_strdup("_=./minishell");
+		if (!new_var_->var)
+			return (free_t_env(mini_env), free_t_env(&new_var_), NULL);
+		add_new_var(mini_env, new_var_);		
+	}
+	else
+	{
+		while (env[i] && env[i] != NULL)
+		{
+			new_env = try_malloc(sizeof(t_env));
+			if (!new_env)
+				return (free_t_env(mini_env), NULL);
+			new_env->var = ft_strdup(env[i]);
+			if (!new_env->var)
+				return (free_t_env(mini_env), free_t_env(&new_env), NULL);
+			new_env->next = NULL;
+			add_new_var(mini_env, new_env);
+			i++;
+		}		
+	}
+	return (mini_env);
+}
+
+
+
+int	loop_readline_main(LEXER **L_input, char **str)
+{
+	*L_input = ft_init_lexer_input();
+	if (!*L_input)
+		return (FALSE);
+	signal(SIGINT, handle_c_signal);
+	signal(SIGQUIT, SIG_IGN);
+	*str = readline("\001\033[36;1m\002minishell ➜ \001\033[0m\002");
+	// str = readline("minishell ➜ ");
+	if (!*str)
+	{
+		ft_putstr_fd("exit\n", 1);
+		rl_clear_history();
+		free(*L_input);
+		return (FALSE);
+	}
+	if (*str && *str[0])
+		add_history(*str);
+	(*L_input)->data = *str;
+	(*L_input)->len = ft_strlen(*str);
+	return (TRUE);
+}
+
+void	free_exec_input(t_mega_struct *mini)
+{
+	print_nodes_list(&mini->nodes);
+	free_tokens(&mini->tokens);
+	mini->p = try_malloc(sizeof(t_pipex));
+	if (!mini->p)
+	{
+	}
+	else
+	{
+		ft_init_struct(mini->p, mini->chained_env, mini->nodes);
+		handle_input(&mini->nodes, mini->p);
+		if (mini->nodes)
+			mini->exit_code = mini->nodes->exit_code;
+		// dprintf(2, "*** (%s, %d) mini->exit_code = %d, mini->nodes->exit_code = %d\n",__FILE__, __LINE__, mini->exit_code, mini->nodes->exit_code);
+		free_pipex(&mini->p);
+	}
+}
+
+void	init_mega_struct(t_mega_struct *mini)
+{
+	mini->p = NULL;
+	mini->L_input = NULL;
+	mini->nodes = NULL;
+	mini->tokens = NULL;
+	mini->chained_env = NULL;
+	mini->exit_code = 0;
+	mini->str = NULL;
+}
+
+void	restore_g_signal()
+{
+	static int	nb_input =0;
+	
+	dprintf(2, "*** (%s, %d) nb_input = %d, g_signal = %d\n", __FILE__, __LINE__, nb_input, g_signal);
+	if (nb_input == 1)
+	{
+		g_signal = 0;
+		nb_input = 0;
+	}
+	if (g_signal == 2)
+		nb_input++;
+	dprintf(2, "*** (%s, %d) nb_input = %d, g_signal = %d\n", __FILE__, __LINE__, nb_input, g_signal);
 }
 
 int		main(int argc, char **argv, char **env)
 {
 	(void)argv;
-	char		*str_input;
-	LEXER		*L_input = NULL;
-	t_token		*tokens = NULL;
-	PARSER		*nodes = NULL;
-	t_pipex	*p = NULL;
-	char		**mini_env;
-	int			exit_code = 0;
+	(void)argc;
+	t_mega_struct	*mini;
+	// int	nb_input;
 
-	mini_env = copy_tab(env);
-	if (argc >= 1)
+	// nb_input = 0;
+	mini = try_malloc(sizeof(t_mega_struct));
+	if (!mini)
+		return (FALSE);
+	init_mega_struct(mini);
+	mini->chained_env = copy_env_list(mini->chained_env, env);
+	if (!mini->chained_env)
+		return (free(mini), FALSE);
+	while (1)
 	{
-		while (1)
+		// dprintf(2, "*** (%s, %d), g_signal = %d\n", __FILE__, __LINE__, g_signal);
+		// restore_g_signal();
+		// dprintf(2, "*** (%s, %d), g_signal = %d\n", __FILE__, __LINE__, g_signal);
+		if (!loop_readline_main(&mini->L_input, &mini->str))
+			break ;
+		if (!fill_list_of_tokens(mini, mini->str))
 		{
-			L_input = ft_init_lexer_input();
-			if (!L_input)
-			{
-				write(1, "fatal: out of memory\n", 21);
-				break;
-			}
-			tokens = NULL;
-			nodes = NULL;
-			signal(SIGINT, handle_c_signal);
-			signal(SIGQUIT, SIG_IGN);
-			str_input = readline("\001\033[36;1m\002minishell ➜ \001\033[0m\002");
-			// str_input = readline("minishell ➜ ");
-			if (!str_input)
-			{
-				dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-				ft_putstr_fd("exit\n", 1);
-				rl_clear_history();
-				free(L_input);
-				break;
-			}
-			if (str_input && str_input[0])
-				add_history(str_input);
-			L_input->data = str_input;
-			L_input->len = ft_strlen(str_input);
-			if (str_input[0] == '\0')
-			{
-			}
-			else if (!fill_list_of_tokens(L_input, &tokens))
-			{
-				print_tokens_list(&tokens);
-				ft_putendl_fd("syntax error", 2);
-				exit_code = 2;
-				// free_tokens(tokens);
-			}
-			// free_tokens(tokens);
-			else
-			{
-				if (create_nodes(&tokens, &nodes, mini_env, exit_code) == 0)
-				{
-					print_tokens_list(&tokens);
-					free_tokens(tokens);						
-					// print_tokens_list(&tokens);
-					// dprintf(2, "taille de list %d\n\n", ft_size_list(&nodes));
-					print_nodes_list(&nodes);
-					p = try_malloc(sizeof(*p));
-					ft_init_struct(p, mini_env, nodes);
-					handle_input(&nodes, p);
-					
-					mini_env = copy_tab(p->mini_env);
-					ft_free_tab(p->mini_env);
-					if (nodes)
-						exit_code = nodes->exit_code;
-					free_pipex(p);
-					if (p == NULL)
-						dprintf(2, "pipex est freeee (%s, %d)\n", __FILE__, __LINE__);
-					if (mini_env == NULL)
-						dprintf(2, "Le mini_env est nul, dommage\n");
-				}
-				else
-					free_tokens(tokens);
-				if (nodes)
-				{
-					reset_node(&nodes);
-					if (nodes == NULL)
-						printf("nodes est freeee (%s, %d)\n", __FILE__, __LINE__);
-
-					
-				}
-				dprintf(0, "hello\n");
-
-				//str_input deplace
-			}
-			// rl_replace_line("", 0);
-			// rl_redisplay();
-			free(str_input);
+		}
+		else
+		{
+			if (create_nodes(mini))
+				free_exec_input(mini);
+			reset_node_mini(mini, NULL);
+			free(mini->str);
 		}
 	}
-	
-	ft_free_tab(mini_env);
-	return (0);
+	return (free_t_env(mini->chained_env), free(mini), TRUE);
 }
 
-// check history

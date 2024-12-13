@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+         #
+#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/11/27 14:17:06 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/12/11 14:34:15 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = minishell
 
 # Compiler
 CC		= cc
-CFLAGS	= -Wall -Wextra -Werror
+CFLAGS	= -Wall -Wextra -Werror -g
 
 # Libft
 LIBFT_PATH	= libft/
@@ -29,6 +29,7 @@ INC			=	-I ./includes/\
 SRC_PATH	=	src/
 SRC_FILES			=	minishell.c \
 							token.c \
+							nodes.c \
 							utils.c \
 							lexer.c \
 							exec.c \

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_echo.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/27 18:30:30 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/12 11:58:04 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,20 @@ int		all_n(char *str)
 	return (TRUE);
 }
 
+int	check_args(char **cmd, int *i, int *is_n)
+{
+	if (!cmd[*i])
+		return (-1);
+	while (ft_strncmp(cmd[*i], "-n", 2) == 0 && all_n(cmd[*i]))
+	{
+		(*i)++;
+		*is_n = 1;
+	}
+	if (!cmd[*i])
+		return (-1);
+	else
+		return (0);
+}
 
 int	ft_echo(char **cmd)
 {
@@ -34,23 +48,14 @@ int	ft_echo(char **cmd)
 
 	i = 1;
 	is_n = 0;
-	if (!cmd[1])
+	if (check_args(cmd, &i, &is_n) < 0)
 		return (TRUE);
-	while (ft_strncmp(cmd[i], "-n", 2) == 0 && all_n(cmd[i]))
-	{
-		i++;
-		is_n = 1;
-	}
-	if (!cmd[i])
-	{
-		return (TRUE);
-	}
-	// dprintf(2, "LINE %d\n", __LINE__);
 	if (cmd[i][0] != '-' || !all_n(cmd[i]))
 	{
 		while (cmd[i])
 		{
-			ft_putstr_fd(cmd[i], 1);
+			if (ft_putstr_fd(cmd[i], 1) == -1)
+				return (FALSE);
 			if (cmd[i + 1])
 				write(1, " ", 1);
 			i++;

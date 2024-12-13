@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 14:30:31 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 11:50:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,96 +28,75 @@ int		count_env_var(char **list)
 	len = 0;
 	while (list[len] != NULL)
 	{
-		// dprintf(2, "list[len] dans count env var = %s\n", list[len]);
 		len++;
 	}
 	return (len);
 }
 
-char	**suppress_var(char **env, int index)
+t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 {
-	char	**new_env;
-	int		new_size;
 	int		i;
 	int		j;
-
-	new_size = count_env_var(env) - 1;
-	dprintf(2, "new_size = %d\n", new_size);
-	new_env = try_malloc((new_size + 1)* sizeof(char *));
-	if (!new_env)
-	{
-		return (NULL);
-	}
-	i = 0;
-	j = 0;
-	while (i <= new_size)
-	{
-		if (i != index)
-		{
-			new_env[j] = ft_strdup(env[i]);
-			// free(env[i]);
-			j++;
-		}
-		else
-		{
-			dprintf(2, "env[%d]= %s\n", i, env[i]);
-			free(env[i]);
-		}
-		i++;
-	}
-	new_env[j] = NULL;
-	dprintf(2, "size de new_env apres alloc = %d\n", count_env_var(new_env));
-	free(env);
-	return (new_env);
-}
-
-char	**ft_unset(PARSER *current, char **env)
-{
-	int		i;
 	int		index;
-	char	**new_env;
+	int		size_env;
+	t_env	*temp;
+	t_env	*saved;
 
 	i = 1;
-	new_env = NULL;
+	saved = NULL;
+	if (!env_nodes || !*env_nodes)
+	{	
+		dprintf(2, "env_nodes n'existe pas");
+		return (NULL);
+	}
 	if (!current->command[1])
-		return (env);
-	
+		return (env_nodes);
 	if (current->command[1] && current->command[1][0] == '-')
 	{
 		ft_putstr_fd("unset: ", 2);
 		ft_putstr_fd(current->command[1], 2);
 		ft_putendl_fd(": invalid option", 2);
 		current->exit_code = 2;
-		return (env);
+		return (env_nodes);
 	}
-	while (current->command[i])
+	while (current->command[i] != NULL)
 	{
-		index = env_var_exists(env, current->command[i]);
-		// dprintf(2, "index = %d\n", index);
+		index = env_var_exists(env_nodes, current->command[i]);
 		if (index >= 0)
 		{
-			dprintf(2, "i = %d\n", i);
-			// dprintf(2, "nb de var d'env = %d\n", count_env_var(env));
-			new_env = suppress_var(env, index);
-			// dprintf(2, "new_env = %s (%s, %d)\n", new_env[0], __FILE__, __LINE__);
-			if (!new_env)
+			size_env = lstsize_t_env(env_nodes);
+			if (size_env == 1)
 			{
-				current->exit_code = 1;
-				write(1, "fatal: out of memory\n", 21);
-				return (env);
+				ft_putendl_fd("empty envp not allowed\n", 2);
+				break ;
 			}
-			env = new_env;
-			// dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
-			// free(new_env);
-			// dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
-			i++;
+			temp = *env_nodes;
+			j = 0;
+			if (index == 0)
+			{
+				*env_nodes = temp->next;
+				free(temp->var);
+				free(temp);
+			}
+			else
+			{
+				while (temp && j < index)
+				{
+					saved = temp;
+					temp = temp->next;
+					j++;
+				}
+				if (!temp)
+				{
+					return (env_nodes);
+				}
+				saved->next = temp->next;
+				free(temp->var);
+				free(temp);
+			}
 		}
-		else
-			i++;
+		i++;
 	}
-	// if (!new_env)
-	// 	return (env);
-	// dprintf(2, "env = %s (%s, %d)\n", env[0], __FILE__, __LINE__);
-	return (env);
+	return (env_nodes);
 }
 

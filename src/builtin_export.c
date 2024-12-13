@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/02 18:25:45 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 12:26:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,59 +20,53 @@
 // verifier la syntaxe des noms de variables + des valeurs possibles
 // gerer les guillemet et les "export" ecrits avant
 
-int		env_var_exists(char **env, char *var)
+int		env_var_exists(t_env **nodes_env, char *var)
 {
 	int	i;
 	int	size;
+	int	sizeofvar;
+	t_env	*temp;
 
 	i = 0;
-	size = count_env_var(env);
-	dprintf(2, "size dans env_var_exist = %d\n", size);
+	size = lstsize_t_env(nodes_env);
+	sizeofvar = ft_strlen(var);
+	temp = *nodes_env;
 	if (!var || var[0] == '\0')
 		return (-1);
-	if (!env)
-		dprintf(2, "env est nul\n");
-	// dprintf(2, "(%s, %d) et env[i] = %s\n", __FILE__, __LINE__, env[i]);
-	while (env[i] && i < size)
+	if (!nodes_env || !(*nodes_env))
+		return (-1);
+	while (temp && i < size)
 	{
-		if (ft_strncmp(env[i], var, strlen(var)) == 0)
-		{
-			// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		if (ft_strncmp(temp->var, var, sizeofvar) == 0 && (temp->var[sizeofvar] == '\0' 
+			|| temp->var[sizeofvar] == '='))
 			return (i);
-		}
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		
 		i++;
+		temp = temp->next;
 	}
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (-1);
 }
 
-void	sort_tab_ascii(char **env, int count)
+void	sort_tab_ascii(t_env **env)
 {
-	int	i;
-	int	j;
-	int	min_idx;
 	char *temp;
+	t_env *current;
+	t_env	*head;
 
-	i = 0;
+	head = *env;
+	current = head;
 	temp = NULL;
-	while (i < count)
+	while (current != NULL && current->next != NULL)
 	{
-		min_idx = i;
-		j = i + 1;
-		while (j < count)
+		if (ft_strcmp(current->var, current->next->var) > 0)
 		{
-			if (ft_strcmp(env[j], env[min_idx]) < 0)
-				min_idx = j;
-			j++;
+			temp = current->var;
+			current->var = current->next->var;
+			current->next->var = temp;
+			current = head;
 		}
-		if (min_idx != i)
-		{
-			temp = env[i];
-			env[i] = env[min_idx];
-			env[min_idx] = temp;
-		}
-		i++;
+		else
+			current = current->next;
 	}
 }
 
@@ -83,8 +77,11 @@ void	write_var(char *sorted_env)
 
 	j = 0;
 	ft_putstr_fd("export ", 2);
-	while (sorted_env[j] && sorted_env[j] != '=')
-		write(1, &sorted_env[j++], 1);
+	while (*sorted_env && sorted_env[j] && sorted_env[j] != '=')
+	{
+		write(1, &sorted_env[j], 1);
+		j++;
+	}
 	if (sorted_env[j] == '=')
 	{
 		write(1, "=\"", 2);
@@ -97,46 +94,70 @@ void	write_var(char *sorted_env)
 		write(1, "\n", 1);
 }
 
-void	print_sorted_env(char **sorted_env)
+void	print_sorted_env(t_env **env_nodes)
 {
 	int	i;
+	t_env *current;
 
 	i = 0;
-	while (sorted_env[i] != NULL)
+	if (!*env_nodes || !env_nodes)
+		return ;
+	current = *env_nodes;
+	while (current != NULL)
 	{
-		if (sorted_env[i] && sorted_env[i][0] == '_' && (sorted_env[i][1] == '\0' || sorted_env[i][1] == '='))
+		if (current->var && current->var[0] == '_' && (current->var[1] == '\0' || current->var[1] == '='))
 		{
-			if (sorted_env[i + 1])
-				i++;
+			if (current->next)
+				current = current->next;
 			else
 				break ;
 		}
-		write_var(sorted_env[i]);
-		i++;
+		else if (current && current->var)
+		{
+			write_var(current->var);
+			if (current->next)
+				current = current->next;
+			else
+				break ;
+		}			
 	}
 }
 
-void	copy_and_sort_env(char **env)
+t_env	**copy_t_env(t_env **env)
 {
-	int		count;
-	int		i;
-	char	**sorted_env;
-
-	count = 0;
-	i = 0;
-	sorted_env = NULL;
-	while (env[count])
-		count++;
-	sorted_env = try_malloc((count + 1) * sizeof(char *));
-	while (i < count)
+	t_env	**sorted_env = NULL;
+	t_env	*new_var;
+	t_env	*current;
+	int	count;
+	
+	current = *env;
+	sorted_env = try_malloc(sizeof(t_env *));
+	if (!sorted_env)
+		return (env);
+	count = lstsize_t_env(&current);
+	while (current != NULL)
 	{
-		sorted_env[i] = ft_strdup(env[i]);
-		i++;
+		new_var = try_malloc(sizeof(t_env));
+		if (!new_var)
+			return (env);
+		new_var->var = ft_strdup(current->var);
+		if (!new_var)
+			return (env);
+		new_var->next = NULL;
+		add_new_var(sorted_env, new_var);
+		current = current->next;
 	}
-	sorted_env[count] = NULL;
-	sort_tab_ascii(sorted_env, count);
+	return (sorted_env);
+}
+
+void	copy_and_sort_env(t_env **env)
+{
+	t_env	**sorted_env;
+
+	sorted_env = copy_t_env(env);
+	sort_tab_ascii(sorted_env);
 	print_sorted_env(sorted_env);
-	free(sorted_env);
+	free_t_env(sorted_env); // free la liste
 }
 
 int	check_name(char *name)
@@ -146,104 +167,123 @@ int	check_name(char *name)
 	i = 0;
 	if (!name || !name[0] || ft_isdigit(name[0]))
 		return (FALSE);
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	while (name[i] && name[i] != '=')
 	{
 		if (!ft_isalnum(name[i]) && name[i] != '_')
 			return (FALSE);
 		i++;
 	}
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	return (TRUE);
 }
 
-void	print_error_msg(char *str, PARSER *current)
+
+void	print_error_msg(char *str, PARSER *current, char *error_msg)
 {
-	ft_putstr_fd("minishell: export: '", 2);
+	ft_putstr_fd("export: '", 2);
 	ft_putstr_fd(str, 2);
-	ft_putstr_fd("': not a valid identifier\n", 2);
+	ft_putendl_fd(error_msg, 2);
 	current->exit_code = 1;
 }
 
-void	handle_value(char *cmd, PARSER *current, char **env)
+void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
 {
 	int		index;
 	char	*equal;
 	char	*name;
 	int		j;
+	t_env	*temp;
+	t_env	*new;
 
 	equal = ft_strchr(cmd, '=');
 	*equal = '\0';
 	name = cmd;
 	j = 0;
+	new = NULL;
 	if (!check_name(name))
-		return (print_error_msg(name, current));
-	index = env_var_exists(env, name);
+		return (print_error_msg(name, current, "': not a valid identifier"));
+	index = env_var_exists(nodes_env, name);
 	*equal = '=';
+	temp = *nodes_env;
 	if (index >= 0)
 	{
-		free(env[index]);
-		env[index] = ft_strdup(cmd);
+		while (temp && j < index)
+		{
+			temp = temp->next;
+			j++;
+		}
+		free(temp->var);
+		temp->var = ft_strdup(cmd);
+		if (!temp->var)
+			return ;
 	}
 	else
 	{
-		while (env[j])
-			j++;
-		env[j] = ft_strdup(cmd);
-		env[j + 1] = NULL;
+		new = try_malloc(sizeof(t_env));
+		if (!new)
+			return ;
+		new->var = ft_strdup(cmd);
+		if (!new->var)
+			return (free(new));
+		new->next = NULL; 
+		ft_lstadd_env_back(nodes_env, new);
 	}
 }
 
-void	handle_variable_without_value(char *cmd, PARSER *current, char **env)
+
+
+t_env	**handle_variable_without_value(char *cmd, PARSER *current, t_env **env_nodes)
 {
 	int index;
 	int j;
+	t_env	*new_var;
 
 	j = 0;
+	new_var = NULL;
 	if (!check_name(cmd))
 	{
-		print_error_msg(cmd, current);
-		return ;
+		print_error_msg(cmd, current, "': not a valid identifier");
+		return (env_nodes);
 	}
-	index = env_var_exists(env, cmd);
+	index = env_var_exists(env_nodes, cmd);
 	if (index < 0)
 	{
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-		while (env[j])
-			j++;
-		env[j] = ft_strdup(cmd);
-		if (!env[j])
-			return ;
-		env[j + 1] = NULL;
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		new_var = try_malloc(sizeof(t_env));
+		if (!new_var)
+			return (env_nodes);
+		new_var->var = ft_strdup(cmd);
+		if (!new_var->var)
+			return (free(new_var), env_nodes);
+		new_var->next = NULL; 
+		add_new_var(env_nodes, new_var);
 	}
+	return (env_nodes);
 }
 
-int	ft_export(PARSER *current, char **env)
+
+t_env	**ft_export(PARSER *current, t_env **env_nodes)
 {
 	int	i;
 
 	i = 1;
-	if (!current->command[1]) // si pas d'arg afficher par ordre ascii
-		return (copy_and_sort_env(env), TRUE);
+	if (!current->command[1])
+		return (copy_and_sort_env(env_nodes), env_nodes);
 	while (current->command[i])
 	{
 		if (current->command[i] && current->command[i][0] == '-')
 		{
-			ft_putstr_fd("export:", 2);
-			ft_putstr_fd(current->command[i], 2);
-			ft_putendl_fd(": invalid option", 2);
+			print_error_msg(current->command[i], current, ": invalid option");
 			current->exit_code = 1;
 			if (i == 1)
 			{
 				current->exit_code = 2;
-				return (FALSE);
+				return (env_nodes);
 			}				
 		}
 		if (ft_strchr(current->command[i], '=') != NULL)
-			handle_value(current->command[i++], current, env);
+			handle_value(current->command[i], current, env_nodes);
 		else
-			handle_variable_without_value(current->command[i++], current, env);
+			handle_variable_without_value(current->command[i], current, env_nodes);
+		i++;
 	}
-	return (TRUE);
+	return (env_nodes);
 }

@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/11/28 15:16:51 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/12 11:56:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	input_ok(t_pipex *p, char *cmd, PARSER *node)
 {
 	if (p->flag == 1)
 	{
-		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit\n", 1);
 		p->exit = 1;
 	}
 	if (cmd)
@@ -38,7 +38,7 @@ void	too_many(t_pipex *p, PARSER *node)
 {
 	if (p->flag == 1)
 	{
-		ft_putstr_fd("exit\n", 2);
+		ft_putstr_fd("exit\n", 1);  // sortie renvoyee sur le terminal et non stderr
 		ft_putstr_fd("exit: too many arguments\n", 2);
 	}
 	node->exit_code = 1;
@@ -48,8 +48,8 @@ void	not_a_num(t_pipex *p, PARSER *node)
 {
 	if (p->flag == 1)
 	{
-		ft_putstr_fd("exit\n", 2);
-		ft_putstr_fd("exit: not a numeric argument\n", 2);
+		ft_putstr_fd("exit\n", 1); // sortie renvoyee sur le terminal et non stderr
+		ft_putstr_fd("exit: numeric argument required\n", 2);
 		p->exit = 1;
 	}
 	node->exit_code = 2;
@@ -66,36 +66,51 @@ int	is_arg_too_big(char *cmd)
 		return (0);
 }
 
-void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p)
+void	check_exit_arg(char *cmd, PARSER *node, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 {
 	int	j;
 
 	j = 0;
 	while (cmd[j])
 	{
-		if (cmd[0] == '-')
+		if (cmd[0] == '-' || cmd[0] == '+')
 			j++;
 		if (!isdigit(cmd[j]))
 		{
 			not_a_num(p, node);
+			safe_close(cpy_stdin);
+			safe_close(cpy_stdout);
+			reset_node(&node);
+			free_t_env(p->env_nodes);
+			free_pipex(&p);
 			exit(2);
 		}
 		j++;
 	}
 }
 
-int	ft_exit(char **cmd, t_pipex *p, PARSER *node)
+void	free_exit(t_pipex *p, PARSER *nodes, int exit_c)
+{
+	reset_node(&nodes);
+	free_t_env(p->env_nodes);
+	free_pipex(&p);
+	exit(exit_c);
+}
+
+int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout)
 {
 	int	i;
+	int	exit_code;
 
 	i = 1;
 	if (cmd[i])
 	{
-		check_exit_arg(cmd[i], node, p);
+		check_exit_arg(cmd[i], node, p, cpy_stdin, cpy_stdout);
 		if (is_arg_too_big(cmd[1]))
 		{
 			not_a_num(p, node);
-			exit(2);
+			restore_std(cpy_stdin, cpy_stdout);
+			free_exit(p, node, 2);
 		}
 		i++;
 	}
@@ -104,7 +119,9 @@ int	ft_exit(char **cmd, t_pipex *p, PARSER *node)
 	else
 	{
 		input_ok(p, cmd[1], node);
-		exit(node->exit_code);
+		restore_std(cpy_stdin, cpy_stdout);
+		exit_code = node->exit_code;
+		free_exit(p, node, exit_code);		
 	}
 	return (TRUE);
 }
