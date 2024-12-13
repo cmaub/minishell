@@ -6,7 +6,7 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 12:42:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 15:53:35 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,15 @@
 
 # define FALSE 0
 # define TRUE 1
+
+
+// typedef struct s_exec
+// {
+// 	char	*path;
+// 	char	**tmp_cmd;
+// 	char	**tmp_minienv;
+// 	char	**str_env;
+// } t_exec;
 
 typedef struct PARSER
 {

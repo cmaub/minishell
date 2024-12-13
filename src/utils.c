@@ -130,6 +130,8 @@ char	**copy_tab(char **tab)
 	int	i;
 
 	i = 0;
+	if (!tab) //verifier verification
+		return (NULL);
 	while (tab[i])
 		i++;
 	new_tab = try_malloc((i + 1) * sizeof(char *));
@@ -270,7 +272,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 				(*nodes)->exit_code = status_code;
 				dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
 			}
-			else if (g_signal != -1)
+			else if (g_signal != 0)
 			{
 				dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		 		status_code = 128 + g_signal;

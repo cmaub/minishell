@@ -6,49 +6,38 @@
 /*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 14:41:36 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 16:51:19 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 #include <errno.h>
 
-
 void	close_pipefds(t_pipex *p)
 {
 	if (p->pipefd[0] != -1)
-	{
 		safe_close(&p->pipefd[0]);
-		// p->pipefd[0] = -1;
-	}
 	if (p->pipefd[1] != -1)
-	{
 		safe_close(&p->pipefd[1]);
-		// p->pipefd[1] = -1;
-	}
 	if (p->prev_fd != -1)
-	{
 		safe_close(&p->prev_fd);
-		// p->prev_fd = -1;
-	}
 }
 
-int	handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out)
+int	handle_output_redirection(PARSER **n, t_pipex *p, int fd_out)
 {
-	if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT)
-		fd_out = open((*nodes)->file[(*nodes)->f], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else if ((*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
-		fd_out = open((*nodes)->file[(*nodes)->f], O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if ((*n)->redir_type[(*n)->f] == REDIRECT_OUT)
+		fd_out = open((*n)->file[(*n)->f], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	else if ((*n)->redir_type[(*n)->f] == APPEND_OUT)
+		fd_out = open((*n)->file[(*n)->f], O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1)
 	{
-		ft_close_error_no_exit(NULL, p, (*nodes)->file[(*nodes)->f]);
+		ft_close_error_no_exit(NULL, p, (*n)->file[(*n)->f]);
 		return (FALSE);
 	}
 	dprintf(2, "fd_out = %d\n", fd_out);
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
 	{
-		//dprintf(2, "dupe de stdout a fail\n");
-		ft_close_error_no_exit(&fd_out, p, (*nodes)->file[(*nodes)->f]);
+		ft_close_error_no_exit(&fd_out, p, (*n)->file[(*n)->f]);
 		return (FALSE);
 	}
 	safe_close(&fd_out);
@@ -62,7 +51,6 @@ int	is_command(char *cmd)
 		return (FALSE);
 	}
 	return (TRUE);
-	
 }
 
 int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
@@ -80,18 +68,14 @@ int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 	if (ft_strncmp(current->command[0], "export", 7) == 0)
 	{
 		p->env_nodes = ft_export(current, p->env_nodes);
-		// dprintf(2, "env dans exec builtin\n");
-		// print_t_env(p->env_nodes);
 		return (TRUE);
 	}
-		// return (ft_export(current, p->env_nodes));
 	if (ft_strncmp(current->command[0], "unset", 6) == 0)
 	{
 		p->env_nodes = ft_unset(current, p->env_nodes);
 		return (TRUE);
 	}
 	return (FALSE);
-
 }
 
 int	is_builtin(PARSER *current)
@@ -115,40 +99,6 @@ int	is_builtin(PARSER *current)
 	}
 	return (FALSE);
 }
-// int	copy_list_in_str(char **str_env, t_env **env_nodes)
-// {
-// 	t_env	*temp;
-// 	int		i;
-
-// 	temp = *env_nodes;
-// 	str_env = try_malloc(sizeof(char *) * (lstsize_t_env(env_nodes) + 1));
-// 	if (!str_env)
-// 		return (FALSE);
-// 	i = 0;
-// 	while (temp)
-// 	{
-// 		str_env[i] = ft_strdup(temp->var);
-// 		// dprintf(2, "str_env[%d] = %s\n", i, str_env[i]);
-// 		if (!str_env[i])
-// 			return (FALSE); 
-// 		i++;
-// 		temp = temp->next;
-// 	}
-// 	str_env[i] = NULL;
-// 	return (TRUE);
-// }
-
-void	print_tab(char **tab)
-{
-	int	i;
-
-	i = 0;
-	while (tab[i] != NULL)
-	{
-		dprintf(2, "tab[%d] = %s\n", i, tab[i]);
-		i++;			
-	}
-}
 
 char	**copy_list_in_str(t_env **env_nodes)
 {
@@ -167,7 +117,7 @@ char	**copy_list_in_str(t_env **env_nodes)
 	{
 		str_env[i] = ft_strdup(temp->var);
 		if (!str_env[i])
-			return (NULL); 
+			return (NULL);
 		i++;
 		if (temp->next)
 			temp = temp->next;
@@ -178,85 +128,100 @@ char	**copy_list_in_str(t_env **env_nodes)
 	return (str_env);
 }
 
-int	execute(PARSER *current, t_pipex *p)
+int	find_path(char **env)
+{
+	int	i;
+
+	i = 0 ;
+	while (env[i])
+	{
+		if (ft_strncmp(env[i], "PATH", 4) == 0)
+			return (TRUE);
+		i++;
+	}
+	return (FALSE);
+}
+
+void	try_find_cmd_file(char **tmp_cmd, char **str_env)
+{
+	char	*dir_cmd;
+	char	*curr_dir;
+
+	curr_dir = "./";
+	dir_cmd = ft_strjoin(curr_dir, tmp_cmd[0]);
+	if (!dir_cmd)
+		(free_array(tmp_cmd), free_array(str_env), exit(1));
+	if (access(dir_cmd, F_OK) == 0)
+	{
+		if (access(dir_cmd, R_OK) == -1)
+			(perror(dir_cmd), free_array(tmp_cmd),
+				free_array(str_env), free(dir_cmd), exit(126));
+		if (find_path(str_env))
+			execve(dir_cmd, tmp_cmd, str_env);// PB on verrifie pas le retour d'execve
+		else
+			execve(dir_cmd, tmp_cmd, NULL);// PB on verrifie pas le retour d'execve
+	}
+	else
+		(perror(tmp_cmd[0]), free_array(tmp_cmd),
+			free_array(str_env), exit(127));
+}
+
+void	exec_no_env_or_path(char **tmp_cmd, char **str_env)
+{
+	if (access(tmp_cmd[0], F_OK) == 0)
+	{
+		if (access(tmp_cmd[0], R_OK) == -1)
+			(perror(tmp_cmd[0]), free_array(tmp_cmd),
+				free_array(str_env), exit(126));
+	}
+	else
+		try_find_cmd_file(tmp_cmd, str_env);
+	if (find_path(str_env))
+		execve(tmp_cmd[0], tmp_cmd, str_env); // PB on verrifie pas le retour d'execve
+	else
+		execve(tmp_cmd[0], tmp_cmd, NULL);// PB on verrifie pas le retour d'execve
+}
+
+int	exec_without_pb(char **tmp_cmd, char **str_env)
 {
 	char	*path;
+	
+	path = get_path_and_check(&tmp_cmd[0], str_env);
+	if (execve(path, tmp_cmd, str_env) == -1)
+	{
+		free_array(tmp_cmd);
+		free(path);
+		free_array(str_env);
+		return (FALSE);
+	}
+	return (FALSE);
+}
+
+int	execute(PARSER *current, t_pipex *p)
+{
 	char	**tmp_cmd;
 	char	**tmp_minienv;
 	char	**str_env;
-	char	*curr_dir;
-	char	*dir_cmd;
-	
+
 	tmp_cmd = NULL;
 	tmp_minienv = NULL;
 	str_env = NULL;
-	curr_dir = "./";
 	if (is_builtin(current) == 1)
-	{
-		exec_builtin(current, p, NULL, NULL); //verifier si on free bien les 2 structures
-		reset_node(&current);
-		free_pipex(&p);
-		exit(EXIT_SUCCESS);
-	}
+		(exec_builtin(current, p, NULL, NULL),
+			reset_node(&current), free_pipex(&p), exit(EXIT_SUCCESS));
 	else
 	{
 		str_env = copy_list_in_str(p->env_nodes);
 		if (!str_env)
 			return (FALSE);
-		if (current->command)
-			tmp_cmd = copy_tab(current->command);
+		tmp_cmd = copy_tab(current->command);
 		if (!tmp_cmd)
 			return (free_array(str_env), FALSE);
-		free_t_env(p->env_nodes);
-		free_pipex(&p);
-		reset_node(&current);
-		if (ft_strchr(tmp_cmd[0], '/') || !find_path_line(str_env))
-		{
-			if (access(tmp_cmd[0], F_OK) == 0)
-			{
-				if (access(tmp_cmd[0], R_OK) == -1)
-				{
-					perror(tmp_cmd[0]); // sur meme ligne dans parentheses
-					free_array(tmp_cmd);
-					free_array(str_env);
-					exit(126);
-				}
-			}
-			else
-			{
-				dir_cmd = ft_strjoin(curr_dir, tmp_cmd[0]);
-				if (!dir_cmd)
-					(free_array(tmp_cmd), free_array(str_env), exit(1));
-				if (access(dir_cmd, F_OK) == 0)
-				{
-					if (access(dir_cmd, R_OK) == -1)
-						(perror(dir_cmd), free_array(tmp_cmd),
-							free_array(str_env), free(dir_cmd), exit(126));
-					if (find_path_line(str_env))
-						execve(dir_cmd, tmp_cmd, str_env);
-					else
-						execve(dir_cmd, tmp_cmd, NULL);
-				}
-				else
-				{
-					perror(tmp_cmd[0]);
-					free_array(tmp_cmd);
-					free_array(str_env);
-					exit(127);
-				}
-			}
-			if (find_path_line(str_env))
-				execve(tmp_cmd[0], tmp_cmd, str_env);
-			else
-				execve(tmp_cmd[0], tmp_cmd, NULL);
-		}
-		else if (!ft_strchr(tmp_cmd[0], '/') && find_path_line(str_env))
-		{	
-			path = get_path_and_check(&tmp_cmd[0], str_env);
-			// dprintf(2, "path = %s, split_cmd = %s, %s, %s, %s\n", path, tmp_cmd[0], tmp_cmd[1], tmp_cmd[2], tmp_cmd[3]);
-			if (execve(path, tmp_cmd, str_env) == -1)
-				return (free_array(tmp_cmd), free(path), free_array(str_env), FALSE);
-		}
+		(free_t_env(p->env_nodes), free_pipex(&p), reset_node(&current));
+		if (ft_strchr(tmp_cmd[0], '/') || !find_path(str_env) )
+			exec_no_env_or_path(tmp_cmd, str_env);
+		else if (!ft_strchr(tmp_cmd[0], '/') && find_path(str_env))
+			exec_without_pb(tmp_cmd, str_env);
 	}
 	return (FALSE);
 }
@@ -315,6 +280,8 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 		safe_close(&p->pipefd[1]);
 	}
+	if (!(*nodes)->command)
+		exit(EXIT_SUCCESS);
 	if (!execute((*nodes), p))
 	{
 		ft_putstr_fd((*nodes)->command[0], 2);
@@ -377,6 +344,8 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 			close_error_and_free(&fd_in, p, nodes, "pipe", 1);
 	}
 	safe_close(&p->pipefd[1]);
+	if (!(*nodes)->command)
+		exit(EXIT_SUCCESS);
 	if (!execute((*nodes), p))
 	{
 		ft_putstr_fd((*nodes)->command[0], 2);
@@ -431,6 +400,8 @@ void	last_child(t_pipex *p, PARSER **nodes)
 		}
 		(*nodes)->f++;
 	}
+	if (!(*nodes)->command)
+		exit(EXIT_SUCCESS);
 	if (!execute((*nodes), p))
 	{
 		ft_putstr_fd((*nodes)->command[0], 2);
