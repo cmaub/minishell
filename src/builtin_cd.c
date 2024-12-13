@@ -3,17 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_cd.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 14:34:38 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 19:05:06 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*
-si cd est appele sans arguments -> fail (cf sujet)
+/*si cd est appele sans arguments -> fail (cf sujet)
 si plus d'un argument -> fail
 
 chdir() permet de changer de repertoire. 
@@ -24,31 +23,38 @@ si le changement reussi, mettre a jour la nouvelle position
 
 char *getcwd( char *buffer, size_t size );
 permet de recuperer le chemin absolu du repertoire courant
-- buffer : le bloc de mémoire dans lequel le chemin de travail courant vous sera retourné.
+- buffer : le bloc de mémoire dans lequel le chemin de travail 
+courant vous sera retourné.
 - size : la taille du bloc de mémoire passé en premier paramètre.
 */
 
-int	create_new_var(t_env **node, char *str)
+int	handle_new_var(t_env **nodes, char *dest_tmp, char *src)
 {
-	t_env	*new;
+	char	*new_var;
 
-	new = try_malloc(sizeof(t_env));
-	if (!new)
+	new_var = ft_strjoin(dest_tmp, src);
+	if (!new_var)
+		return (free(dest_tmp), -1);
+	if (!create_new_var(nodes, new_var))
+		return (free(new_var), FALSE);
+	free(new_var);
+	return (TRUE);
+}
+
+int	handle_existing_var(t_env *temp, char *dest_tmp, char *src)
+{
+	free(temp->var);
+	temp->var = NULL;
+	temp->var = ft_strjoin(dest_tmp, src);
+	if (!temp->var)
 		return (FALSE);
-	new->var = ft_strdup(str);
-	if (!new->var)
-		return (FALSE);
-	new->next = NULL; 
-	ft_lstadd_env_back(node, new);
 	return (TRUE);
 }
 
 int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 {	
-	t_env 	*temp;
+	t_env	*temp;
 	char	*dest_tmp;
-	char	*new_var;
-	
 
 	temp = *env_nodes;
 	dest_tmp = ft_strjoin(dest, "=");
@@ -64,50 +70,34 @@ int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 	{
 		if (ft_strncmp(dest_tmp, src, 6) == 0)
 		{
-			new_var = ft_strjoin(dest_tmp, src);
-			if (!temp)
-				return (free(dest_tmp), -1);
-			if (!create_new_var(env_nodes, new_var))
-				return (free(new_var), free(dest_tmp), FALSE);
-			free(new_var);
+			if (!handle_new_var(env_nodes, dest_tmp, src))
+				return (free(dest_tmp), FALSE);
 		}
-		else
-			return (FALSE);
 	}
-	free(temp->var);
-	temp->var = NULL;
-	temp->var = ft_strjoin(dest_tmp, src);
-	if (!temp->var)
+	else if (!temp->var || !handle_existing_var(temp, dest_tmp, src))
 		return (free(dest_tmp), FALSE);
 	return (free(dest_tmp), TRUE);
 }
 
-
-int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
+int	check_args_cd(char **cmd)
 {
-	char	*old_pwd;
-	char	*new_pwd;
-	char	*pwd_var;
-
 	if (!cmd[1])
-		return(ft_error_int("cd: no directory specified", node), FALSE);
+		return (ft_putendl_fd("cd: no directory specified", 2), FALSE);
 	if (cmd[2])
-		return(ft_error_int("cd: too many arguments", node), FALSE);
+		return (ft_putendl_fd("cd: too many arguments", 2), FALSE);
 	else
 	{
 		if (chdir(cmd[1]) == -1)
-			return (ft_error_int("cd: error", node));
+			return (ft_putendl_fd("cd: error", 2), FALSE);
 	}
-	if (!env_var_exists(p->env_nodes, "PWD"))
-	{
-		new_pwd = getcwd(NULL, 0);
-		pwd_var = ft_strjoin("PWD=", new_pwd);
-		if (!pwd_var)
-			return(free(new_pwd), FALSE);
-		free(new_pwd);
-		create_new_var(p->env_nodes, pwd_var);
-		free(pwd_var);
-	}
+	return (TRUE);
+}
+
+int	set_old_and_new_pwd(t_pipex *p, PARSER *node)
+{
+	char	*old_pwd;
+	char	*new_pwd;
+
 	old_pwd = return_var_from_env("PWD", p->env_nodes);
 	if (!old_pwd)
 		return (ft_error_int("cd: error", node));
@@ -118,5 +108,31 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 		return (free(old_pwd), ft_error_int("cd: error", node));
 	if (!ft_setenv("PWD", new_pwd, p->env_nodes))
 		return (free(new_pwd), free(old_pwd), FALSE);
-	return (free(new_pwd), free(old_pwd), TRUE);			
+	return (free(new_pwd), free(old_pwd), TRUE);
+}
+
+int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
+{
+	char	*new_pwd;
+	char	*pwd_var;
+
+	new_pwd = NULL;
+	if (!check_args_cd(cmd))
+	{
+		node->exit_code = 1;
+		return (FALSE);
+	}
+	if (!env_var_exists(p->env_nodes, "PWD"))
+	{
+		new_pwd = getcwd(NULL, 0);
+		pwd_var = ft_strjoin("PWD=", new_pwd);
+		if (!pwd_var)
+			return (free(new_pwd), FALSE);
+		(free(new_pwd), create_new_var(p->env_nodes, pwd_var), free(pwd_var));
+	}
+	if (!set_old_and_new_pwd(p, node))
+		return (FALSE);
+	if (new_pwd)
+		free (new_pwd);
+	return (TRUE);
 }

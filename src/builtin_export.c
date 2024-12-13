@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 17:26:49 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 19:05:59 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,32 +19,32 @@
 // verifier la syntaxe des noms de variables + des valeurs possibles
 // gerer les guillemet et les "export" ecrits avant
 
-int	env_var_exists(t_env **nodes_env, char *var)
-{
-	int		i;
-	int		size;
-	int		sizeofvar;
-	t_env	*temp;
+// int	env_var_exists(t_env **env_nodes, char *var)
+// {
+// 	int		i;
+// 	int		size;
+// 	int		sizeofvar;
+// 	t_env	*temp;
 
-	i = 0;
-	size = lstsize_t_env(nodes_env);
-	sizeofvar = ft_strlen(var);
-	temp = *nodes_env;
-	if (!var || var[0] == '\0')
-		return (-1);
-	if (!nodes_env || !(*nodes_env))
-		return (-1);
-	while (temp && i < size)
-	{
-		if (ft_strncmp(temp->var, var, sizeofvar) == 0
-			&& (temp->var[sizeofvar] == '\0'
-				|| temp->var[sizeofvar] == '='))
-			return (i);
-		i++;
-		temp = temp->next;
-	}
-	return (-1);
-}
+// 	i = 0;
+// 	size = lstsize_t_env(env_nodes);
+// 	sizeofvar = ft_strlen(var);
+// 	temp = *env_nodes;
+// 	if (!var || var[0] == '\0')
+// 		return (-1);
+// 	if (!env_nodes || !(*env_nodes))
+// 		return (-1);
+// 	while (temp && i < size)
+// 	{
+// 		if (ft_strncmp(temp->var, var, sizeofvar) == 0
+// 			&& (temp->var[sizeofvar] == '\0'
+// 				|| temp->var[sizeofvar] == '='))
+// 			return (i);
+// 		i++;
+// 		temp = temp->next;
+// 	}
+// 	return (-1);
+// }
 
 void	sort_tab_ascii(t_env **env)
 {
@@ -190,78 +190,45 @@ void	print_error_msg(char *str, PARSER *current, char *error_msg)
 	current->exit_code = 1;
 }
 
-// int	create_and_add_new_var_to_env(t_env **nodes_env, char *var)
+// int	create_new_var(t_env **env_nodes, char *cmd)
 // {
 // 	t_env	*new;
-	
+
 // 	new = try_malloc(sizeof(t_env));
 // 	if (!new)
 // 		return (FALSE);
-// 	new->var = ft_strdup(var);
+// 	new->var = ft_strdup(cmd);
 // 	if (!new->var)
 // 		return (free(new), FALSE);
 // 	new->next = NULL;
-// 	ft_lstadd_env_back(nodes_env, new);
+// 	ft_lstadd_env_back(env_nodes, new);
 // 	return (TRUE);
 // }
 
-int	ft_add_new_var(t_env **nodes_env, char *cmd)
-{
-	t_env	*new;
-	
-	new = try_malloc(sizeof(t_env));
-	if (!new)
-		return (FALSE);
-	new->var = ft_strdup(cmd);
-	if (!new->var)
-		return (free(new), FALSE);
-	new->next = NULL;
-	ft_lstadd_env_back(nodes_env, new);
-	return (TRUE);
-}
-
-int	check_value_and_add(t_env **nodes_env, char *cmd, int index)
+int	check_value_and_add(t_env **env_nodes, char *cmd, int index)
 {
 	t_env	*temp;
-	// t_env	*new;
-	int	j;
-	
-	temp = *nodes_env;
-	// new = NULL;
+	int		j;
+
+	temp = *env_nodes;
 	j = -1;
-	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 	if (index >= 0)
 	{
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		while (temp && j++ < index)
 			temp = temp->next;
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-		if (temp)
-		{
-			free(temp->var);
-			dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
-			temp->var = ft_strdup(cmd);
-		}
-		dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+		if (!temp)
+			return (FALSE);
+		free(temp->var);
+		temp->var = ft_strdup(cmd);
 		if (!temp->var)
 			return (FALSE);
 	}
 	else
-	{
-		return (ft_add_new_var(nodes_env, cmd));
-		// new = try_malloc(sizeof(t_env));
-		// if (!new)
-		// 	return (FALSE);
-		// new->var = ft_strdup(cmd);
-		// if (!new->var)
-		// 	return (free(new), FALSE);
-		// new->next = NULL;
-		// ft_lstadd_env_back(nodes_env, new);
-	}
+		return (create_new_var(env_nodes, cmd));
 	return (TRUE);
 }
 
-void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
+void	handle_value(char *cmd, PARSER *current, t_env **env_nodes)
 {
 	int		index;
 	char	*equal;
@@ -272,10 +239,10 @@ void	handle_value(char *cmd, PARSER *current, t_env **nodes_env)
 	name = cmd;
 	if (!check_name(name))
 		return (print_error_msg(name, current, "': not a valid identifier"));
-	index = env_var_exists(nodes_env, name);
+	index = env_var_exists(env_nodes, name);
 	*equal = '=';
 	dprintf(2, "cmd = %s\n", cmd);
-	if (!check_value_and_add(nodes_env, cmd, index))
+	if (!check_value_and_add(env_nodes, cmd, index))
 		return ;
 }
 
@@ -294,16 +261,7 @@ t_env	**handle_var_wo_value(char *cmd, PARSER *current, t_env **env_nodes)
 	}
 	index = env_var_exists(env_nodes, cmd);
 	if (index < 0)
-	{
-		new_var = try_malloc(sizeof(t_env));
-		if (!new_var)
-			return (env_nodes);
-		new_var->var = ft_strdup(cmd);
-		if (!new_var->var)
-			return (free(new_var), env_nodes);
-		new_var->next = NULL;
-		add_new_var(env_nodes, new_var);
-	}
+		create_new_var(env_nodes, cmd);
 	return (env_nodes);
 }
 

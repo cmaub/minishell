@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 17:30:12 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 19:06:23 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ void	ft_lstadd_env_back(t_env **lst, t_env *new);
 void	add_new_var(t_env **mini_env, t_env *new_var);
 void	print_t_env(t_env **mini_env);
 int	count_env_var(char **list);
-int	env_var_exists(t_env **nodes_env, char *var);
+int	env_var_exists(t_env **env_nodes, char *var);
 char	*return_var_from_env(char *str, t_env **chained_env);
 t_env	**copy_t_env(t_env **env);
 char	**find_path_line(char **env);
@@ -175,6 +175,8 @@ int	ft_pwd(PARSER *current);
 int	ft_env(PARSER *current, t_env **env);
 int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout);
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
+int	create_new_var(t_env **node, char *str);
+int	env_var_exists(t_env **env_nodes, char *var);
 void	print_sorted_env(t_env **env_nodes);
 t_env	**ft_unset(PARSER *current, t_env **env_nodes);
 t_env	**ft_export(PARSER *current, t_env **env_nodes);

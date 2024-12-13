@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 16:51:19 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/13 18:17:35 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -436,7 +436,6 @@ void handle_c_signal_child(int signum)
 	ft_putstr_fd("\n", 2);
 	rl_on_new_line();
 	rl_replace_line("", 0);
-	// rl_redisplay();
 }
 
 void	create_process(t_pipex *p, PARSER **nodes)
@@ -483,10 +482,7 @@ int	restore_std(int *cpy_stdin, int *cpy_stdout)
 	if (*cpy_stdout != -1)
 	{
 		if (dup2(*cpy_stdout, STDOUT_FILENO) == -1)
-		{
 			perror("STDOUT");
-			// safe_close(*cpy_stdin);
-		}
 		safe_close(cpy_stdout);
 		*cpy_stdout = -1;
 	}
@@ -578,18 +574,15 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 		current->exit_code = 1;
 	if (restore_std(&cpy_stdin, &cpy_stdout) == FALSE)
 	{
-		dprintf(2, "**** (%s, %d): restore std echoue\n", __FILE__, __LINE__);
 		current->exit_code = 1;
 		return ;
 	}
-	dprintf(2, "**** (%s, %d): restore std success\n", __FILE__, __LINE__);
 	if (p->exit == 1)
 		exit(EXIT_SUCCESS);
 }
 void	handle_quit_child(int signum)
 {
 	g_signal = signum;
-	// ft_putstr_fd("\n", 2);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 }

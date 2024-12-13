@@ -6,13 +6,13 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/12 11:58:04 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/13 19:08:14 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int		all_n(char *str)
+int	all_n(char *str)
 {
 	int	i;
 
@@ -66,5 +66,3 @@ int	ft_echo(char **cmd)
 	}
 	return (TRUE);
 }
-
-	
