@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/16 16:54:44 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/16 18:52:09 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,12 @@
 // 	char	**str_env;
 // } t_exec;
 
+typedef struct s_cpy
+{
+	int cpy_stdin;
+	int cpy_stdout;
+} t_cpy;
+
 typedef struct PARSER
 {
 	char **file;
@@ -69,7 +75,8 @@ typedef struct PARSER
 	int	**fd_heredoc;
 } PARSER ;
 
-typedef struct _LEXER {
+typedef struct _LEXER 
+{
     char    *data;
     size_t  len;
     size_t  head;
@@ -155,7 +162,8 @@ void	handle_c_signal_wait(int signum);
 /* TOKENS */
 int	fill_list_of_tokens(t_mega_struct *mini, char *str);
 int	no_envp(char **tab);
-int	handle_input(PARSER **nodes, t_pipex *p);
+// int	handle_input(PARSER **nodes, t_pipex *p);
+int	handle_input(PARSER **nodes, t_pipex *p, t_mega_struct *mini);
 int	ft_here_doc(PARSER *nodes);
 int	execute(PARSER *current, t_pipex *p);
 int    ft_wait(pid_t last_pid, PARSER **nodes);
@@ -175,7 +183,7 @@ int	is_command(char *cmd);
 int	ft_echo(char **cmd);
 int	ft_pwd(PARSER *current);
 int	ft_env(PARSER *current, t_env **env);
-int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout);
+int	ft_exit(t_pipex *p, PARSER *node, t_cpy *cpy, t_mega_struct *mini);
 int	ft_cd(char **cmd, t_pipex *p, PARSER *node);
 int	create_new_var(t_env **node, char *str);
 int	env_var_exists(t_env **env_nodes, char *var);

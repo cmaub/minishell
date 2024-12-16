@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 15:39:38 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 18:32:50 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,7 +198,7 @@ void	free_exec_input(t_mega_struct *mini)
 	else
 	{
 		ft_init_struct(mini->p, mini->chained_env, mini->nodes);
-		handle_input(&mini->nodes, mini->p);
+		handle_input(&mini->nodes, mini->p, mini);
 		if (mini->nodes)
 			mini->exit_code = mini->nodes->exit_code;
 		free_pipex(&mini->p);

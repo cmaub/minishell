@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/16 18:05:31 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/16 18:57:52 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	is_command(char *cmd)
 	return (TRUE);
 }
 
-int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
+int	exec_builtin(PARSER *current, t_pipex *p, t_cpy *cpy, t_mega_struct *mini)
 {
 	if (ft_strncmp(current->command[0], "echo", 5) == 0)
 		return (ft_echo(current->command));
@@ -41,7 +41,7 @@ int	exec_builtin(PARSER *current, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 	if (ft_strncmp(current->command[0], "env", 4) == 0)
 		return (ft_env(current, p->env_nodes));
 	if (ft_strncmp(current->command[0], "exit", 5) == 0)
-		return (ft_exit(current->command, p, current, cpy_stdin, cpy_stdout));
+		return (ft_exit(p, current, cpy, mini));
 	if (ft_strncmp(current->command[0], "cd", 3) == 0)
 		return (ft_cd(current->command, p, current));
 	if (ft_strncmp(current->command[0], "export", 7) == 0)
@@ -497,7 +497,7 @@ int	simpl_pro_input(PARSER *nod, int *fd_in, int *d)
 	return (TRUE);
 }
 
-int	builtins(PARSER *nod, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
+int	builtins(PARSER *nod, t_pipex *p, t_cpy *cpy, t_mega_struct *mini)
 {
 	int	fd_in;
 	int	d;
@@ -514,7 +514,7 @@ int	builtins(PARSER *nod, t_pipex *p, int *cpy_stdin, int *cpy_stdout)
 			return (FALSE);
 		nod->f++;
 	}
-	if (!exec_builtin(nod, p, cpy_stdin, cpy_stdout))
+	if (!exec_builtin(nod, p, cpy, mini))
 		nod->exit_code = 1;
 	return (TRUE);
 }
@@ -526,31 +526,30 @@ void	q_child(int signum)
 	rl_replace_line("", 0);
 }
 
-int	handle_builtin(PARSER *node, t_pipex *p)
+int	handle_builtin(PARSER *node, t_pipex *p, t_mega_struct *mini)
 {
-	int	cpy_stdin;
-	int	cpy_stdout;
+	t_cpy	cpy;
 
-	cpy_stdin = -1;
-	cpy_stdout = -1;
-	if (cpy_std(&cpy_stdin, &cpy_stdout) == FALSE)
+	cpy.cpy_stdin = -1;
+	cpy.cpy_stdout = -1;
+	if (cpy_std(&cpy.cpy_stdin, &cpy.cpy_stdout) == FALSE)
 	{
 		node->exit_code = 1;
 		return (FALSE);
 	}
-	if (!builtins(node, p, &cpy_stdin, &cpy_stdout))
+	if (!builtins(node, p, &cpy, mini))
 	{
-		restore_std(&cpy_stdin, &cpy_stdout);
+		restore_std(&cpy.cpy_stdin, &cpy.cpy_stdout);
 		node->exit_code = 1;
 		return (FALSE);
 	}
-	if (!restore_std(&cpy_stdin, &cpy_stdout))
+	if (!restore_std(&cpy.cpy_stdin, &cpy.cpy_stdout))
 	{
 		node->exit_code = 1;
 		return (FALSE);
 	}
 	if (p->exit == 1)
-		exit(EXIT_SUCCESS);
+		(free(mini), exit(EXIT_SUCCESS));
 	return (TRUE);
 }
 
@@ -568,13 +567,13 @@ int	create_pipes(t_pipex *p, PARSER *node)
 	return (TRUE);
 }
 
-int	handle_input(PARSER **nodes, t_pipex *p)
+int	handle_input(PARSER **nodes, t_pipex *p, t_mega_struct *mini)
 {
 	PARSER		*current;
 
 	current = (*nodes);
 	if (current && current->next == NULL && is_builtin(current))
-		return (handle_builtin(current, p));
+		return (handle_builtin(current, p, mini));
 	while (p->i < p->nb_cmd)
 	{
 		if (!create_pipes(p, current))

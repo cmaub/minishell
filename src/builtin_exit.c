@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_exit.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 19:09:26 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 19:00:02 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,40 +89,42 @@ int	check_exit_arg(char *cmd)
 	return (TRUE);
 }
 
-void	free_exit(t_pipex *p, PARSER *nodes, int exit_c)
+void	free_exit(t_pipex *p, PARSER *nodes, t_mega_struct *mini, int exit_c)
 {
 	reset_node(&nodes);
 	free_t_env(p->env_nodes);
 	free_pipex(&p);
+	if (mini)
+		free(mini);
 	exit(exit_c);
 }
 
-// trop d'arguments
-int	ft_exit(char **cmd, t_pipex *p, PARSER *node, int *cpy_stdin, int *cpy_stdout)
+int	ft_exit(t_pipex *p, PARSER *node, t_cpy *cpy, t_mega_struct *mini)
 {
 	int	i;
 	int	exit_code;
 
 	i = 1;
-	if (cmd[i])
+	if (node->command[i])
 	{
-		if (!check_exit_arg(cmd[i])
-			|| !lenght_exit_code(cmd[1]))
+		if (!check_exit_arg(node->command[i])
+			|| !lenght_exit_code(node->command[1]))
 		{
 			not_a_num(p, node);
-			restore_std(cpy_stdin, cpy_stdout);
-			free_exit(p, node, 2);
+			restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout); //verifier si ca pose pas pb quand fonction appelee dans un enfant
+			free_exit(p, node, mini, 2);
 		}
 		i++;
 	}
-	if (cmd[i])
+	if (node->command[i])
 		too_many(p, node);
 	else
 	{
-		input_ok(p, cmd[1], node);
-		restore_std(cpy_stdin, cpy_stdout);
+		input_ok(p, node->command[1], node);
+		
+		restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
 		exit_code = node->exit_code;
-		free_exit(p, node, exit_code);
+		free_exit(p, node, mini, exit_code);
 	}
 	return (TRUE);
 }
