@@ -39,7 +39,7 @@ void	print_nodes_list(PARSER **nodes)
 		d = 0;
 		while (f < 30 && tmp->file && tmp->file[f] != NULL)
 		{
-			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir_type[f]);
+			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir[f]);
 			if (d < 30 && tmp->delimiter && tmp->delimiter[d] != NULL)
 			{
 				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
@@ -91,7 +91,7 @@ void	calloc_tab_of_node(PARSER *new_node)
 	if (new_node->nb_file > 0)
 	{
 		new_node->file = try_malloc((new_node->nb_file + 1) * sizeof(char *));
-		new_node->redir_type = try_malloc((new_node->nb_file) * sizeof(int));
+		new_node->redir = try_malloc((new_node->nb_file) * sizeof(int));
 	}
 	if (new_node->nb_command > 0)
 		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
@@ -140,6 +140,7 @@ char	*isolate_expand(char *str, int index)
 	{
 		// if (str[index + i] == 39 || str[index + i] == 34 || str[index + i] == 32)
 		// 	break;
+		dprintf(2, "**** LINE %d, str = %s\n", __LINE__, str);
 		if (!ft_isalnum(str[index + i]) && str[index + i] != '_')
 			break ;
 		
@@ -200,6 +201,7 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 	empty = ft_strdup("");
 	if (!empty)
 		return (NULL);
+	dprintf(2, "***LINE = %d, str = %s\n", __LINE__, str);
 	expand_expr = isolate_expand(str, *index + 1);
 	expand_result = return_var_from_env(expand_expr, chained_env);
 	// if (!expand_expr)
@@ -378,6 +380,60 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 	return (result);
 }
 
+// int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
+// {
+// 	char	*tmp;
+
+// 	tmp = NULL;
+// 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC 
+// 		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
+// 	{
+// 		if (cur->type == HEREDOC)
+// 			new_node->nb_heredoc++;
+// 		if (cur->type) // checker que next n'est pas un pb
+// 		{
+// 			tmp = ft_strdup(cur->value);
+// 			if (!tmp)
+// 				return (FALSE);
+// 			free(cur->value);
+// 			cur->value = NULL;
+// 			cur->value = withdraw_quotes(new_node, tmp, chained_env);
+// 			free(tmp);
+// 			if (!cur->value)
+// 				return (FALSE);
+// 		}
+// 		new_node->nb_file++;
+// 	}
+// 	else if (cur->type == ARGUMENT)
+// 	{
+// 		tmp = ft_strdup(cur->value);
+// 		if (!tmp)
+// 			return (FALSE);
+// 		free(cur->value);
+// 		cur->value = NULL;
+// 		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
+// 		free(tmp);
+// 		if (!cur->value || !*cur->value)
+// 			return (FALSE);
+// 		new_node->nb_command++;
+// 	}
+// 	return (TRUE);
+// }
+
+char	*update_value_in_node(char **value, PARSER *node, t_env **chained_env)
+{
+	char	*tmp;
+
+	tmp = ft_strdup(*value);
+	if (!tmp)
+		return (NULL);
+	free (*value);
+	*value = NULL;
+	*value = withdraw_quotes(node, tmp, chained_env);
+	free(tmp);
+	return (*value);
+}
+
 int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 {
 	char	*tmp;
@@ -390,13 +446,7 @@ int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 			new_node->nb_heredoc++;
 		if (cur->type) // checker que next n'est pas un pb
 		{
-			tmp = ft_strdup(cur->value);
-			if (!tmp)
-				return (FALSE);
-			free(cur->value);
-			cur->value = NULL;
-			cur->value = withdraw_quotes(new_node, tmp, chained_env);
-			free(tmp);
+			cur->value = update_value_in_node(&cur->value, new_node, chained_env);
 			if (!cur->value)
 				return (FALSE);
 		}
@@ -404,13 +454,7 @@ int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 	}
 	else if (cur->type == ARGUMENT)
 	{
-		tmp = ft_strdup(cur->value);
-		if (!tmp)
-			return (FALSE);
-		free(cur->value);
-		cur->value = NULL;
-		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
-		free(tmp);
+		cur->value = update_value_in_node(&cur->value, new_node, chained_env);
 		if (!cur->value || !*cur->value)
 			return (FALSE);
 		new_node->nb_command++;
@@ -453,14 +497,12 @@ void	handle_c_signal_heredoc(int signum)
 {
 	g_signal = signum;
 	write(1, "\n", 1);
-	// rl_on_new_line();
 	rl_replace_line("", 0);
-	// rl_redisplay();
 	rl_done = 1;
 	close(STDIN_FILENO);
 }
 
-int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifier le retour de readline ou renvoyer un void
+int	loop_readline(char *delimiter, int *fd_heredoc)
 {
 	char	*input;
 
@@ -470,16 +512,11 @@ int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifi
 	{
 		input = readline("heredoc> ");
 		if (g_signal == SIGINT)
-		{
-			free(input);
-			safe_close(fd_heredoc);
-			return (-1);
-		}
+			return (free(input), safe_close(fd_heredoc), -1);
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-			safe_close(fd_heredoc);
-			return (-1);
+			return (safe_close(fd_heredoc), -1);
 		}
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0)
 		{
@@ -488,9 +525,7 @@ int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifi
 			break;
 		}
 		else //verifier variable globale
-		{
 			ft_putendl_fd(input, *fd_heredoc);
-		}
 		free(input);
 	}
 	return (0);
@@ -509,14 +544,13 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 		return (safe_close(&fd), FALSE);
 	if (loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]) == -1)
 	{
-		dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		if (dup2(fd, STDIN_FILENO) == -1)
 			return (perror ("dup"), FALSE);
 		safe_close(&fd);
 		return (FALSE);		
 	}
 	safe_close(&new_node->fd_heredoc[*d][1]);
-	new_node->redir_type[*f] = current->type;
+	new_node->redir[*f] = current->type;
 	signal(SIGINT, SIG_DFL); //
 	if (dup2(fd, STDIN_FILENO) == -1)
 		return (perror ("dup"), FALSE);
@@ -548,7 +582,7 @@ int	create_nodes(t_mega_struct *mini)
 				new_node->file[f] = ft_strdup(current->value);
 				if (!new_node->file[f]){}
 					// return (reset)
-				new_node->redir_type[f++] = current->type;
+				new_node->redir[f++] = current->type;
 			}
 			else if (current->type == HEREDOC && current->value != NULL)
 			{
@@ -579,7 +613,7 @@ int	create_nodes(t_mega_struct *mini)
 			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 			{
 					new_node->file[f] = ft_strdup(current->value);
-					new_node->redir_type[f++] = current->type;
+					new_node->redir[f++] = current->type;
 			}
 			else if (current->type == ARGUMENT && current->value != NULL)
 			{

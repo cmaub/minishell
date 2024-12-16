@@ -23,8 +23,8 @@
 // 			free(new_node->command);
 // 		if (new_node->delimiter && new_node->nb_heredoc > 0)
 // 			free(new_node->delimiter);
-// 		if (new_node->redir_type && new_node->nb_file > 0)
-// 			free(new_node->redir_type);
+// 		if (new_node->redir && new_node->nb_file > 0)
+// 			free(new_node->redir);
 // 		if (new_node->fd_heredoc && new_node->nb_heredoc > 0)
 // 			free(new_node->fd_heredoc);
 // 		free(new_node);
@@ -38,13 +38,13 @@ void	check_and_free_new_node(PARSER *new_node)
 	if ((!new_node->file && new_node->nb_file > 0)
 		|| (!new_node->command && new_node->nb_command > 0)
 		|| (!new_node->delimiter && new_node->nb_heredoc > 0)
-		|| (!new_node->redir_type && new_node->nb_file > 0)
+		|| (!new_node->redir && new_node->nb_file > 0)
 		|| (!new_node->fd_heredoc && new_node->nb_heredoc > 0))
 	{
 		free(new_node->file);
 		free(new_node->command);
 		free(new_node->delimiter);
-		free(new_node->redir_type);
+		free(new_node->redir);
 		free(new_node->fd_heredoc);
 		free(new_node);
 		new_node = NULL;
@@ -164,8 +164,8 @@ void	reset_one_node(PARSER **node)
 		free_array((*node)->command);
 	if ((*node)->delimiter)
 		free_array((*node)->delimiter);
-	if ((*node)->redir_type)
-		free((*node)->redir_type);
+	if ((*node)->redir)
+		free((*node)->redir);
 	if ((*node)->fd_heredoc)
 		(close_heredoc((*node)), free_array_int((*node)->fd_heredoc, (*node)));
 	if ((*node))
@@ -192,8 +192,8 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 			free_array(current->command);
 		if (current->delimiter)
 			free_array(current->delimiter);
-		if (current->redir_type)
-			free(current->redir_type);
+		if (current->redir)
+			free(current->redir);
 		if (current->nb_heredoc)
 			(close_heredoc(current), 
 				free_array_int(current->fd_heredoc, current));
@@ -222,8 +222,8 @@ void	reset_node(PARSER **node)
 			free_array(current->command);
 		if (current->delimiter)
 			free_array(current->delimiter);
-		if (current->redir_type)
-			free(current->redir_type);
+		if (current->redir)
+			free(current->redir);
 		if (current->fd_heredoc)
 			(close_heredoc(current), 
 				free_array_int(current->fd_heredoc, current));

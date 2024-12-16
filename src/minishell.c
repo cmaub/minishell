@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 15:39:38 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 11:29:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,19 +82,19 @@ void	free_t_env(t_env **mini_env)
 	free(mini_env);
 }
 
-// void	print_t_env(t_env **mini_env)
-// {
-// 	t_env	*current;
+void	print_t_env(t_env **mini_env)
+{
+	t_env	*current;
 
-// 	if (!mini_env || !*mini_env)
-// 		dprintf(2, "mini_env est null\n");
-// 	current = *mini_env;
-// 	while (current != NULL)
-// 	{
-// 		dprintf(2, "mini_env->var = %s\n", current->var);
-// 		current = current->next;
-// 	}
-// }
+	if (!mini_env || !*mini_env)
+		dprintf(2, "mini_env est null\n");
+	current = *mini_env;
+	while (current != NULL)
+	{
+		dprintf(2, "mini_env->var = %s\n", current->var);
+		current = current->next;
+	}
+}
 
 int	create_full_env(t_env **mini_env, char **env)
 {

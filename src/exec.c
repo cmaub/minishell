@@ -25,9 +25,9 @@ void	close_pipefds(t_pipex *p)
 
 int	handle_output_redirection(PARSER **n, t_pipex *p, int fd_out)
 {
-	if ((*n)->redir_type[(*n)->f] == REDIRECT_OUT)
+	if ((*n)->redir[(*n)->f] == REDIRECT_OUT)
 		fd_out = open((*n)->file[(*n)->f], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	else if ((*n)->redir_type[(*n)->f] == APPEND_OUT)
+	else if ((*n)->redir[(*n)->f] == APPEND_OUT)
 		fd_out = open((*n)->file[(*n)->f], O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1)
 	{
@@ -241,20 +241,20 @@ void	first_child(t_pipex *p, PARSER **nodes)
 	safe_close(&p->pipefd[0]);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-		if (fd_in == -1 && (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if (fd_in == -1 && (*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 		{
 			close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 		{
 			dprintf(2, "fd_in = %d\n", fd_in);
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 			safe_close(&fd_in);
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+		if ((*nodes)->redir[(*nodes)->f] == HEREDOC)
 		{
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
@@ -262,7 +262,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][0]);
 			d++;
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir[(*nodes)->f] == APPEND_OUT)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 			{
@@ -308,17 +308,17 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 	safe_close(&p->prev_fd);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-		if (fd_in == -1 && (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if (fd_in == -1 && (*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 			close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 		{
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 				close_error_and_free(&fd_in, p, nodes,(*nodes)->file[(*nodes)->f], 1);
 			safe_close(&fd_in);
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+		if ((*nodes)->redir[(*nodes)->f] == HEREDOC)
 		{
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
@@ -326,7 +326,7 @@ void	inter_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][0]);
 			d++;
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir[(*nodes)->f] == APPEND_OUT)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 			{
@@ -370,18 +370,18 @@ void	last_child(t_pipex *p, PARSER **nodes)
 	close_pipefds(p);
 	while ((*nodes)->file && (*nodes)->file[(*nodes)->f] != NULL)
 	{
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 			fd_in = open((*nodes)->file[(*nodes)->f], O_RDONLY | 0644);
-		if (fd_in == -1 && (*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if (fd_in == -1 && (*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 			close_error_and_free(NULL, p, nodes, (*nodes)->file[(*nodes)->f], 1);
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_IN)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 		{
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 
 			safe_close(&fd_in);
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == HEREDOC)
+		if ((*nodes)->redir[(*nodes)->f] == HEREDOC)
 		{
 			safe_close(&(*nodes)->fd_heredoc[d][1]);
 			if (dup2((*nodes)->fd_heredoc[d][0], STDIN_FILENO) == -1)
@@ -389,7 +389,7 @@ void	last_child(t_pipex *p, PARSER **nodes)
 			safe_close(&(*nodes)->fd_heredoc[d][0]);
 			d++;
 		}
-		if ((*nodes)->redir_type[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir_type[(*nodes)->f] == APPEND_OUT)
+		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_OUT || (*nodes)->redir[(*nodes)->f] == APPEND_OUT)
 		{
 			if (!handle_output_redirection(nodes, p, fd_out))
 			{
@@ -523,16 +523,16 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 	}
 	while (current->file && current->file[current->f] != NULL)
 	{
-		if (current->redir_type[current->f] == REDIRECT_IN )
+		if (current->redir[current->f] == REDIRECT_IN )
 			fd_in = open(current->file[current->f], O_RDONLY | 0644);
-		if (fd_in == -1 && current->redir_type[current->f] == REDIRECT_IN)
+		if (fd_in == -1 && current->redir[current->f] == REDIRECT_IN)
 		{
 			perror(current->file[current->f]);
 			current->exit_code = 1;
 			restore_std(&cpy_stdin, &cpy_stdout);
 			return ;
 		}
-		if (current->redir_type[current->f] == REDIRECT_IN)
+		if (current->redir[current->f] == REDIRECT_IN)
 		{
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 			{
@@ -544,7 +544,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 			}
 			safe_close(&fd_in);
 		}
-		if (current->redir_type[current->f] == HEREDOC)
+		if (current->redir[current->f] == HEREDOC)
 		{
 			safe_close(&current->fd_heredoc[d][1]);
 			if (dup2(current->fd_heredoc[d][0], STDIN_FILENO) == -1)
@@ -558,7 +558,7 @@ void	handle_simple_process(PARSER *current, t_pipex *p)
 			safe_close(&current->fd_heredoc[d][0]);
 			d++;
 		}
-		if (current->redir_type[current->f] == REDIRECT_OUT || current->redir_type[current->f] == APPEND_OUT)
+		if (current->redir[current->f] == REDIRECT_OUT || current->redir[current->f] == APPEND_OUT)
 		{
 			if (!handle_output_redirection(&current, p, fd_out))
 			{

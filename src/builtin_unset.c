@@ -6,7 +6,7 @@
 /*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 16:16:37 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 11:37:43 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	check_args_unset(PARSER *current, t_env **env_nodes)
 	return (TRUE);
 }
 
-int	browse_env_and_unset_var(t_env **env_nodes, int index)
+t_env	**browse_env_and_unset_var(t_env **env_nodes, int index)
 {
 	int		j;
 	t_env	*temp;
@@ -62,17 +62,17 @@ int	browse_env_and_unset_var(t_env **env_nodes, int index)
 	}
 	else
 	{
-		while (temp && j++ < index)
+		while (temp && j++ < index -1)
 		{
 			saved = temp;
 			temp = temp->next;
 		}
 		if (!temp)
-			return (FALSE);
+			return (env_nodes);
 		saved->next = temp->next;
 		(free(temp->var), free(temp));
 	}
-	return (TRUE);
+	return (env_nodes);
 }
 
 t_env	**ft_unset(PARSER *current, t_env **env_nodes)
@@ -95,8 +95,7 @@ t_env	**ft_unset(PARSER *current, t_env **env_nodes)
 				ft_putendl_fd("empty envp not allowed\n", 2);
 				break ;
 			}
-			if (!browse_env_and_unset_var(env_nodes, index))
-				return (env_nodes);
+			env_nodes = browse_env_and_unset_var(env_nodes, index);
 		}
 		i++;
 	}

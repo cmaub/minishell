@@ -58,7 +58,7 @@ typedef struct PARSER
 	char **file;
 	char	**command; // n'exec que la premiere
 	char	**delimiter;
-	int		*redir_type;
+	int		*redir;
 	int		cmd;
 	int		f;
 	int	nb_command;
