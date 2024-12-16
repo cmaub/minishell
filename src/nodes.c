@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   nodes.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/13 14:33:17 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/16 17:58:26 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	print_nodes_list(PARSER **nodes)
 		d = 0;
 		while (f < 30 && tmp->file && tmp->file[f] != NULL)
 		{
-			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir_type[f]);
+			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir[f]);
 			if (d < 30 && tmp->delimiter && tmp->delimiter[d] != NULL)
 			{
 				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
@@ -91,7 +91,7 @@ void	calloc_tab_of_node(PARSER *new_node)
 	if (new_node->nb_file > 0)
 	{
 		new_node->file = try_malloc((new_node->nb_file + 1) * sizeof(char *));
-		new_node->redir_type = try_malloc((new_node->nb_file) * sizeof(int));
+		new_node->redir = try_malloc((new_node->nb_file) * sizeof(int));
 	}
 	if (new_node->nb_command > 0)
 		new_node->command = try_malloc((new_node->nb_command + 3) * sizeof(char *));
@@ -485,6 +485,7 @@ int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifi
 		{
 			safe_close(fd_heredoc);
 			free(input);
+			close(STDIN_FILENO);
 			break;
 		}
 		else //verifier variable globale
@@ -516,7 +517,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 		return (FALSE);		
 	}
 	safe_close(&new_node->fd_heredoc[*d][1]);
-	new_node->redir_type[*f] = current->type;
+	new_node->redir[*f] = current->type;
 	signal(SIGINT, SIG_DFL); //
 	if (dup2(fd, STDIN_FILENO) == -1)
 		return (perror ("dup"), FALSE);
@@ -548,7 +549,7 @@ int	create_nodes(t_mega_struct *mini)
 				new_node->file[f] = ft_strdup(current->value);
 				if (!new_node->file[f]){}
 					// return (reset)
-				new_node->redir_type[f++] = current->type;
+				new_node->redir[f++] = current->type;
 			}
 			else if (current->type == HEREDOC && current->value != NULL)
 			{
@@ -571,6 +572,7 @@ int	create_nodes(t_mega_struct *mini)
 					if (g_signal == 2)
 						mini->exit_code = g_signal + 128;
 					return (FALSE);
+					// break ;
 				}
 				f++;
 				d++;
@@ -579,7 +581,7 @@ int	create_nodes(t_mega_struct *mini)
 			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
 			{
 					new_node->file[f] = ft_strdup(current->value);
-					new_node->redir_type[f++] = current->type;
+					new_node->redir[f++] = current->type;
 			}
 			else if (current->type == ARGUMENT && current->value != NULL)
 			{

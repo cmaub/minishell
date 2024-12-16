@@ -162,6 +162,7 @@ void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes)
 	p->env_nodes = chained_env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
+	p->d = 0;
 	p->prev_fd = -1;
 	p->pid = 0;
 	p->last_pid = 0;

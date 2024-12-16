@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_unset.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 16:16:37 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 11:37:16 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,59 +46,59 @@ int	check_args_unset(PARSER *current, t_env **env_nodes)
 	return (TRUE);
 }
 
-int	browse_env_and_unset_var(t_env **env_nodes, int index)
+t_env    **browse_env_and_unset_var(t_env **env_nodes, int index)
 {
-	int		j;
-	t_env	*temp;
-	t_env	*saved;
+    int        j;
+    t_env    *temp;
+    t_env    *saved;
 
-	j = -1;
-	temp = *env_nodes;
-	saved = NULL;
-	if (index == 0)
-	{
-		*env_nodes = temp->next;
-		(free(temp->var), free(temp));
-	}
-	else
-	{
-		while (temp && j++ < index)
-		{
-			saved = temp;
-			temp = temp->next;
-		}
-		if (!temp)
-			return (FALSE);
-		saved->next = temp->next;
-		(free(temp->var), free(temp));
-	}
-	return (TRUE);
+    j = 0;
+    temp = *env_nodes;
+    saved = NULL;
+    if (index == 0)
+    {
+        *env_nodes = temp->next;
+        (free(temp->var), free(temp));
+    }
+    else
+    {
+        while (temp && j < index)
+        {
+            saved = temp;
+            temp = temp->next;
+            j++;
+        }
+        if (!temp)
+            return (env_nodes);
+        saved->next = temp->next;
+        (free(temp->var), free(temp));
+    }
+    return (env_nodes);
 }
 
-t_env	**ft_unset(PARSER *current, t_env **env_nodes)
+t_env    **ft_unset(PARSER *current, t_env **env_nodes)
 {
-	int		i;
-	int		index;
-	int		size_env;
+    int        i;
+    int        index;
+    int        size_env;
 
-	i = 1;
-	if (!check_args_unset(current, env_nodes))
-		return (env_nodes);
-	while (current->command[i] != NULL)
-	{
-		index = env_var_exists(env_nodes, current->command[i]);
-		if (index >= 0)
-		{
-			size_env = lstsize_t_env(env_nodes);
-			if (size_env == 1)
-			{
-				ft_putendl_fd("empty envp not allowed\n", 2);
-				break ;
-			}
-			if (!browse_env_and_unset_var(env_nodes, index))
-				return (env_nodes);
-		}
-		i++;
-	}
-	return (env_nodes);
+    i = 1;
+    if (!check_args_unset(current, env_nodes))
+        return (env_nodes);
+    while (current->command[i] != NULL)
+    {
+        index = env_var_exists(env_nodes, current->command[i]);
+        if (index >= 0)
+        {
+            size_env = lstsize_t_env(env_nodes);
+            if (size_env == 1)
+            {
+                ft_putendl_fd("empty envp not allowed\n", 2);
+                break ;
+            }
+            env_nodes = browse_env_and_unset_var(env_nodes, index);
+        }
+        i++;
+    }
+    return (env_nodes);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 19:06:23 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 16:54:44 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ typedef struct PARSER
 	char **file;
 	char	**command; // n'exec que la premiere
 	char	**delimiter;
-	int		*redir_type;
+	int		*redir;
 	int		cmd;
 	int		f;
 	int	nb_command;
@@ -96,6 +96,7 @@ typedef struct s_pipex
 	char			**mini_env;
 	int		 	nb_cmd;
 	int		       i; // ceci est un compteur qui compte les pid
+	int				d; //compteur pour le pipe heredoc
 	int		       prev_fd;
 	int			pipefd[2];
 	int			exit;
@@ -144,7 +145,8 @@ void	ft_close_error_no_exit(int *fd, t_pipex *p, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes);
 void	safe_close(int *fd);
-int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
+// int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
+int		handle_output_redirection(PARSER **nodes, t_pipex *p, int *flag_output);
 void	handle_c_signal(int signum);
 void	handle_c_signal_wait(int signum);
 // void	handle_c_signal_child(int signum);

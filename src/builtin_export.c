@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_export.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 19:05:59 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/16 14:37:00 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void	write_var(char *sorted_env)
 	char	*tmp;
 
 	j = 0;
-	ft_putstr_fd("export ", 2);
+	ft_putstr_fd("export ", 1);
 	while (*sorted_env && sorted_env[j] && sorted_env[j] != '=')
 	{
 		write(1, &sorted_env[j], 1);
