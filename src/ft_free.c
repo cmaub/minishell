@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/16 14:23:14 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 16:00:22 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void	free_array_and_close_fds(char **array)
 	array = NULL;
 }
 
-void	free_array_int(int **array, PARSER *current)
+void	free_arr_i(int **array, PARSER *current)
 {
 	int	i;
 
@@ -167,11 +167,17 @@ void	reset_one_node(PARSER **node)
 	if ((*node)->redir)
 		free((*node)->redir);
 	if ((*node)->fd_heredoc)
-		(close_heredoc((*node)), free_array_int((*node)->fd_heredoc, (*node)));
+		free_arr_i((*node)->fd_heredoc, (*node));
 	if ((*node))
 		free((*node));
 	(*node) = NULL;
 	node = NULL;
+}
+
+void	init_mini_null(t_mega_struct *mini)
+{
+	mini->nodes = NULL;
+	mini->p = NULL;
 }
 
 void	reset_node_mini(t_mega_struct *mini, PARSER **node)
@@ -180,9 +186,9 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 	PARSER	*temp;
 
 	reset_one_node(node);
-	current = mini->nodes;
-	if (!mini->nodes)
+	if (!mini || !mini->nodes)
 		return ;
+	current = mini->nodes;
 	while (current)
 	{
 		temp = current->next;
@@ -195,14 +201,12 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 		if (current->redir)
 			free(current->redir);
 		if (current->nb_heredoc)
-			(close_heredoc(current), 
-				free_array_int(current->fd_heredoc, current));
+			(close_heredoc(current), free_arr_i(current->fd_heredoc, current));
 		if (current)
 			free(current);
 		current = temp;
 	}
-	mini->nodes = NULL;
-	mini->p = NULL;
+	init_mini_null(mini);
 }
 
 void	reset_node(PARSER **node)
@@ -210,9 +214,9 @@ void	reset_node(PARSER **node)
 	PARSER	*current;
 	PARSER	*temp;
 
-	current = *node;
-	if (!node || !(*node))
+	if (!node | !*node)
 		return ;
+	current = *node;
 	while (current)
 	{
 		temp = current->next;
@@ -225,8 +229,8 @@ void	reset_node(PARSER **node)
 		if (current->redir)
 			free(current->redir);
 		if (current->fd_heredoc)
-			(close_heredoc(current), 
-				free_array_int(current->fd_heredoc, current));
+			(close_heredoc(current),
+				free_arr_i(current->fd_heredoc, current));
 		if (current)
 			free(current);
 		current = temp;

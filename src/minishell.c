@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 09:38:54 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 14:49:04 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ LEXER	*ft_init_lexer_input(void)
 
 void	handle_c_signal(int signum)
 {
+	dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
 	g_signal = signum;
 	ft_putstr_fd("\n", 2);
 	rl_on_new_line();
@@ -210,6 +211,7 @@ void	init_mega_struct(t_mega_struct *mini)
 	mini->p = NULL;
 	mini->L_input = NULL;
 	mini->nodes = NULL;
+	mini->begin = NULL;
 	mini->tokens = NULL;
 	mini->chained_env = NULL;
 	mini->exit_code = 0;

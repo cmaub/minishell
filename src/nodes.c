@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/17 09:39:30 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 11:54:10 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -484,6 +484,16 @@ void	add_null_to_tab(PARSER *new_node, t_mega_struct *mini)
 		new_node->command[mini->cmd] = NULL;
 }
 
+// void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
+// {
+// 	if (f > 0)
+// 		new_node->file[f] = NULL;
+// 	if (d > 0)
+// 		new_node->delimiter[d] = NULL;
+// 	if (cmd > 0)
+// 		new_node->command[cmd] = NULL;
+// }
+
 void	handle_c_signal_heredoc(int signum)
 {
 	g_signal = signum;
@@ -536,10 +546,11 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 		return (safe_close(&fd), FALSE);
 	if (loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]) == -1)
 	{
+		dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
 		if (dup2(fd, STDIN_FILENO) == -1)
-			return (perror ("dup"), FALSE);
+			return (perror("dup"), FALSE);
 		safe_close(&fd);
-		return (FALSE);		
+		return (FALSE);
 	}
 	safe_close(&new_node->fd_heredoc[*d][1]);
 	new_node->redir[*f] = current->type;
@@ -567,14 +578,17 @@ int	fill_nodes_with_heredoc(t_token **current, PARSER **new_node, t_mega_struct 
 	if (!create_heredoc((*new_node), (*current), &(*mini)->f, &(*mini)->d))
 	{
 		safe_close(&(*new_node)->fd_heredoc[(*mini)->d][0]);
-		reset_node_mini(*mini, &(*new_node)); // regarder si possible de mettre en une seule fonction
+		reset_node_mini(NULL, &(*new_node)); // regarder si possible de mettre en une seule fonction
 		free((*mini)->nodes);
 		(*mini)->nodes = NULL;
 		free((*new_node));
 		(*new_node) = NULL;
 		free_tokens(&(*mini)->tokens);
+		
 		if (g_signal == 2)
-		(*mini)->exit_code = g_signal + 128;
+		{
+			(*mini)->exit_code = g_signal + 128;
+		}
 		return (FALSE);
 	}
 	(*mini)->d++;
@@ -616,10 +630,13 @@ int	create_nodes(t_mega_struct *mini)
 			if (cur->type == REDIRECT_IN || cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 				fill_nodes_with_files(&cur, &new_node, &mini);
 			else if (cur->type == HEREDOC && cur->value != NULL)
-				fill_nodes_with_heredoc(&cur, &new_node, &mini);
+			{
+				if (!fill_nodes_with_heredoc(&cur, &new_node, &mini))
+					return (FALSE);
+			}
 			else if (cur->type == ARGUMENT && cur->value != NULL)
 				fill_nodes_with_args(&cur, &new_node, &mini);
-			cur = cur->next;			
+			cur = cur->next;
 		}
 		(add_null_to_tab(new_node, mini), add_new_node(&mini->nodes, new_node));
 		if (cur && cur->type == PIPEX)

@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/16 18:52:09 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:18:23 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,7 @@ typedef struct s_sig
 typedef struct s_mega_struct
 {
 	PARSER *nodes;
+	PARSER *begin;
 	t_token *tokens;
 	LEXER	*L_input;
 	t_env	**chained_env;
@@ -151,7 +152,7 @@ char	*get_path_and_check(char **split_cmd, char **env);
 char	**copy_tab(char **envp);
 int	ft_error_int(char *str, PARSER *node);
 void	ft_error_exit(char *str, int exit_c);
-void	ft_close_error_no_exit(int *fd, t_pipex *p, char *str);
+void	clse_n_qit(int *fd, t_pipex *p, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes);
 void	safe_close(int *fd);
@@ -168,7 +169,9 @@ int	no_envp(char **tab);
 // int	handle_input(PARSER **nodes, t_pipex *p);
 int	handle_input(PARSER **nodes, t_pipex *p, t_mega_struct *mini);
 int	ft_here_doc(PARSER *nodes);
-int	execute(PARSER *current, t_pipex *p);
+// int	execute(PARSER *current, t_pipex *p);
+// int	execute(PARSER *current, t_pipex *p, t_mega_struct *mini);
+int	execute(PARSER **current, t_pipex *p, t_mega_struct *mini);
 int    ft_wait(pid_t last_pid, PARSER **nodes);
 int	add_new_token(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
@@ -209,6 +212,7 @@ void   close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int 
 void	free_array(char **array);
 void	free_pipex(t_pipex **p);
 int	restore_std(int *cpy_stdin, int *cpy_stdout);
+void	free_exit(t_pipex *p, t_mega_struct *mini, int exit_c);
 
 /* LEXER */
 int 	PIPE(LEXER *input, t_token **list);

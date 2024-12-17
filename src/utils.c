@@ -224,27 +224,27 @@ int	no_envp(char **tab)
 	return (0);
 }
 
-void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)
+void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)//remplacer en passant mini ?
 {
 	if (fd)
 		safe_close(fd);
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
+	if (p->env_nodes)
+		free_t_env(p->env_nodes);
 	free_pipex(&p);
 	reset_node(nodes);
 	exit(exit_c);
 }
 
-void	ft_close_error_no_exit(int *fd, t_pipex *p, char *str)
+void	clse_n_qit(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
 		safe_close(fd);
 	safe_close(&p->pipefd[1]);
 	safe_close(&p->pipefd[0]);
 	perror(str);
-	// free_pipex(&p);
-	// reset_node(nodes);//pas ici
 }
 
 int ft_wait(pid_t last_pid, PARSER **nodes)

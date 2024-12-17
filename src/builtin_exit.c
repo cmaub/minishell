@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/16 19:00:02 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 16:14:06 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,11 +89,12 @@ int	check_exit_arg(char *cmd)
 	return (TRUE);
 }
 
-void	free_exit(t_pipex *p, PARSER *nodes, t_mega_struct *mini, int exit_c)
+void	free_exit(t_pipex *p, t_mega_struct *mini, int exit_c)
 {
-	reset_node(&nodes);
 	free_t_env(p->env_nodes);
 	free_pipex(&p);
+	if (mini->begin)
+		reset_node(&mini->begin);
 	if (mini)
 		free(mini);
 	exit(exit_c);
@@ -111,8 +112,9 @@ int	ft_exit(t_pipex *p, PARSER *node, t_cpy *cpy, t_mega_struct *mini)
 			|| !lenght_exit_code(node->command[1]))
 		{
 			not_a_num(p, node);
-			restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout); //verifier si ca pose pas pb quand fonction appelee dans un enfant
-			free_exit(p, node, mini, 2);
+			if (cpy)
+				restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
+			free_exit(p, mini, 2);
 		}
 		i++;
 	}
@@ -121,10 +123,10 @@ int	ft_exit(t_pipex *p, PARSER *node, t_cpy *cpy, t_mega_struct *mini)
 	else
 	{
 		input_ok(p, node->command[1], node);
-		
-		restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
+		if (cpy)
+			restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
 		exit_code = node->exit_code;
-		free_exit(p, node, mini, exit_code);
+		free_exit(p, mini, exit_code);
 	}
 	return (TRUE);
 }
