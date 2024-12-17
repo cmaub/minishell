@@ -116,7 +116,6 @@ typedef struct s_sig
 typedef struct s_mega_struct
 {
 	PARSER *nodes;
-	PARSER *new;
 	t_token *tokens;
 	LEXER	*L_input;
 	t_env	**chained_env;
@@ -126,6 +125,7 @@ typedef struct s_mega_struct
 	int	f;
 	int	cmd;
 	int	d;
+	int	idx;
 } t_mega_struct;
 
 // ENV

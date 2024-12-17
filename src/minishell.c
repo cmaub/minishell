@@ -210,7 +210,6 @@ void	init_mega_struct(t_mega_struct *mini)
 	mini->p = NULL;
 	mini->L_input = NULL;
 	mini->nodes = NULL;
-	mini->new = NULL;
 	mini->tokens = NULL;
 	mini->chained_env = NULL;
 	mini->exit_code = 0;
@@ -218,6 +217,7 @@ void	init_mega_struct(t_mega_struct *mini)
 	mini->f = 0;
 	mini->d = 0;
 	mini->cmd = 0;
+	mini->idx = 0;
 }
 
 int	main(int argc, char **argv, char **env)

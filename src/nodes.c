@@ -142,15 +142,14 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 	return (empty);
 }
 
-char	*expand_var(t_mega_struct *mini, char *str, int *i)
-// char	*expand_var(PARSER *node, char *str, int *i, t_env **env)
+char	*expand_var(PARSER *node, t_mega_struct *mini, char *str, int *i)
 {
 	char	*expand;
 
 	expand = NULL;
 	if (str[(*i) + 1] && str[(*i) + 1] == '?')
 	{
-		expand = print_exit_code(mini->nodes, i);
+		expand = print_exit_code(node, i);
 		if (!expand)
 			return (NULL);
 	}
@@ -187,16 +186,15 @@ int	is_expandable(char *str, int i, int flag)
 	return (0);
 }
 
-char	*withdraw_0(t_mega_struct *mini, char *str, int *i, char *res)
-// char	*withdraw_0(PARSER *node, char *str, int *i, t_env **env, char *res)
+char	*withdraw_0(PARSER *node, t_mega_struct *mini, char *str, char *res)
 {
 	char	*tmp;
 	char	*tmp_result;
 	char	*expand;
 
-	if (is_expandable(str, *i, 0))
+	if (is_expandable(str, mini->idx, 0))
 	{
-		expand = expand_var(mini, str, i);
+		expand = expand_var(node, mini, str, &mini->idx);
 		if (!expand)
 			return (NULL);
 		tmp_result = ft_strjoin(res, expand);
@@ -208,31 +206,28 @@ char	*withdraw_0(t_mega_struct *mini, char *str, int *i, char *res)
 	}
 	else
 	{
-		tmp = join_char(str[*i], res);
+		tmp = join_char(str[mini->idx], res);
 		if (!tmp)
 			return (free(res), NULL);
 		res = tmp;
-		(*i)++;
+		(mini->idx)++;
 	}
 	return (res);
 }
 
-char	*process_unquoted(PARSER *node, t_mega_struct *mini, char *str, int *index)
-// char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **env)
+char	*process_unquoted(PARSER *node, t_mega_struct *mini, char *str, int *i)
 {
 	char	*result;
 	char	*tmp_result;
 	char	*tmp;
 
-	mini->new = node;
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
 	tmp_result = NULL;
 	tmp = NULL;
-	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
-		result = withdraw_0(mini, str, index, result);
-		// result = withdraw_0(new_node, str, index, env, result);
+	while (str[*i] != 39 && str[*i] != 34 && str[*i] != '\0')
+		result = withdraw_0(node, mini, str, result);
 	return (result);
 }
 
@@ -259,16 +254,15 @@ char	*process_single_quotes(char *str, int *index)
 	return (result);
 }
 
-char	*withdraw_2(t_mega_struct *mini, char *str, int *i, char *res)
-// char	*withdraw_2(PARSER *node, char *str, int *i, t_env **env, char *res)
+char	*withdraw_2(PARSER *node, t_mega_struct *mini, char *str, char *res)
 {
 	char	*tmp;
 	char	*tmp_result;
 	char	*expand;
 
-	if (is_expandable(str, *i, 2))
+	if (is_expandable(str, mini->idx, 2))
 	{
-		expand = expand_var(mini, str, i);
+		expand = expand_var(node, mini, str, &mini->idx);
 		if (!expand)
 			return (NULL);
 		tmp_result = ft_strjoin(res, expand);
@@ -280,62 +274,57 @@ char	*withdraw_2(t_mega_struct *mini, char *str, int *i, char *res)
 	}
 	else
 	{
-		tmp = join_char(str[*i], res);
+		tmp = join_char(str[mini->idx], res);
 		if (!tmp)
 			return (free(res), NULL);
 		res = tmp;
-		(*i)++;
+		(mini->idx)++;
 	}
 	return (res);
 }
 
-char	*process_double(PARSER *node, t_mega_struct *mini, char *str, int *index)
-// char	*process_double(PARSER *new_node, char *str, int *index, t_env **env)
+char	*process_double(PARSER *node, t_mega_struct *mini, char *str, int *i)
 {
 	char	*result;
 	char	*tmp;
 	char	*tmp_result;
 
-	mini->new = node;
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
 	tmp_result = NULL;
 	tmp = NULL;
-	(*index)++;
-	while (str[*index] != 34 && str[*index] != '\0')
-		result = withdraw_2(mini, str, index, result);
-	if (str[*index] == 34)
-		(*index)++;
+	(*i)++;
+	while (str[*i] != 34 && str[*i] != '\0')
+		result = withdraw_2(node, mini, str, result);
+	if (str[*i] == 34)
+		(*i)++;
 	return (result);
 }
 
-char	*process_string(PARSER *node, t_mega_struct *mini, char *str, int *start)
-// char	*process_string(PARSER *new_node, char *str, int *start, t_env **env)
+char	*process_string(PARSER *node, t_mega_struct *mini, char *str, int *i)
 {
-	if (str[*start] == 34)
-		return (process_double(node, mini, str, start));
-	else if (str[*start] == 39)
-		return (process_single_quotes(str, start));
+	if (str[*i] == 34)
+		return (process_double(node, mini, str, i));
+	else if (str[*i] == 39)
+		return (process_single_quotes(str, i));
 	else
-		return (process_unquoted(node, mini, str, start));
+		return (process_unquoted(node, mini, str, i));
 }
 
 char	*withdraw_quotes(PARSER *node, t_mega_struct *mini, char *str)
-// char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 {
 	char	*result;
 	char	*tmp_result;
 	char	*tmp;
-	int		start;
 
-	start = 0;
+	mini->idx = 0;
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
-	while (str[start] != '\0')
+	while (str[mini->idx] != '\0')
 	{
-		tmp = process_string(node, mini, str, &start);
+		tmp = process_string(node, mini, str, &mini->idx);
 		if (!tmp)
 			return (free(result), free(tmp_result), NULL);
 		tmp_result = ft_strjoin(result, tmp);
@@ -352,7 +341,6 @@ char	*withdraw_quotes(PARSER *node, t_mega_struct *mini, char *str)
 }
 
 int	update_value_in_node(t_token **cur, PARSER *node, t_mega_struct *mini)
-// int	update_value_in_node(t_token **cur, PARSER *new_node, t_env **env)
 {
 	char	*tmp;
 
@@ -372,7 +360,6 @@ int	update_value_in_node(t_token **cur, PARSER *node, t_mega_struct *mini)
 }
 
 int	calculate_size_of_tab(t_token *cur, PARSER *node, t_mega_struct *mini)
-// int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 {
 	char	*tmp;
 
@@ -381,25 +368,24 @@ int	calculate_size_of_tab(t_token *cur, PARSER *node, t_mega_struct *mini)
 		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 	{
 		if (cur->type == HEREDOC)
-			mini->nodes->nb_heredoc++;
+			node->nb_heredoc++;
 		if (cur->type)
 		{
 			if (!update_value_in_node(&cur, node, mini))
 				return (FALSE);
 		}
-		mini->nodes->nb_file++;
+		node->nb_file++;
 	}
 	else if (cur->type == ARGUMENT)
 	{
 		if (!update_value_in_node(&cur, node, mini))
 			return (FALSE);
-		mini->nodes->nb_command++;
+		node->nb_command++;
 	}
 	return (TRUE);
 }
 
 PARSER	*alloc_new_node(t_token *current, t_mega_struct *mini, int exit_code)
-// PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 {
 	PARSER	*new_node;
 	t_token	*cur;
