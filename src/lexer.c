@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:52:18 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/13 12:22:05 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:37:08 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,7 +380,7 @@ int	expr(LEXER *input, t_token **list)
 		return (TRUE);
 	if (!command(input, list))
 	{
-		//dprintf(2, "invalide car pas de cmd ni espaces\n");
+		////dprintf(2, "invalide car pas de cmd ni espaces\n");
 		return (FALSE);
 	}
 	ows(input);

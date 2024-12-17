@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 18:18:23 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:53:46 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,9 @@ typedef struct s_mega_struct
 	int	idx;
 } t_mega_struct;
 
+
+void	try_find_cmd_file(char **tmp_cmd, char **str_env);
+
 // ENV
 int	lstsize_t_env(t_env **lst);
 void	ft_lstadd_env_back(t_env **lst, t_env *new);
@@ -153,10 +156,10 @@ char	*get_path_and_check(char **split_cmd, char **env);
 char	**copy_tab(char **envp);
 int	ft_error_int(char *str, PARSER *node);
 void	ft_error_exit(char *str, int exit_c);
-void	clse_n_qit(int *fd, t_pipex *p, char *str);
+void	clse_n_x(int *fd, t_pipex *p, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes);
-void	safe_close(int *fd);
+void	s_clse(int *fd);
 // int		handle_output_redirection(PARSER **nodes, t_pipex *p, int fd_out);
 int		handle_output_redirection(PARSER **nodes, t_pipex *p, int *flag_output);
 void	handle_c_signal(int signum);

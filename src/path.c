@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/13 11:15:41 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:56:04 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,11 +80,12 @@ char	*get_path_and_check(char **split_cmd, char **env)
 	new_path = get_path(split_cmd[0], env);
 	if (!new_path)
 	{
-		ft_putstr_fd(split_cmd[0], 2);
-		ft_putendl_fd(": command not found", 2);
-		ft_free_tab(split_cmd);
-		ft_free_tab(env);
-		exit(127);
+		try_find_cmd_file(split_cmd, env);
+		// ft_putstr_fd(split_cmd[0], 2);
+		// ft_putendl_fd(": command not found", 2);
+		// ft_free_tab(split_cmd);
+		// ft_free_tab(env);
+		// exit(127);
 	}
 	return (new_path);
 }

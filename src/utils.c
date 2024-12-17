@@ -79,7 +79,7 @@ int	ft_error_int(char *str, PARSER *node)
 
 // if we try to close a fd that is already closed, it will return -1
 // an unsuccessful close will return (Bad file descriptor) in errno
-void	safe_close(int *fd)
+void	s_clse(int *fd)
 {
 	if (*fd != -1)
 	{
@@ -120,7 +120,7 @@ int		ft_size_list(PARSER **nodes)
 // 		return (NULL);
 // 	new_tab[0] = getcwd(NULL, 0);
 // 	new_tab[1] = NULL;
-// 	//dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
+// 	////dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
 // 	return (new_tab);
 // }
 
@@ -227,9 +227,9 @@ int	no_envp(char **tab)
 void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)//remplacer en passant mini ?
 {
 	if (fd)
-		safe_close(fd);
-	safe_close(&p->pipefd[1]);
-	safe_close(&p->pipefd[0]);
+		s_clse(fd);
+	s_clse(&p->pipefd[1]);
+	s_clse(&p->pipefd[0]);
 	perror(str);
 	if (p->env_nodes)
 		free_t_env(p->env_nodes);
@@ -238,12 +238,12 @@ void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int ex
 	exit(exit_c);
 }
 
-void	clse_n_qit(int *fd, t_pipex *p, char *str)
+void	clse_n_x(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
-		safe_close(fd);
-	safe_close(&p->pipefd[1]);
-	safe_close(&p->pipefd[0]);
+		s_clse(fd);
+	s_clse(&p->pipefd[1]);
+	s_clse(&p->pipefd[0]);
 	perror(str);
 }
 
@@ -283,7 +283,7 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	// 	status_code = (*nodes)->exit_code;
 	// else
 	// {
-	// 	dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
+	// 	//dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
 	// 	(*nodes)->exit_code = status_code;
 	// 	status_code = (*nodes)->exit_code;
 	// }
@@ -301,15 +301,15 @@ void	print_nodes_list(PARSER **nodes)
 	int	d;
 	PARSER	*tmp;
 	
-	dprintf(2, "entree dans print_nodes_list\n");
+	//dprintf(2, "entree dans print_nodes_list\n");
 	if (!nodes)
 	{
-		dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
+		//dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
 	if (!(*nodes)/* || !nodes*/)
 	{
-		dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
+		//dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
 	tmp = (*nodes);

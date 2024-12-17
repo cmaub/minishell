@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/16 14:37:00 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:37:08 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,7 @@ void	handle_value(char *cmd, PARSER *current, t_env **env_nodes)
 		return (print_error_msg(name, current, "': not a valid identifier"));
 	index = env_var_exists(env_nodes, name);
 	*equal = '=';
-	// dprintf(2, "cmd = %s\n", cmd);
+	// //dprintf(2, "cmd = %s\n", cmd);
 	if (!check_value_and_add(env_nodes, cmd, index))
 		return ;
 }

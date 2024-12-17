@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   nodes.c                                            :+:      :+:    :+:   */
+/*   znodes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <maubert.cassandre@gmail.com>     +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/13 14:33:17 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:36:56 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,15 +20,12 @@ void	print_nodes_list(PARSER **nodes)
 	int	d;
 	PARSER	*tmp;
 	
-	dprintf(2, "entree dans print_nodes_list\n");
 	if (!nodes)
 	{
-		dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
 	if (!(*nodes)/* || !nodes*/)
 	{
-		dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
 		return ;
 	}
 	tmp = (*nodes);
@@ -568,15 +565,15 @@ int	loop_readline(char *delimiter, int *fd_heredoc)
 	{
 		input = readline("heredoc> ");
 		if (g_signal == SIGINT)
-			return (free(input), safe_close(fd_heredoc), -1);
+			return (free(input), s_clse(fd_heredoc), -1);
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-			return (safe_close(fd_heredoc), -1);
+			return (s_clse(fd_heredoc), -1);
 		}
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0)
 		{
-			safe_close(fd_heredoc);
+			s_clse(fd_heredoc);
 			free(input);
 			break;
 		}
@@ -597,20 +594,20 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	signal(SIGINT, SIG_IGN); //
 	new_node->delimiter[*d] = ft_strdup(current->value);
 	if (!new_node->delimiter[*d])
-		return (safe_close(&fd), FALSE);
+		return (s_clse(&fd), FALSE);
 	if (loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]) == -1)
 	{
 		if (dup2(fd, STDIN_FILENO) == -1)
 			return (perror ("dup"), FALSE);
-		safe_close(&fd);
+		s_clse(&fd);
 		return (FALSE);		
 	}
-	safe_close(&new_node->fd_heredoc[*d][1]);
+	s_clse(&new_node->fd_heredoc[*d][1]);
 	new_node->redir[*f] = current->type;
 	signal(SIGINT, SIG_DFL); //
 	if (dup2(fd, STDIN_FILENO) == -1)
 		return (perror ("dup"), FALSE);
-	safe_close(&fd);
+	s_clse(&fd);
 	return (TRUE);
 }
 
@@ -630,7 +627,7 @@ int	fill_nodes_with_heredoc(t_token **current, PARSER **new_node, t_mega_struct 
 	(*new_node)->file[(*mini)->f] = ft_strdup("heredoc");
 	if (!create_heredoc((*new_node), (*current), &(*mini)->f, &(*mini)->d))
 	{
-		safe_close(&(*new_node)->fd_heredoc[(*mini)->d][0]);
+		s_clse(&(*new_node)->fd_heredoc[(*mini)->d][0]);
 		reset_node_mini(*mini, &(*new_node)); // regarder si possible de mettre en une seule fonction
 		free((*mini)->nodes);
 		(*mini)->nodes = NULL;
@@ -773,7 +770,7 @@ int	create_nodes(t_mega_struct *mini)
 // 				new_node->file[f] = ft_strdup("heredoc");
 // 				if (!create_heredoc(new_node, current, &f, &d))
 // 				{
-// 					safe_close(&new_node->fd_heredoc[d][0]);
+// 					s_clse(&new_node->fd_heredoc[d][0]);
 // 					reset_node_mini(mini, &new_node); // regarder si possible de mettre en une seule fonction
 // 					free(mini->nodes);
 // 					mini->nodes = NULL;

@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 14:49:04 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:48:23 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ LEXER	*ft_init_lexer_input(void)
 
 void	handle_c_signal(int signum)
 {
-	dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
+	//dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
 	g_signal = signum;
 	ft_putstr_fd("\n", 2);
 	rl_on_new_line();
@@ -66,7 +66,7 @@ void	free_t_env(t_env **mini_env)
 
 	if (!mini_env || !(*mini_env))
 	{
-		// dprintf(2, "mini_env dans free_t_env est null\n");
+		// //dprintf(2, "mini_env dans free_t_env est null\n");
 		return ;
 	}
 	while (*mini_env)
@@ -88,11 +88,12 @@ void	print_t_env(t_env **mini_env)
 	t_env	*current;
 
 	if (!mini_env || !*mini_env)
-		dprintf(2, "mini_env est null\n");
+	{}
+		//dprintf(2, "mini_env est null\n");
 	current = *mini_env;
 	while (current != NULL)
 	{
-		dprintf(2, "mini_env->var = %s\n", current->var);
+		//dprintf(2, "mini_env->var = %s\n", current->var);
 		current = current->next;
 	}
 }

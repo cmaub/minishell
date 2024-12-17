@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/17 18:29:30 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 18:37:08 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -444,15 +444,15 @@ int	loop_readline(char *delimiter, int *fd_heredoc)
 	{
 		input = readline("heredoc> ");
 		if (g_signal == SIGINT)
-			return (free(input), safe_close(fd_heredoc), -1);
+			return (free(input), s_clse(fd_heredoc), -1);
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-			return (safe_close(fd_heredoc), -1);
+			return (s_clse(fd_heredoc), -1);
 		}
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0)
 		{
-			safe_close(fd_heredoc);
+			s_clse(fd_heredoc);
 			free(input);
 			// close(STDIN_FILENO); tester /!/
 			break;
@@ -474,21 +474,21 @@ int	create_heredoc(PARSER *node, t_token *current, int *f, int *d)
 	signal(SIGINT, SIG_IGN);
 	node->delimiter[*d] = ft_strdup(current->value);
 	if (!node->delimiter[*d])
-		return (safe_close(&fd), FALSE);
+		return (s_clse(&fd), FALSE);
 	if (loop_readline(node->delimiter[*d], &node->fd_heredoc[*d][1]) == -1)
 	{
-		dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
+		//dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
 		if (dup2(fd, STDIN_FILENO) == -1)
 			return (perror("dup"), FALSE);
-		safe_close(&fd);
+		s_clse(&fd);
 		return (FALSE);
 	}
-	safe_close(&node->fd_heredoc[*d][1]);
+	s_clse(&node->fd_heredoc[*d][1]);
 	node->redir[*f] = current->type;
 	signal(SIGINT, SIG_DFL);
 	if (dup2(fd, STDIN_FILENO) == -1)
 		return (perror ("dup"), FALSE);
-	safe_close(&fd);
+	s_clse(&fd);
 	return (TRUE);
 }
 
@@ -508,7 +508,7 @@ int	fill_nodes_with_heredoc(t_token **cur, PARSER **node, t_mega_struct **mini)
 	(*node)->file[(*mini)->f] = ft_strdup("heredoc");
 	if (!create_heredoc((*node), (*cur), &(*mini)->f, &(*mini)->d))
 	{
-		safe_close(&(*node)->fd_heredoc[(*mini)->d][0]);
+		s_clse(&(*node)->fd_heredoc[(*mini)->d][0]);
 		reset_node_mini(*mini, &(*node));
 		free((*mini)->nodes);
 		(*mini)->nodes = NULL;
