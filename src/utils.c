@@ -256,7 +256,6 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 
 	status_code = 0;
 	current = *nodes;
-	dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 	if (current == NULL)
 		return (0);
 	while ((waited_pid = wait(&status)) != -1)
@@ -271,11 +270,9 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 			{
 				status_code = WEXITSTATUS(status);
 				(*nodes)->exit_code = status_code;
-				dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
 			}
 			else if (g_signal != 0)
 			{
-				dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		 		status_code = 128 + g_signal;
 				(*nodes)->exit_code = status_code;
 				g_signal = 0;
@@ -294,5 +291,54 @@ int ft_wait(pid_t last_pid, PARSER **nodes)
 	// return (signal(SIGINT, SIG_IGN), status_code);
 	// return (status_code);
 
+}
+
+void	print_nodes_list(PARSER **nodes)
+{
+	int	index = 0;
+	int	f;
+	int	h;
+	int	d;
+	PARSER	*tmp;
+	
+	dprintf(2, "entree dans print_nodes_list\n");
+	if (!nodes)
+	{
+		dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
+		return ;
+	}
+	if (!(*nodes)/* || !nodes*/)
+	{
+		dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
+		return ;
+	}
+	tmp = (*nodes);
+	while (index <= ft_size_list(nodes))
+	{
+		f = 0;
+		h = 0;
+		d = 0;
+		while (f < 30 && tmp->file && tmp->file[f] != NULL)
+		{
+			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir[f]);
+			if (d < 30 && tmp->delimiter && tmp->delimiter[d] != NULL)
+			{
+				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
+				d++;
+			}
+			f++;
+		}
+		while (h < 30 && tmp->command && tmp->command[h] != NULL)
+		{
+			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
+			h++;
+		}
+		if (!tmp->next)
+			break;
+		tmp = tmp->next;
+		index++;
+		printf("\n");
+	}
+	printf("\n");
 }
 

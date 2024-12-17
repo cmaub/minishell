@@ -134,6 +134,7 @@ typedef struct s_mega_struct
 	int	f;
 	int	cmd;
 	int	d;
+	int	idx;
 } t_mega_struct;
 
 // ENV
