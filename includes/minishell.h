@@ -130,6 +130,9 @@ typedef struct s_mega_struct
 	t_pipex *p;
 	int	exit_code;
 	char	*str;
+	int	f;
+	int	cmd;
+	int	d;
 } t_mega_struct;
 
 // ENV

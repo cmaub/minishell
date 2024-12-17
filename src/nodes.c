@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/16 17:58:26 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/17 09:39:30 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,7 @@ void	add_new_node(PARSER **nodes, PARSER *new_node)
 	PARSER	*current;
 
 	if (!nodes || !new_node)
-	{
 		return ;
-	}
 	if (!(*nodes))
 	{
 		*nodes = new_node;
@@ -138,8 +136,6 @@ char	*isolate_expand(char *str, int index)
 	i = 0;
 	while (str[index + i] != '\0')
 	{
-		// if (str[index + i] == 39 || str[index + i] == 34 || str[index + i] == 32)
-		// 	break;
 		if (!ft_isalnum(str[index + i]) && str[index + i] != '_')
 			break ;
 		
@@ -167,25 +163,12 @@ char	*print_exit_code(PARSER *new_node, int *index)
 	char	*expand_result;
 	char	*itoa_result;
 
-	// if (g_signal != 2)
-	// {
-		itoa_result = ft_itoa(new_node->exit_code);
-		if (!itoa_result)
-			return (NULL);
-		expand_result = ft_strdup(itoa_result);
-		if (!expand_result)
+	itoa_result = ft_itoa(new_node->exit_code);
+	if (!itoa_result)
+		return (NULL);
+	expand_result = ft_strdup(itoa_result);
+	if (!expand_result)
 			return (free(itoa_result), NULL);			
-	// }
-	// else
-	// {
-	// 	itoa_result = ft_itoa(130);
-	// 	if (!itoa_result)
-	// 		return (NULL);
-	// 	expand_result = ft_strdup(itoa_result);
-	// 	if (!expand_result)
-	// 		return (free(itoa_result), NULL);
-	// 	g_signal = 0;
-	// }
 	new_node->exit_code = 0;
 	*index += 2;
 	return (free(itoa_result), expand_result);
@@ -202,14 +185,30 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 		return (NULL);
 	expand_expr = isolate_expand(str, *index + 1);
 	expand_result = return_var_from_env(expand_expr, chained_env);
-	// if (!expand_expr)
-	// 	return (NULL);
 	*index += ft_strlen(expand_expr) + 1;
 	free(expand_expr);
 	if (expand_result != NULL)
-		// return (ft_strdup(expand_result));
 		return (free(empty), expand_result);
 	return (empty);
+}
+
+char	*expand_var(PARSER *node, char *str, int *i, t_env **env)
+{
+	char	*expand = NULL;
+
+	if (str[(*i) + 1] && str[(*i) + 1] == '?')
+	{
+		expand = print_exit_code(node, i);
+		if (!expand)
+			return (NULL);
+	}
+	else
+	{
+		expand = print_expand(str, i, env);
+		if (!expand)
+			return (NULL);
+	}
+	return (expand);
 }
 
 char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_env)
@@ -222,7 +221,6 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
-	// result = "";
 	tmp_result = NULL;
 	tmp = NULL;
 	while (str[*index] != 39 && str[*index] != 34 && str[*index] != '\0')
@@ -231,18 +229,9 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?' 
 			|| ((str[(*index) + 1]) == 39 && (str[(*index) + 2] == 39))))
 		{
-			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-			{
-				expand = print_exit_code(new_node, index);
+				expand = expand_var(new_node, str, index, chained_env); // si besoin la version d'avant est dans process double_quotes
 				if (!expand)
 					return (NULL);
-			}
-			else
-			{
-				expand = print_expand(str, &(*index), chained_env);
-				if (!expand)
-					return (NULL); //free result ?
-			}
 			tmp_result = ft_strjoin(result, expand);
 			free(expand);
 			expand = NULL;
@@ -255,7 +244,7 @@ char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_
 		{
 			tmp = join_char(str[*index], result);
 			if (!tmp)
-				return (/*free(result), */NULL);
+				return (NULL);
 			result = tmp; 
 			if (tmp[ft_strlen(tmp) - 1] == '$' && (str[(*index) + 1] == 39 || str[(*index) + 1] == 34))
 				tmp[ft_strlen(tmp) - 1] = '\0';
@@ -307,18 +296,21 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **cha
 		if (str[*index] == '$' 
 			&& (ft_isalpha(str[(*index) +1]) || str[(*index) +1] == '_' || str[(*index) + 1] == '?'))
 		{
-			if (str[(*index) + 1] && str[(*index) + 1] == '?')
-			{
-				expand = print_exit_code(new_node, index);
-				if (!expand)
+			// if (str[(*index) + 1] && str[(*index) + 1] == '?')
+			// {
+			// 	expand = print_exit_code(new_node, index);
+			// 	if (!expand || !*expand)
+			// 		return (NULL);
+			// }
+			// else
+			// {
+			// 	expand = print_expand(str, &(*index), chained_env);
+			// 	if (!expand || !*expand)
+			// 		return (NULL);
+			// }
+			expand = expand_var(new_node, str, index, chained_env);
+			if (!expand)
 					return (NULL);
-			}
-			else
-			{
-				expand = print_expand(str, &(*index), chained_env);
-				if (!expand)
-					return (NULL);
-			}
 			tmp_result = ft_strjoin(result, expand);
 			free(expand);
 			expand = NULL;
@@ -378,6 +370,63 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 	return (result);
 }
 
+int	update_value_in_node(t_token **cur, PARSER *new_node, t_env **env)
+{
+	char	*tmp;
+
+	tmp = NULL;
+	tmp = ft_strdup(((*cur))->value);
+	if (!tmp)
+		return (FALSE);
+	free((*cur)->value);
+	(*cur)->value = NULL;
+	(*cur)->value = withdraw_quotes(new_node, tmp, env);
+	free(tmp);
+	if (!(*cur)->value)
+		return (FALSE);
+	return (TRUE);
+}
+
+// int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
+// {
+// 	char	*tmp;
+
+// 	tmp = NULL;
+// 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC 
+// 		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
+// 	{
+// 		if (cur->type == HEREDOC)
+// 			new_node->nb_heredoc++;
+// 		if (cur->type)
+// 		{
+// 			tmp = ft_strdup(cur->value);
+// 			if (!tmp)
+// 				return (FALSE);
+// 			free(cur->value);
+// 			cur->value = NULL;
+// 			cur->value = withdraw_quotes(new_node, tmp, chained_env);
+// 			free(tmp);
+// 			if (!cur->value)
+// 				return (FALSE);
+// 		}
+// 		new_node->nb_file++;
+// 	}
+// 	else if (cur->type == ARGUMENT)
+// 	{
+// 		tmp = ft_strdup(cur->value);
+// 		if (!tmp)
+// 			return (FALSE);
+// 		free(cur->value);
+// 		cur->value = NULL;
+// 		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
+// 		free(tmp);
+// 		if (!cur->value || !*cur->value)
+// 			return (FALSE);
+// 		new_node->nb_command++;
+// 	}
+// 	return (TRUE);
+// }
+
 int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 {
 	char	*tmp;
@@ -388,30 +437,16 @@ int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 	{
 		if (cur->type == HEREDOC)
 			new_node->nb_heredoc++;
-		if (cur->type) // checker que next n'est pas un pb
+		if (cur->type)
 		{
-			tmp = ft_strdup(cur->value);
-			if (!tmp)
-				return (FALSE);
-			free(cur->value);
-			cur->value = NULL;
-			cur->value = withdraw_quotes(new_node, tmp, chained_env);
-			free(tmp);
-			if (!cur->value)
+			if (!update_value_in_node(&cur, new_node, chained_env))
 				return (FALSE);
 		}
 		new_node->nb_file++;
 	}
 	else if (cur->type == ARGUMENT)
 	{
-		tmp = ft_strdup(cur->value);
-		if (!tmp)
-			return (FALSE);
-		free(cur->value);
-		cur->value = NULL;
-		cur->value = withdraw_quotes(new_node, tmp, chained_env);	
-		free(tmp);
-		if (!cur->value || !*cur->value)
+		if (!update_value_in_node(&cur, new_node, chained_env))
 			return (FALSE);
 		new_node->nb_command++;
 	}
@@ -431,7 +466,7 @@ PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 	while (cur && cur->type != PIPEX)
 	{
 		if (!calculate_size_of_tab(cur, new_node, chained_env))
-			return (NULL);
+			break ;
 		cur = cur->next;
 	}
 	calloc_tab_of_node(new_node);
@@ -439,28 +474,26 @@ PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 	return (new_node);
 }
 
-void	add_null_to_tab(PARSER *new_node, int f, int d, int cmd)
+void	add_null_to_tab(PARSER *new_node, t_mega_struct *mini)
 {
-	if (f > 0)
-		new_node->file[f] = NULL;
-	if (d > 0)
-		new_node->delimiter[d] = NULL;
-	if (cmd > 0)
-		new_node->command[cmd] = NULL;
+	if (mini->f > 0)
+		new_node->file[mini->f] = NULL;
+	if (mini->d > 0)
+		new_node->delimiter[mini->d] = NULL;
+	if (mini->cmd > 0)
+		new_node->command[mini->cmd] = NULL;
 }
 
 void	handle_c_signal_heredoc(int signum)
 {
 	g_signal = signum;
 	write(1, "\n", 1);
-	// rl_on_new_line();
 	rl_replace_line("", 0);
-	// rl_redisplay();
 	rl_done = 1;
 	close(STDIN_FILENO);
 }
 
-int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifier le retour de readline ou renvoyer un void
+int	loop_readline(char *delimiter, int *fd_heredoc)
 {
 	char	*input;
 
@@ -470,16 +503,11 @@ int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifi
 	{
 		input = readline("heredoc> ");
 		if (g_signal == SIGINT)
-		{
-			free(input);
-			safe_close(fd_heredoc);
-			return (-1);
-		}
+			return (free(input), safe_close(fd_heredoc), -1);
 		if (!input)
 		{
 			ft_putendl_fd("warning: here-document delimited by end-of-file", 2);
-			safe_close(fd_heredoc);
-			return (-1);
+			return (safe_close(fd_heredoc), -1);
 		}
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0)
 		{
@@ -488,10 +516,8 @@ int	loop_readline(char *delimiter, int *fd_heredoc) //il faudra peut etre verifi
 			close(STDIN_FILENO);
 			break;
 		}
-		else //verifier variable globale
-		{
+		else
 			ft_putendl_fd(input, *fd_heredoc);
-		}
 		free(input);
 	}
 	return (0);
@@ -510,7 +536,6 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 		return (safe_close(&fd), FALSE);
 	if (loop_readline(new_node->delimiter[*d], &new_node->fd_heredoc[*d][1]) == -1)
 	{
-		dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 		if (dup2(fd, STDIN_FILENO) == -1)
 			return (perror ("dup"), FALSE);
 		safe_close(&fd);
@@ -525,82 +550,150 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	return (TRUE);
 }
 
+int	fill_nodes_with_files(t_token **current, PARSER **new_node, t_mega_struct **mini)
+{
+	(*new_node)->file[(*mini)->f] = ft_strdup((*current)->value);
+	if (!(*new_node)->file[(*mini)->f])
+		return (FALSE);
+	(*new_node)->redir[(*mini)->f++] = (*current)->type;
+	return (TRUE);
+}
+
+int	fill_nodes_with_heredoc(t_token **current, PARSER **new_node, t_mega_struct **mini)
+{
+	if (pipe((*new_node)->fd_heredoc[(*mini)->d]) == -1)
+		return (perror("pipe"), FALSE);
+	(*new_node)->file[(*mini)->f] = ft_strdup("heredoc");
+	if (!create_heredoc((*new_node), (*current), &(*mini)->f, &(*mini)->d))
+	{
+		safe_close(&(*new_node)->fd_heredoc[(*mini)->d][0]);
+		reset_node_mini(*mini, &(*new_node)); // regarder si possible de mettre en une seule fonction
+		free((*mini)->nodes);
+		(*mini)->nodes = NULL;
+		free((*new_node));
+		(*new_node) = NULL;
+		free_tokens(&(*mini)->tokens);
+		if (g_signal == 2)
+		(*mini)->exit_code = g_signal + 128;
+		return (FALSE);
+	}
+	(*mini)->d++;
+	(*mini)->f++;
+	return (TRUE);		
+}
+
+int	fill_nodes_with_args(t_token **current, PARSER **new_node, t_mega_struct **mini)
+{
+
+	while ((*current) && (*current)->value && !is_command((*current)->value))
+		(*current) = (*current)->next;
+	if ((*current)->type == ARGUMENT && (*current)->value != NULL)
+	{
+		(*new_node)->command[(*mini)->cmd] = ft_strdup((*current)->value);
+		if (!(*new_node)->command[(*mini)->cmd])
+			return (FALSE);
+	}
+	(*mini)->cmd++;
+	return (TRUE);
+}
+
 int	create_nodes(t_mega_struct *mini)
 {
-	t_token	*current;
+	t_token	*cur;
 	PARSER		*new_node;
-	int		cmd;
-	int		d;
-	int		f;
 
-	current = mini->tokens;
-	while (current)
+	cur = mini->tokens;
+	while (cur)
 	{
-		cmd = 0;
-		d = 0;
-		f = 0;
-		new_node = alloc_new_node(current, mini->chained_env, mini->exit_code);
+		mini->f = 0;
+		mini->d = 0;
+		mini->cmd = 0;
+		new_node = alloc_new_node(cur, mini->chained_env, mini->exit_code);
 		if (!new_node)
 			return (FALSE);
-		while (current && current->type != PIPEX)
+		while (cur && cur->type != PIPEX)
 		{
-			if (current->type == REDIRECT_IN)
-			{
-				new_node->file[f] = ft_strdup(current->value);
-				if (!new_node->file[f]){}
-					// return (reset)
-				new_node->redir[f++] = current->type;
-			}
-			else if (current->type == HEREDOC && current->value != NULL)
-			{
-				if (pipe(new_node->fd_heredoc[d]) == -1)
-				{
-					perror("pipe");
-					return (FALSE);
-				}
-				new_node->file[f] = ft_strdup("heredoc");
-				if (!create_heredoc(new_node, current, &f, &d))
-				{
-					safe_close(&new_node->fd_heredoc[d][0]);
-					// reset_one_node(&new_node);
-					reset_node_mini(mini, &new_node); // regarder si possible de mettre en une seule fonction
-					free(mini->nodes);
-					mini->nodes = NULL;
-					free(new_node);
-					new_node = NULL;
-					free_tokens(&mini->tokens);
-					if (g_signal == 2)
-						mini->exit_code = g_signal + 128;
-					return (FALSE);
-					// break ;
-				}
-				f++;
-				d++;
-				
-			}
-			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
-			{
-					new_node->file[f] = ft_strdup(current->value);
-					new_node->redir[f++] = current->type;
-			}
-			else if (current->type == ARGUMENT && current->value != NULL)
-			{
-				while (current && current->value && !is_command(current->value))
-				{
-					current = current->next;
-				}
-				if (current->type == ARGUMENT && current->value != NULL)
-				{
-					new_node->command[cmd++] = ft_strdup(current->value);
-				}
-			}
-			current = current->next;
+			if (cur->type == REDIRECT_IN || cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
+				fill_nodes_with_files(&cur, &new_node, &mini);
+			else if (cur->type == HEREDOC && cur->value != NULL)
+				fill_nodes_with_heredoc(&cur, &new_node, &mini);
+			else if (cur->type == ARGUMENT && cur->value != NULL)
+				fill_nodes_with_args(&cur, &new_node, &mini);
+			cur = cur->next;			
 		}
-		add_null_to_tab(new_node, f, d, cmd);
-		add_new_node(&mini->nodes, new_node);
-		if (current && current->type == PIPEX)
-			current = current->next;
-		// check_and_free_new_node(new_node);
+		(add_null_to_tab(new_node, mini), add_new_node(&mini->nodes, new_node));
+		if (cur && cur->type == PIPEX)
+			cur = cur->next;
 	}
 	return (TRUE);
 }
+
+// int	create_nodes(t_mega_struct *mini)
+// {
+// 	t_token	*current;
+// 	PARSER		*new_node;
+// 	int		cmd;
+// 	int		d;
+// 	int		f;
+
+// 	current = mini->tokens;
+// 	while (current)
+// 	{
+// 		cmd = 0;
+// 		d = 0;
+// 		f = 0;
+// 		new_node = alloc_new_node(current, mini->chained_env, mini->exit_code);
+// 		if (!new_node)
+// 			return (FALSE);
+// 		while (current && current->type != PIPEX)
+// 		{
+// 			if (current->type == REDIRECT_IN)
+// 			{
+// 				new_node->file[f] = ft_strdup(current->value);
+// 				if (!new_node->file[f])
+// 				{
+// 					return (FALSE);
+// 				}
+// 				new_node->redir[f++] = current->type;
+// 			}
+// 			else if (current->type == HEREDOC && current->value != NULL)
+// 			{
+// 				if (pipe(new_node->fd_heredoc[d]) == -1)
+// 					return (perror("pipe"), FALSE);
+// 				new_node->file[f] = ft_strdup("heredoc");
+// 				if (!create_heredoc(new_node, current, &f, &d))
+// 				{
+// 					safe_close(&new_node->fd_heredoc[d][0]);
+// 					reset_node_mini(mini, &new_node); // regarder si possible de mettre en une seule fonction
+// 					free(mini->nodes);
+// 					mini->nodes = NULL;
+// 					free(new_node);
+// 					new_node = NULL;
+// 					free_tokens(&mini->tokens);
+// 					if (g_signal == 2)
+// 						mini->exit_code = g_signal + 128;
+// 					return (FALSE);
+// 				}
+// 				f++;
+// 				d++;			
+// 			}
+// 			if (current->type == REDIRECT_OUT || current->type == APPEND_OUT)
+// 			{
+// 					new_node->file[f] = ft_strdup(current->value);
+// 					new_node->redir[f++] = current->type;
+// 			}
+// 			else if (current->type == ARGUMENT && current->value != NULL)
+// 			{
+// 				while (current && current->value && !is_command(current->value))
+// 					current = current->next;
+// 				if (current->type == ARGUMENT && current->value != NULL)
+// 					new_node->command[cmd++] = ft_strdup(current->value);
+// 			}
+// 			current = current->next;
+// 		}
+// 		(add_null_to_tab(new_node, f, d, cmd), add_new_node(&mini->nodes, new_node));
+// 		if (current && current->type == PIPEX)
+// 			current = current->next;
+// 	}
+// 	return (TRUE);
+// }
