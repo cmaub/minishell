@@ -34,7 +34,7 @@ int	handle_output_redirection(PARSER **n, t_pipex *p, int fd_out)
 		ft_close_error_no_exit(NULL, p, (*n)->file[(*n)->f]);
 		return (FALSE);
 	}
-	dprintf(2, "fd_out = %d\n", fd_out);
+	// dprintf(2, "fd_out = %d\n", fd_out);
 	if (dup2(fd_out, STDOUT_FILENO) == -1)
 	{
 		ft_close_error_no_exit(&fd_out, p, (*n)->file[(*n)->f]);
@@ -249,7 +249,7 @@ void	first_child(t_pipex *p, PARSER **nodes)
 		}
 		if ((*nodes)->redir[(*nodes)->f] == REDIRECT_IN)
 		{
-			dprintf(2, "fd_in = %d\n", fd_in);
+			// dprintf(2, "fd_in = %d\n", fd_in);
 			if (dup2(fd_in, STDIN_FILENO) == -1)
 				close_error_and_free(&fd_in, p, nodes, (*nodes)->file[(*nodes)->f], 1);
 			safe_close(&fd_in);

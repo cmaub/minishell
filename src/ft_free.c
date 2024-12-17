@@ -167,7 +167,7 @@ void	reset_one_node(PARSER **node)
 	if ((*node)->redir)
 		free((*node)->redir);
 	if ((*node)->fd_heredoc)
-		(close_heredoc((*node)), free_array_int((*node)->fd_heredoc, (*node)));
+		free_array_int((*node)->fd_heredoc, (*node));
 	if ((*node))
 		free((*node));
 	(*node) = NULL;

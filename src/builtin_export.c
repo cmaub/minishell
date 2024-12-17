@@ -241,7 +241,7 @@ void	handle_value(char *cmd, PARSER *current, t_env **env_nodes)
 		return (print_error_msg(name, current, "': not a valid identifier"));
 	index = env_var_exists(env_nodes, name);
 	*equal = '=';
-	dprintf(2, "cmd = %s\n", cmd);
+	// dprintf(2, "cmd = %s\n", cmd);
 	if (!check_value_and_add(env_nodes, cmd, index))
 		return ;
 }

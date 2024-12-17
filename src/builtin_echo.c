@@ -46,7 +46,6 @@ int	ft_echo(char **cmd)
 	int	i;
 	int	is_n;
 
-	dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 	i = 1;
 	is_n = 0;
 	if (check_args(cmd, &i, &is_n) < 0)
@@ -55,7 +54,6 @@ int	ft_echo(char **cmd)
 	{
 		while (cmd[i])
 		{
-			dprintf(2, "*** (%s, %d)\n", __FILE__, __LINE__);
 			if (ft_putstr_fd(cmd[i], 1) == -1)
 				return (FALSE);
 			if (cmd[i + 1])

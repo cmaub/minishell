@@ -65,7 +65,7 @@ void	free_t_env(t_env **mini_env)
 
 	if (!mini_env || !(*mini_env))
 	{
-		dprintf(2, "mini_env dans free_t_env est null\n");
+		// dprintf(2, "mini_env dans free_t_env est null\n");
 		return ;
 	}
 	while (*mini_env)
@@ -210,6 +210,7 @@ void	init_mega_struct(t_mega_struct *mini)
 	mini->p = NULL;
 	mini->L_input = NULL;
 	mini->nodes = NULL;
+	mini->new = NULL;
 	mini->tokens = NULL;
 	mini->chained_env = NULL;
 	mini->exit_code = 0;
@@ -243,7 +244,7 @@ int	main(int argc, char **argv, char **env)
 			if (create_nodes(mini))
 				free_exec_input(mini);
 			(reset_node_mini(mini, NULL), free(mini->str));
-			print_nodes_list(&mini->nodes);
+			// print_nodes_list(&mini->nodes);
 		}
 	}
 	return (free_t_env(mini->chained_env), free(mini), TRUE);
