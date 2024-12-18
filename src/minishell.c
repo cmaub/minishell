@@ -14,18 +14,18 @@
 
 int	g_signal = -1;
 
-int	parser_has_reach_end(LEXER *input)
+int	t_parser_has_reach_end(t_lexer *input)
 {
 	if (input->head != input->len)
 		return (FALSE);
 	return (TRUE);
 }
 
-LEXER	*ft_init_lexer_input(void)
+t_lexer	*ft_init_t_lexer_input(void)
 {
-	LEXER	*new_input;
+	t_lexer	*new_input;
 
-	new_input = try_malloc(sizeof(LEXER));
+	new_input = try_malloc(sizeof(t_lexer));
 	if (!new_input)
 		return (NULL);
 	new_input->data = NULL;
@@ -36,22 +36,12 @@ LEXER	*ft_init_lexer_input(void)
 
 void	handle_c_signal(int signum)
 {
-	//dprintf(2, "*** %d, %s\n", __LINE__, __FILE__);
 	g_signal = signum;
 	ft_putstr_fd("\n", 2);
 	rl_on_new_line();
 	rl_replace_line("", 0);
 	rl_redisplay();
 }
-
-// void	handle_c_signal_wait(int signum)
-// {
-// 	g_signal = signum;
-// 	ft_putstr_fd("\n", 2);
-// 	rl_on_new_line();
-// 	rl_replace_line("", 0);
-// 	rl_redisplay();
-// }
 
 void	add_new_var(t_env **mini_env, t_env *new_var)
 {
@@ -60,15 +50,12 @@ void	add_new_var(t_env **mini_env, t_env *new_var)
 	ft_lstadd_env_back(mini_env, new_var);
 }
 
-void	free_t_env(t_env **mini_env)
+void	free_env(t_env **mini_env)
 {
 	t_env	*next;
 
 	if (!mini_env || !(*mini_env))
-	{
-		// //dprintf(2, "mini_env dans free_t_env est null\n");
 		return ;
-	}
 	while (*mini_env)
 	{
 		next = (*mini_env)->next;
@@ -83,19 +70,17 @@ void	free_t_env(t_env **mini_env)
 	free(mini_env);
 }
 
+// A isoler dans un fichier a part et pas l'appeler
 void	print_t_env(t_env **mini_env)
 {
 	t_env	*current;
 
 	if (!mini_env || !*mini_env)
-	{}
-		//dprintf(2, "mini_env est null\n");
+	{
+	}
 	current = *mini_env;
 	while (current != NULL)
-	{
-		//dprintf(2, "mini_env->var = %s\n", current->var);
 		current = current->next;
-	}
 }
 
 int	create_full_env(t_env **mini_env, char **env)
@@ -109,10 +94,10 @@ int	create_full_env(t_env **mini_env, char **env)
 	{
 		new_env = try_malloc(sizeof(t_env));
 		if (!new_env)
-			return (free_t_env(mini_env), FALSE);
+			return (free_env(mini_env), FALSE);
 		new_env->var = ft_strdup(env[i]);
 		if (!new_env->var)
-			return (free_t_env(mini_env), free_t_env(&new_env), FALSE);
+			return (free_env(mini_env), free_env(&new_env), FALSE);
 		new_env->next = NULL;
 		add_new_var(mini_env, new_env);
 		i++;
@@ -128,24 +113,24 @@ int	create_minimalist_env(t_env **mini_env)
 
 	new_var_pwd = try_malloc(sizeof(t_env));
 	if (!new_var_pwd)
-		return (free_t_env(mini_env), FALSE);
+		return (free_env(mini_env), FALSE);
 	new_var_pwd->var = ft_strjoin("PWD=", getcwd(NULL, 0));
 	if (!new_var_pwd->var)
-		return (free_t_env(mini_env), free_t_env(&new_var_pwd), FALSE);
+		return (free_env(mini_env), free_env(&new_var_pwd), FALSE);
 	add_new_var(mini_env, new_var_pwd);
 	new_var_shlvl = try_malloc(sizeof(t_env));
 	if (!new_var_shlvl)
-		return (free_t_env(mini_env), FALSE);
+		return (free_env(mini_env), FALSE);
 	new_var_shlvl->var = ft_strdup("SHLVL=1");
 	if (!new_var_shlvl->var)
-		return (free_t_env(mini_env), free_t_env(&new_var_shlvl), FALSE);
+		return (free_env(mini_env), free_env(&new_var_shlvl), FALSE);
 	add_new_var(mini_env, new_var_shlvl);
 	new_var_ = try_malloc(sizeof(t_env));
 	if (!new_var_)
-		return (free_t_env(mini_env), FALSE);
+		return (free_env(mini_env), FALSE);
 	new_var_->var = ft_strdup("_=./minishell");
 	if (!new_var_->var)
-		return (free_t_env(mini_env), free_t_env(&new_var_), FALSE);
+		return (free_env(mini_env), free_env(&new_var_), FALSE);
 	return (add_new_var(mini_env, new_var_), TRUE);
 }
 
@@ -167,9 +152,9 @@ t_env	**copy_env_list(t_env **mini_env, char **env)
 	return (mini_env);
 }
 
-int	loop_readline_main(LEXER **L_input, char **str)
+int	loop_readline_main(t_lexer **L_input, char **str)
 {
-	*L_input = ft_init_lexer_input();
+	*L_input = ft_init_t_lexer_input();
 	if (!*L_input)
 		return (FALSE);
 	signal(SIGINT, handle_c_signal);
@@ -189,9 +174,8 @@ int	loop_readline_main(LEXER **L_input, char **str)
 	return (TRUE);
 }
 
-void	free_exec_input(t_mega_struct *mini)
+void	free_exec_input(t_mega *mini)
 {
-	// print_nodes_list(&mini->nodes);
 	free_tokens(&mini->tokens);
 	mini->p = try_malloc(sizeof(t_pipex));
 	if (!mini->p)
@@ -207,7 +191,7 @@ void	free_exec_input(t_mega_struct *mini)
 	}
 }
 
-void	init_mega_struct(t_mega_struct *mini)
+void	init_mega(t_mega *mini)
 {
 	mini->p = NULL;
 	mini->L_input = NULL;
@@ -225,13 +209,13 @@ void	init_mega_struct(t_mega_struct *mini)
 
 int	main(int argc, char **argv, char **env)
 {
-	t_mega_struct	*mini;
+	t_mega	*mini;
 
 	((void)argv, (void)argc);
-	mini = try_malloc(sizeof(t_mega_struct));
+	mini = try_malloc(sizeof(t_mega));
 	if (!mini)
 		return (FALSE);
-	init_mega_struct(mini);
+	init_mega(mini);
 	mini->chained_env = copy_env_list(mini->chained_env, env);
 	if (!mini->chained_env)
 		return (free(mini), FALSE);
@@ -246,9 +230,8 @@ int	main(int argc, char **argv, char **env)
 		{
 			if (create_nodes(mini))
 				free_exec_input(mini);
-			(reset_node_mini(mini, NULL), free(mini->str));
-			// print_nodes_list(&mini->nodes);
+			(rst_nde_mini(mini, NULL), free(mini->str));
 		}
 	}
-	return (free_t_env(mini->chained_env), free(mini), TRUE);
+	return (free_env(mini->chained_env), free(mini), TRUE);
 }

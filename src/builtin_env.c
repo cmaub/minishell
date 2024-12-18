@@ -27,7 +27,7 @@ int	create_new_var(t_env **node, char *str)
 	return (TRUE);
 }
 
-int	env_var_exists(t_env **env_nodes, char *var)
+int	env_var_exists(t_env **env_n, char *var)
 {
 	int		i;
 	int		size;
@@ -35,12 +35,12 @@ int	env_var_exists(t_env **env_nodes, char *var)
 	t_env	*temp;
 
 	i = 0;
-	size = lstsize_t_env(env_nodes);
+	size = lstsize_t_env(env_n);
 	sizeofvar = ft_strlen(var);
-	temp = *env_nodes;
+	temp = *env_n;
 	if (!var || var[0] == '\0')
 		return (-1);
-	if (!env_nodes || !(*env_nodes))
+	if (!env_n || !(*env_n))
 		return (-1);
 	while (temp && i < size)
 	{
@@ -54,7 +54,7 @@ int	env_var_exists(t_env **env_nodes, char *var)
 	return (-1);
 }
 
-int	ft_env(PARSER *current, t_env **env)
+int	ft_env(t_parser *current, t_env **env)
 {
 	t_env	*curr;
 

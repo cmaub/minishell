@@ -27,11 +27,11 @@ int	count_env_var(char **list)
 	return (len);
 }
 
-int	check_args_unset(PARSER *current, t_env **env_nodes)
+int	check_args_unset(t_parser *current, t_env **env_n)
 {
-	if (!env_nodes || !*env_nodes)
+	if (!env_n || !*env_n)
 	{
-		env_nodes = NULL;
+		env_n = NULL;
 		return (FALSE);
 	}
 	if (!current->command[1])
@@ -46,18 +46,18 @@ int	check_args_unset(PARSER *current, t_env **env_nodes)
 	return (TRUE);
 }
 
-t_env	**browse_env_and_unset_var(t_env **env_nodes, int index)
+t_env	**browse_env_and_unset_var(t_env **env_n, int index)
 {
-    int        j;
-    t_env    *temp;
-    t_env    *saved;
+	int		j;
+	t_env	*temp;
+	t_env	*saved;
 
 	j = -1;
-	temp = *env_nodes;
+	temp = *env_n;
 	saved = NULL;
 	if (index == 0)
 	{
-		*env_nodes = temp->next;
+		*env_n = temp->next;
 		(free(temp->var), free(temp));
 	}
 	else
@@ -68,36 +68,36 @@ t_env	**browse_env_and_unset_var(t_env **env_nodes, int index)
 			temp = temp->next;
 		}
 		if (!temp)
-			return (env_nodes);
+			return (env_n);
 		saved->next = temp->next;
 		(free(temp->var), free(temp));
 	}
-	return (env_nodes);
+	return (env_n);
 }
 
-t_env    **ft_unset(PARSER *current, t_env **env_nodes)
+t_env	**ft_unset(t_parser *current, t_env **env_n)
 {
-    int        i;
-    int        index;
-    int        size_env;
+	int	i;
+	int	index;
+	int	size_env;
 
 	i = 1;
-	if (!check_args_unset(current, env_nodes))
-		return (env_nodes);
+	if (!check_args_unset(current, env_n))
+		return (env_n);
 	while (current->command[i] != NULL)
 	{
-		index = env_var_exists(env_nodes, current->command[i]);
+		index = env_var_exists(env_n, current->command[i]);
 		if (index >= 0)
 		{
-			size_env = lstsize_t_env(env_nodes);
+			size_env = lstsize_t_env(env_n);
 			if (size_env == 1)
 			{
 				ft_putendl_fd("empty envp not allowed\n", 2);
 				break ;
 			}
-			env_nodes = browse_env_and_unset_var(env_nodes, index);
+			env_n = browse_env_and_unset_var(env_n, index);
 		}
 		i++;
 	}
-	return (env_nodes);
+	return (env_n);
 }

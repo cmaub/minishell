@@ -80,6 +80,7 @@ char	*get_path_and_check(char **split_cmd, char **env)
 	new_path = get_path(split_cmd[0], env);
 	if (!new_path)
 	{
+		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		try_find_cmd_file(split_cmd, env);
 		// ft_putstr_fd(split_cmd[0], 2);
 		// ft_putendl_fd(": command not found", 2);

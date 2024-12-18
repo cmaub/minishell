@@ -12,13 +12,13 @@
 
 #include "minishell.h"
 
-void	print_nodes_list(PARSER **nodes)
+void	print_nodes_list(t_parser **nodes)
 {
 	int	index = 0;
 	int	f;
 	int	h;
 	int	d;
-	PARSER	*tmp;
+	t_parser	*tmp;
 	
 	if (!nodes)
 	{
@@ -58,9 +58,9 @@ void	print_nodes_list(PARSER **nodes)
 	printf("\n");
 }
 
-void	add_new_node(PARSER **nodes, PARSER *new_node)
+void	add_new_node(t_parser **nodes, t_parser *new_node)
 {
-	PARSER	*current;
+	t_parser	*current;
 
 	if (!nodes || !new_node)
 		return ;
@@ -78,7 +78,7 @@ void	add_new_node(PARSER **nodes, PARSER *new_node)
 	}
 }
 
-void	calloc_tab_of_node(PARSER *new_node)
+void	calloc_tab_of_node(t_parser *new_node)
 {
 	int	i;
 
@@ -155,7 +155,7 @@ char	*join_char(char c, char *result)
 	return (tmp);
 }
 
-char	*print_exit_code(PARSER *new_node, int *index)
+char	*print_exit_code(t_parser *new_node, int *index)
 {
 	char	*expand_result;
 	char	*itoa_result;
@@ -189,7 +189,7 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 	return (empty);
 }
 
-char	*expand_var(PARSER *node, char *str, int *i, t_env **env)
+char	*expand_var(t_parser *node, char *str, int *i, t_env **env)
 {
 	char	*expand = NULL;
 
@@ -232,7 +232,7 @@ int	is_expandable(char *str, int i, int flag)
 	return (0);
 }
 
-char	*withdraw_nothing(PARSER *new_node, char *str, int *index, t_env **chained_env, char *result)
+char	*withdraw_nothing(t_parser *new_node, char *str, int *index, t_env **chained_env, char *result)
 {
 	char	*tmp;
 	char	*tmp_result;
@@ -262,7 +262,7 @@ char	*withdraw_nothing(PARSER *new_node, char *str, int *index, t_env **chained_
 	return (result);
 }
 
-char	*process_unquoted(PARSER *new_node, char *str, int *index, t_env **chained_env)
+char	*process_unquoted(t_parser *new_node, char *str, int *index, t_env **chained_env)
 {
 	char	*result;
 	char	*tmp_result;
@@ -302,7 +302,7 @@ char	*process_single_quotes(char *str, int *index)
 	return (result);
 }
 
-char	*withdraw_double(PARSER *new_node, char *str, int *index, t_env **chained_env, char *result)
+char	*withdraw_double(t_parser *new_node, char *str, int *index, t_env **chained_env, char *result)
 {
 	char	*tmp;
 	char	*tmp_result;
@@ -332,7 +332,7 @@ char	*withdraw_double(PARSER *new_node, char *str, int *index, t_env **chained_e
 	return (result);
 }
 
-char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **chained_env)
+char	*process_double_quotes(t_parser *new_node, char *str, int *index, t_env **chained_env)
 {
 	char	*result;
 	char	*tmp;
@@ -351,7 +351,7 @@ char	*process_double_quotes(PARSER *new_node, char *str, int *index, t_env **cha
 	return (result);
 }
 
-char	*process_string(PARSER *new_node, char *str, int *start, t_env **chained_env)
+char	*process_string(t_parser *new_node, char *str, int *start, t_env **chained_env)
 {
 	if (str[*start] == 34)
 		return (process_double_quotes(new_node, str, start, chained_env));
@@ -361,7 +361,7 @@ char	*process_string(PARSER *new_node, char *str, int *start, t_env **chained_en
 		return (process_unquoted(new_node, str, start, chained_env));
 }
 
-char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
+char	*withdraw_quotes(t_parser *new_node, char *str, t_env **chained_env)
 {
 	int	start;
 	char	*result;
@@ -393,7 +393,7 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 	return (result);
 }
 
-// char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
+// char	*withdraw_quotes(t_parser *new_node, char *str, t_env **chained_env)
 // {
 // 	int	start;
 // 	char	*result;
@@ -430,7 +430,7 @@ char	*withdraw_quotes(PARSER *new_node, char *str, t_env **chained_env)
 // 	return (result);
 // }
 
-int	update_value_in_node(t_token **cur, PARSER *new_node, t_env **env)
+int	update_value_in_node(t_token **cur, t_parser *new_node, t_env **env)
 {
 	char	*tmp;
 
@@ -449,7 +449,7 @@ int	update_value_in_node(t_token **cur, PARSER *new_node, t_env **env)
 	return (TRUE);
 }
 
-// int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
+// int	calculate_size_of_tab(t_token *cur, t_parser *new_node, t_env **chained_env)
 // {
 // 	char	*tmp;
 
@@ -489,7 +489,7 @@ int	update_value_in_node(t_token **cur, PARSER *new_node, t_env **env)
 // 	return (TRUE);
 // }
 
-int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
+int	calculate_size_of_tab(t_token *cur, t_parser *new_node, t_env **chained_env)
 {
 	char	*tmp;
 
@@ -515,13 +515,13 @@ int	calculate_size_of_tab(t_token *cur, PARSER *new_node, t_env **chained_env)
 	return (TRUE);
 }
 
-PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
+t_parser	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 {
 	t_token	*cur;
-	PARSER		*new_node;
+	t_parser		*new_node;
 
 	cur = current;
-	new_node = try_malloc(sizeof(PARSER));
+	new_node = try_malloc(sizeof(t_parser));
 	if (!new_node)
 		return (NULL);
 	new_node->exit_code = exit_code;
@@ -536,7 +536,7 @@ PARSER	*alloc_new_node(t_token *current, t_env **chained_env, int exit_code)
 	return (new_node);
 }
 
-void	add_null_to_tab(PARSER *new_node, t_mega_struct *mini)
+void	add_null_to_tab(t_parser *new_node, t_mega *mini)
 {
 	if (mini->f > 0)
 		new_node->file[mini->f] = NULL;
@@ -584,7 +584,7 @@ int	loop_readline(char *delimiter, int *fd_heredoc)
 	return (0);
 }
 
-int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
+int	create_heredoc(t_parser *new_node, t_token *current, int *f, int *d)
 {
 	int	fd;
 
@@ -611,7 +611,7 @@ int	create_heredoc(PARSER *new_node, t_token *current, int *f, int *d)
 	return (TRUE);
 }
 
-int	fill_nodes_with_files(t_token **current, PARSER **new_node, t_mega_struct **mini)
+int	fill_nodes_with_files(t_token **current, t_parser **new_node, t_mega **mini)
 {
 	(*new_node)->file[(*mini)->f] = ft_strdup((*current)->value);
 	if (!(*new_node)->file[(*mini)->f])
@@ -620,7 +620,7 @@ int	fill_nodes_with_files(t_token **current, PARSER **new_node, t_mega_struct **
 	return (TRUE);
 }
 
-int	fill_nodes_with_heredoc(t_token **current, PARSER **new_node, t_mega_struct **mini)
+int	fill_nodes_with_heredoc(t_token **current, t_parser **new_node, t_mega **mini)
 {
 	if (pipe((*new_node)->fd_heredoc[(*mini)->d]) == -1)
 		return (perror("pipe"), FALSE);
@@ -628,7 +628,7 @@ int	fill_nodes_with_heredoc(t_token **current, PARSER **new_node, t_mega_struct 
 	if (!create_heredoc((*new_node), (*current), &(*mini)->f, &(*mini)->d))
 	{
 		s_clse(&(*new_node)->fd_heredoc[(*mini)->d][0]);
-		reset_node_mini(*mini, &(*new_node)); // regarder si possible de mettre en une seule fonction
+		rst_nde_mini(*mini, &(*new_node)); // regarder si possible de mettre en une seule fonction
 		free((*mini)->nodes);
 		(*mini)->nodes = NULL;
 		free((*new_node));
@@ -643,7 +643,7 @@ int	fill_nodes_with_heredoc(t_token **current, PARSER **new_node, t_mega_struct 
 	return (TRUE);		
 }
 
-int	fill_nodes_with_args(t_token **current, PARSER **new_node, t_mega_struct **mini)
+int	fill_nodes_with_args(t_token **current, t_parser **new_node, t_mega **mini)
 {
 	if ((*current)->type == ARGUMENT && (*current)->value != NULL)
 	{
@@ -657,14 +657,14 @@ int	fill_nodes_with_args(t_token **current, PARSER **new_node, t_mega_struct **m
 	return (TRUE);
 }
 
-void	init_mini_counters(t_mega_struct *mini)
+void	init_mini_counters(t_mega *mini)
 {
 		mini->f = 0;
 		mini->d = 0;
 		mini->cmd = 0;
 }
 
-int	fill_nodes_with_(t_token *cur, PARSER *new_node, t_mega_struct *mini)
+int	fill_nodes_with_(t_token *cur, t_parser *new_node, t_mega *mini)
 {
 	if (cur->type == REDIRECT_IN || cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 		fill_nodes_with_files(&cur, &new_node, &mini);
@@ -678,10 +678,10 @@ int	fill_nodes_with_(t_token *cur, PARSER *new_node, t_mega_struct *mini)
 	return (TRUE);
 }
 
-int	create_nodes(t_mega_struct *mini)
+int	create_nodes(t_mega *mini)
 {
 	t_token	*cur;
-	PARSER		*new_node;
+	t_parser		*new_node;
 
 	cur = mini->tokens;
 	while (cur)
@@ -703,10 +703,10 @@ int	create_nodes(t_mega_struct *mini)
 	return (TRUE);
 }
 
-// int	create_nodes(t_mega_struct *mini)
+// int	create_nodes(t_mega *mini)
 // {
 // 	t_token	*cur;
-// 	PARSER		*new_node;
+// 	t_parser		*new_node;
 
 // 	cur = mini->tokens;
 // 	while (cur)
@@ -735,10 +735,10 @@ int	create_nodes(t_mega_struct *mini)
 // 	return (TRUE);
 // }
 
-// int	create_nodes(t_mega_struct *mini)
+// int	create_nodes(t_mega *mini)
 // {
 // 	t_token	*current;
-// 	PARSER		*new_node;
+// 	t_parser		*new_node;
 // 	int		cmd;
 // 	int		d;
 // 	int		f;
@@ -771,7 +771,7 @@ int	create_nodes(t_mega_struct *mini)
 // 				if (!create_heredoc(new_node, current, &f, &d))
 // 				{
 // 					s_clse(&new_node->fd_heredoc[d][0]);
-// 					reset_node_mini(mini, &new_node); // regarder si possible de mettre en une seule fonction
+// 					rst_nde_mini(mini, &new_node); // regarder si possible de mettre en une seule fonction
 // 					free(mini->nodes);
 // 					mini->nodes = NULL;
 // 					free(new_node);

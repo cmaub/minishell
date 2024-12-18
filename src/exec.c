@@ -32,32 +32,32 @@ int	is_command(char *cmd)
 	return (TRUE);
 }
 
-int	exec_builtin(PARSER *current, t_pipex *p, t_cpy *cpy, t_mega_struct *mini)
+int	exc_built(t_parser *current, t_pipex *p, t_cpy *cpy, t_mega *mini)
 {
 	if (ft_strncmp(current->command[0], "echo", 5) == 0)
 		return (ft_echo(current->command));
 	if (ft_strncmp(current->command[0], "pwd", 4) == 0)
 		return (ft_pwd(current));
 	if (ft_strncmp(current->command[0], "env", 4) == 0)
-		return (ft_env(current, p->env_nodes));
+		return (ft_env(current, p->env_n));
 	if (ft_strncmp(current->command[0], "exit", 5) == 0)
 		return (ft_exit(p, current, cpy, mini));
 	if (ft_strncmp(current->command[0], "cd", 3) == 0)
 		return (ft_cd(current->command, p, current));
 	if (ft_strncmp(current->command[0], "export", 7) == 0)
 	{
-		p->env_nodes = ft_export(current, p->env_nodes);
+		p->env_n = ft_export(current, p->env_n);
 		return (TRUE);
 	}
 	if (ft_strncmp(current->command[0], "unset", 6) == 0)
 	{
-		p->env_nodes = ft_unset(current, p->env_nodes);
+		p->env_n = ft_unset(current, p->env_n);
 		return (TRUE);
 	}
 	return (FALSE);
 }
 
-int	is_builtin(PARSER *current)
+int	is_builtin(t_parser *current)
 {
 	if (current->command != NULL)
 	{
@@ -79,16 +79,16 @@ int	is_builtin(PARSER *current)
 	return (FALSE);
 }
 
-char	**copy_list_in_str(t_env **env_nodes)
+char	**copy_list_in_str(t_env **env_n)
 {
 	t_env	*temp;
 	char	**str_env;
 	int		i;
 
-	if (!env_nodes || !*env_nodes)
+	if (!env_n || !*env_n)
 		return (NULL);
-	temp = *env_nodes;
-	str_env = try_malloc(sizeof(char *) * (lstsize_t_env(env_nodes) + 1));
+	temp = *env_n;
+	str_env = try_malloc(sizeof(char *) * (lstsize_t_env(env_n) + 1));
 	if (!str_env)
 		return (NULL);
 	i = 0;
@@ -154,7 +154,7 @@ void	try_find_cmd_file(char **tmp_cmd, char **str_env)
 		if (find_path(str_env))
 		{
 			if (execve(dir_cmd, tmp_cmd, str_env) == -1)
-				free_exit_tab_str(str_env, tmp_cmd, dir_cmd, 126);
+				free_exit_tab_str(str_env, tmp_cmd, dir_cmd, 127);
 		}
 		else
 			if (execve(dir_cmd, tmp_cmd, NULL) == -1)
@@ -169,24 +169,15 @@ void	exec_no_env_or_path(char **tmp_cmd, char **str_env)
 	if (access(tmp_cmd[0], F_OK) == 0)
 	{
 		if (access(tmp_cmd[0], R_OK) == -1)
-		{
-			dprintf(2, "%d, %s\n", __LINE__, __FILE__);
 			(free_exit_tab_str(str_env, tmp_cmd, NULL, 126));
-		}
-	}
-	else
-		try_find_cmd_file(tmp_cmd, str_env);
-	if (find_path(str_env))
-	{
-		if (execve(tmp_cmd[0], tmp_cmd, str_env) == -1)
-			(free_exit_tab_str(str_env, tmp_cmd, NULL, 126));
-	}
-	else
-	{
 		if (execve(tmp_cmd[0], tmp_cmd, NULL) == -1)
 			(free_exit_tab_str(str_env, tmp_cmd, NULL, 126));
 		exit(126);
 	}
+	else if (!ft_strchr(tmp_cmd[0], '/'))
+		try_find_cmd_file(tmp_cmd, str_env);
+	else
+		(free_exit_tab_str(str_env, tmp_cmd, NULL, 127));
 }
 
 void	exec_without_pb(char **tmp_cmd, char **str_env)
@@ -205,7 +196,7 @@ void	exec_without_pb(char **tmp_cmd, char **str_env)
 	exit(126);
 }
 
-int	execute(PARSER **current, t_pipex *p, t_mega_struct *mini)
+int	execute(t_parser **cur, t_pipex *p, t_mega *m)
 {
 	char	**tmp_cmd;
 	char	**tmp_minienv;
@@ -214,18 +205,18 @@ int	execute(PARSER **current, t_pipex *p, t_mega_struct *mini)
 	tmp_cmd = NULL;
 	tmp_minienv = NULL;
 	str_env = NULL;
-	if (is_builtin(*current) == 1)
-		(exec_builtin(*current, p, NULL, mini), reset_node(&mini->begin), free_t_env(p->env_nodes),
-			free_pipex(&p), free(mini), exit(EXIT_SUCCESS));
+	if (is_builtin(*cur) == 1)
+		(exc_built(*cur, p, NULL, m), rst_nde(&m->begin), free_env(p->env_n),
+			free_pipex(&p), free(m), exit(EXIT_SUCCESS));
 	else
 	{
-		str_env = copy_list_in_str(p->env_nodes);
+		str_env = copy_list_in_str(p->env_n);
 		if (!str_env)
 			return (FALSE);
-		tmp_cmd = copy_tab((*current)->command);
+		tmp_cmd = copy_tab((*cur)->command);
 		if (!tmp_cmd)
 			return (free_array(str_env), FALSE);
-		(free_t_env(p->env_nodes), free_pipex(&p), reset_node(&mini->begin), free(mini));
+		(free_env(p->env_n), free_pipex(&p), rst_nde(&m->begin), free(m));
 		if (ft_strchr(tmp_cmd[0], '/') || !find_path(str_env))
 			exec_no_env_or_path(tmp_cmd, str_env);
 		else if (!ft_strchr(tmp_cmd[0], '/') && find_path(str_env))
@@ -234,7 +225,7 @@ int	execute(PARSER **current, t_pipex *p, t_mega_struct *mini)
 	return (FALSE);
 }
 
-int	handle_input_redirection(PARSER **n, t_pipex *p, int *d)
+int	handle_input_redirection(t_parser **n, t_pipex *p, int *d)
 {
 	int	fd_in;
 
@@ -242,18 +233,11 @@ int	handle_input_redirection(PARSER **n, t_pipex *p, int *d)
 	if ((*n)->redir[(*n)->f] == REDIRECT_IN)
 			fd_in = open((*n)->file[(*n)->f], O_RDONLY | 0644);
 	if (fd_in == -1 && (*n)->redir[(*n)->f] == REDIRECT_IN)
-	{
-		clse_n_x(NULL, p, (*n)->file[(*n)->f]);
-		return (FALSE);
-	}
+		return (clse_n_x(NULL, p, (*n)->file[(*n)->f]), FALSE);
 	if ((*n)->redir[(*n)->f] == REDIRECT_IN)
 	{
-
 		if (dup2(fd_in, STDIN_FILENO) == -1)
-		{
-			clse_n_x(&fd_in, p, (*n)->file[(*n)->f]);
-			return (FALSE);
-		}
+			return (clse_n_x(&fd_in, p, (*n)->file[(*n)->f]), FALSE);
 		s_clse(&fd_in);
 	}
 	if ((*n)->redir[(*n)->f] == HEREDOC)
@@ -270,7 +254,7 @@ int	handle_input_redirection(PARSER **n, t_pipex *p, int *d)
 	return (TRUE);
 }
 
-int	handle_output_redirection(PARSER **n, t_pipex *p, int *flag_output)
+int	handle_output_redirection(t_parser **n, t_pipex *p, int *flag_output)
 {
 	int	fd_out;
 
@@ -304,7 +288,7 @@ void	msg_not_executable(char *str)
 	ft_putendl_fd(": not executable", 2);
 }
 
-void	first_child(t_pipex *p, PARSER **nodes, t_mega_struct *mini)
+void	first_child(t_pipex *p, t_parser **nodes, t_mega *mini)
 {
 	int	flag_output;
 
@@ -332,7 +316,7 @@ void	first_child(t_pipex *p, PARSER **nodes, t_mega_struct *mini)
 		(msg_not_executable((*nodes)->command[0]), free_exit(p, mini, 126));
 }
 
-void	inter_child(t_pipex *p, PARSER **nodes, t_mega_struct *mini)
+void	inter_child(t_pipex *p, t_parser **nodes, t_mega *mini)
 {
 	int	flag_output;
 
@@ -361,7 +345,7 @@ void	inter_child(t_pipex *p, PARSER **nodes, t_mega_struct *mini)
 		(msg_not_executable((*nodes)->command[0]), free_exit(p, mini, 126));
 }
 
-void	last_child(t_pipex *p, PARSER **nodes, t_mega_struct *mini)
+void	last_child(t_pipex *p, t_parser **nodes, t_mega *mini)
 {
 	(*nodes)->f = 0;
 	s_clse(&p->pipefd[1]);
@@ -415,7 +399,7 @@ void	c_child(int signum)
 	rl_replace_line("", 0);
 }
 
-void	s_clse_array(int **array, PARSER **node)
+void	s_clse_array(int **array, t_parser **node)
 {
 	int	i;
 
@@ -430,7 +414,7 @@ void	s_clse_array(int **array, PARSER **node)
 	}
 }
 
-void	create_process(t_pipex *p, PARSER **nodes, t_mega_struct *mini)
+void	create_process(t_pipex *p, t_parser **nodes, t_mega *mini)
 {
 	if (p->pid == 0)
 	{
@@ -493,7 +477,7 @@ int	restore_std(int *cpy_stdin, int *cpy_stdout)
 	return (TRUE);
 }
 
-int	simpl_pro_input(PARSER *nod, int *fd_in, int *d)
+int	simpl_pro_input(t_parser *nod, int *fd_in, int *d)
 {
 	if (nod->redir[nod->f] == REDIRECT_IN)
 	{
@@ -519,7 +503,7 @@ int	simpl_pro_input(PARSER *nod, int *fd_in, int *d)
 	return (TRUE);
 }
 
-int	builtins(PARSER *nod, t_pipex *p, t_cpy *cpy, t_mega_struct *mini)
+int	builtins(t_parser *nod, t_pipex *p, t_cpy *cpy, t_mega *mini)
 {
 	int	fd_in;
 	int	d;
@@ -536,7 +520,7 @@ int	builtins(PARSER *nod, t_pipex *p, t_cpy *cpy, t_mega_struct *mini)
 			return (FALSE);
 		nod->f++;
 	}
-	if (!exec_builtin(nod, p, cpy, mini))
+	if (!exc_built(nod, p, cpy, mini))
 		nod->exit_code = 1;
 	return (TRUE);
 }
@@ -548,7 +532,7 @@ void	q_child(int signum)
 	rl_replace_line("", 0);
 }
 
-int	handle_builtin(PARSER *node, t_pipex *p, t_mega_struct *mini)
+int	handle_builtin(t_parser *node, t_pipex *p, t_mega *mini)
 {
 	t_cpy	cpy;
 
@@ -575,7 +559,7 @@ int	handle_builtin(PARSER *node, t_pipex *p, t_mega_struct *mini)
 	return (TRUE);
 }
 
-int	create_pipes(t_pipex *p, PARSER *node)
+int	create_pipes(t_pipex *p, t_parser *node)
 {
 	if (p->nb_cmd > 1 && p->i < p->nb_cmd - 1)
 	{
@@ -589,14 +573,14 @@ int	create_pipes(t_pipex *p, PARSER *node)
 	return (TRUE);
 }
 
-int	handle_input(PARSER **nodes, t_pipex *p, t_mega_struct *mini)
+int	handle_input(t_parser **nodes, t_pipex *p, t_mega *mini)
 {
-	PARSER		*current;
+	t_parser		*current;
 
 	current = (*nodes);
+	// mini->begin = (*nodes);
 	if (current && current->next == NULL && is_builtin(current))
 		return (handle_builtin(current, p, mini));
-	mini->begin = (*nodes);
 	while (p->i < p->nb_cmd)
 	{
 		if (!create_pipes(p, current))

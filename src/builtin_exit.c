@@ -23,7 +23,7 @@ Message d'erreur:
 - si plusieurs args et 1er invalide => not a numeric argument
 */
 
-void	input_ok(t_pipex *p, char *cmd, PARSER *node)
+void	input_ok(t_pipex *p, char *cmd, t_parser *node)
 {
 	if (p->flag == 1)
 	{
@@ -34,7 +34,7 @@ void	input_ok(t_pipex *p, char *cmd, PARSER *node)
 		node->exit_code = ft_strtoll(cmd) % 256;
 }
 
-void	too_many(t_pipex *p, PARSER *node)
+void	too_many(t_pipex *p, t_parser *node)
 {
 	if (p->flag == 1)
 	{
@@ -44,7 +44,7 @@ void	too_many(t_pipex *p, PARSER *node)
 	node->exit_code = 1;
 }
 
-void	not_a_num(t_pipex *p, PARSER *node)
+void	not_a_num(t_pipex *p, t_parser *node)
 {
 	if (p->flag == 1)
 	{
@@ -89,44 +89,80 @@ int	check_exit_arg(char *cmd)
 	return (TRUE);
 }
 
-void	free_exit(t_pipex *p, t_mega_struct *mini, int exit_c)
+void	free_exit(t_pipex *p, t_mega *mini, int exit_c)
 {
-	free_t_env(p->env_nodes);
+	free_env(p->env_n);
 	free_pipex(&p);
 	if (mini->begin)
-		reset_node(&mini->begin);
+		rst_nde(&mini->begin);
 	if (mini)
 		free(mini);
 	exit(exit_c);
 }
 
-int	ft_exit(t_pipex *p, PARSER *node, t_cpy *cpy, t_mega_struct *mini)
+void	invalid_arg(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini)
 {
-	int	i;
+	not_a_num(p, node);
+	if (cpy)
+		restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
+	free_exit(p, mini, 2);
+}
+
+void	valid_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini)
+{
 	int	exit_code;
 
-	i = 1;
-	if (node->command[i])
+	if (cpy)
+		restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
+	exit_code = node->exit_code;
+	free_exit(p, mini, exit_code);
+}
+
+int	ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini)
+{
+	if (node->command[1])
 	{
-		if (!check_exit_arg(node->command[i])
+		if (!check_exit_arg(node->command[1])
 			|| !lenght_exit_code(node->command[1]))
-		{
-			not_a_num(p, node);
-			if (cpy)
-				restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
-			free_exit(p, mini, 2);
-		}
-		i++;
+			invalid_arg(p, node, cpy, mini);
 	}
-	if (node->command[i])
+	if (node->command[2])
 		too_many(p, node);
 	else
 	{
 		input_ok(p, node->command[1], node);
-		if (cpy)
-			restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
-		exit_code = node->exit_code;
-		free_exit(p, mini, exit_code);
+		valid_exit(p, node, cpy, mini);
 	}
 	return (TRUE);
 }
+
+// int	ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini)
+// {
+// 	int	i;
+// 	int	exit_code;
+
+// 	i = 1;
+// 	if (node->command[i])
+// 	{
+// 		if (!check_exit_arg(node->command[i])
+// 			|| !lenght_exit_code(node->command[1]))
+// 		{
+// 			not_a_num(p, node);
+// 			if (cpy)
+// 				restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
+// 			free_exit(p, mini, 2);
+// 		}
+// 		i++;
+// 	}
+// 	if (node->command[i])
+// 		too_many(p, node);
+// 	else
+// 	{
+// 		input_ok(p, node->command[1], node);
+// 		if (cpy)
+// 			restore_std(&cpy->cpy_stdin, &cpy->cpy_stdout);
+// 		exit_code = node->exit_code;
+// 		free_exit(p, mini, exit_code);
+// 	}
+// 	return (TRUE);
+// }

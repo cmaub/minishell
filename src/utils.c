@@ -70,7 +70,7 @@ void	ft_error_exit(char *str, int exit_c)
 	exit(exit_c);
 }
 
-int	ft_error_int(char *str, PARSER *node)
+int	ft_error_int(char *str, t_parser *node)
 {
 	ft_putendl_fd(str, 2);
 	node->exit_code = 1;
@@ -91,10 +91,10 @@ void	s_clse(int *fd)
 		return ;
 }
 
-int		ft_size_list(PARSER **nodes)
+int	ft_size_list(t_parser **nodes)
 {
-	PARSER	*current;
-	int	size;
+	t_parser	*current;
+	int		size;
 
 	current = *nodes;
 	size = 0;
@@ -106,28 +106,10 @@ int		ft_size_list(PARSER **nodes)
 	return (size);
 }
 
-// **** RETIRER ?
-
-// char	**copy_env()
-// {
-// 	char	**new_tab;
-// 	int	i;
-
-// 	i = 0;
-
-// 	new_tab = try_malloc(4 * sizeof(char *));
-// 	if (!new_tab)
-// 		return (NULL);
-// 	new_tab[0] = getcwd(NULL, 0);
-// 	new_tab[1] = NULL;
-// 	////dprintf(2, "new_tab[0] = %s\n", new_tab[0]);
-// 	return (new_tab);
-// }
-
 char	**copy_tab(char **tab)
 {
 	char	**new_tab;
-	int	i;
+	int		i;
 
 	i = 0;
 	if (!tab) //verifier verification
@@ -143,12 +125,7 @@ char	**copy_tab(char **tab)
 		new_tab[i] = ft_strdup(tab[i]);
 		if (!new_tab[i])
 		{
-			while (i >= 0)
-			{
-				free(new_tab[i]);
-				new_tab[i] = NULL;
-				i--;
-			}
+			free_array(new_tab);
 			return (NULL);
 		}
 		i++;
@@ -157,35 +134,56 @@ char	**copy_tab(char **tab)
 	return (new_tab);
 }
 
-void	ft_init_struct(t_pipex *p, t_env **chained_env, PARSER *nodes)
+// //tester le cas ou on doit supprimer l'allocation de new_tab
+// char	**copy_tab(char **tab)
+// {
+// 	char	**new_tab;
+// 	int		i;
+
+// 	i = 0;
+// 	if (!tab) //verifier verification
+// 		return (NULL);
+// 	while (tab[i])
+// 		i++;
+// 	new_tab = try_malloc((i + 1) * sizeof(char *));
+// 	if (!new_tab)
+// 		return (NULL);
+// 	i = 0;
+// 	while (tab[i])
+// 	{
+// 		new_tab[i] = ft_strdup(tab[i]);
+// 		if (!new_tab[i])
+// 		{
+// 			while (--i >= 0)
+// 			// {
+// 				free(new_tab[i]);
+// 			free(new_tab);
+// 			return (NULL);
+// 				// new_tab[i] = NULL;
+// 				// i--;
+// 			// }
+// 			// return (NULL);
+// 		}
+// 		i++;
+// 	}
+// 	new_tab[i] = NULL;
+// 	return (new_tab);
+// }
+
+void	ft_init_struct(t_pipex *p, t_env **chained_env, t_parser *nodes)
 {
-	p->env_nodes = chained_env;
+	p->env_n = chained_env;
 	p->nb_cmd = ft_size_list(&nodes);
 	p->i = 0;
 	p->d = 0;
 	p->prev_fd = -1;
 	p->pid = 0;
 	p->last_pid = 0;
-	p->exit = 0; //supprimer ?
+	p->exit = 0;
 	p->flag = 0;
 	p->pipefd[0] = -1;
 	p->pipefd[1] = -1;
 }
-
-// *** RETIRER ?
-// int	is_str(char *str)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	while (str[i] != '\0')
-// 	{
-// 		if (!ft_isalpha(str[i]))
-// 			return (0);
-// 		i++;
-// 	}
-// 	return (1);
-// }
 
 void	ft_free_tab(char **tab)
 {
@@ -193,7 +191,7 @@ void	ft_free_tab(char **tab)
 
 	i = 0;
 	if (!tab || !(*tab))
-		return;
+		return ;
 	while (tab[i] && tab[i] != NULL)
 	{
 		if (tab[i] != NULL)
@@ -224,20 +222,6 @@ int	no_envp(char **tab)
 	return (0);
 }
 
-void	close_error_and_free(int *fd, t_pipex *p, PARSER **nodes, char *str, int exit_c)//remplacer en passant mini ?
-{
-	if (fd)
-		s_clse(fd);
-	s_clse(&p->pipefd[1]);
-	s_clse(&p->pipefd[0]);
-	perror(str);
-	if (p->env_nodes)
-		free_t_env(p->env_nodes);
-	free_pipex(&p);
-	reset_node(nodes);
-	exit(exit_c);
-}
-
 void	clse_n_x(int *fd, t_pipex *p, char *str)
 {
 	if (fd)
@@ -247,98 +231,128 @@ void	clse_n_x(int *fd, t_pipex *p, char *str)
 	perror(str);
 }
 
-int ft_wait(pid_t last_pid, PARSER **nodes)
+void	update_exit_code(int status, t_parser **nodes, int *status_code)
 {
-	int   status;
-	int   status_code;
-	pid_t waited_pid;
-	PARSER *current;	
+	if (WIFEXITED(status))
+	{
+		*status_code = WEXITSTATUS(status);
+		(*nodes)->exit_code = *status_code;
+	}
+	else if (g_signal != 0)
+	{
+		*status_code = 128 + g_signal;
+		(*nodes)->exit_code = *status_code;
+		g_signal = 0;
+	}
+}
+
+int	ft_wait(pid_t last_pid, t_parser **nodes)
+{
+	int		status;
+	int		status_code;
+	pid_t	waited_pid;
+	t_parser	*current;	
 
 	status_code = 0;
 	current = *nodes;
 	if (current == NULL)
 		return (0);
-	while ((waited_pid = wait(&status)) != -1)
+	waited_pid = wait(&status);
+	while (waited_pid != -1)
 	{
 		if (current && current->next)
 			current = current->next;
 		else
-			current = *nodes;	
+			current = *nodes;
 		if (waited_pid == last_pid)
-		{
-			if (WIFEXITED(status))
-			{
-				status_code = WEXITSTATUS(status);
-				(*nodes)->exit_code = status_code;
-			}
-			else if (g_signal != 0)
-			{
-		 		status_code = 128 + g_signal;
-				(*nodes)->exit_code = status_code;
-				g_signal = 0;
-			}
-		}
+			update_exit_code(status, nodes, &status_code);
+		waited_pid = wait(&status);
 	}		
-	// if (*nodes && (*nodes)->exit_code != 0)
-	// 	status_code = (*nodes)->exit_code;
-	// else
-	// {
-	// 	//dprintf(2, "*** (%s, %d), status_code = %d\n", __FILE__, __LINE__, status_code);
-	// 	(*nodes)->exit_code = status_code;
-	// 	status_code = (*nodes)->exit_code;
-	// }
 	return (signal(SIGINT, handle_c_signal), status_code);
-	// return (signal(SIGINT, SIG_IGN), status_code);
-	// return (status_code);
-
 }
 
-void	print_nodes_list(PARSER **nodes)
-{
-	int	index = 0;
-	int	f;
-	int	h;
-	int	d;
-	PARSER	*tmp;
-	
-	//dprintf(2, "entree dans print_nodes_list\n");
-	if (!nodes)
-	{
-		//dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
-		return ;
-	}
-	if (!(*nodes)/* || !nodes*/)
-	{
-		//dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
-		return ;
-	}
-	tmp = (*nodes);
-	while (index <= ft_size_list(nodes))
-	{
-		f = 0;
-		h = 0;
-		d = 0;
-		while (f < 30 && tmp->file && tmp->file[f] != NULL)
-		{
-			printf("tmp->file[%d] = %s, type = %d\n", f, tmp->file[f], tmp->redir[f]);
-			if (d < 30 && tmp->delimiter && tmp->delimiter[d] != NULL)
-			{
-				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
-				d++;
-			}
-			f++;
-		}
-		while (h < 30 && tmp->command && tmp->command[h] != NULL)
-		{
-			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
-			h++;
-		}
-		if (!tmp->next)
-			break;
-		tmp = tmp->next;
-		index++;
-		printf("\n");
-	}
-	printf("\n");
-}
+// int	ft_wait(pid_t last_pid, t_parser **nodes)
+// {
+// 	dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
+// 	int		status;
+// 	int		status_code;
+// 	pid_t	waited_pid;
+// 	t_parser	*current;	
 
+// 	status_code = 0;
+// 	current = *nodes;
+// 	if (current == NULL)
+// 		return (0);
+// 	while ((waited_pid = wait(&status)) != -1)
+// 	{
+// 		if (current && current->next)
+// 			current = current->next;
+// 		else
+// 			current = *nodes;
+// 		if (waited_pid == last_pid)
+// 		{
+// 			if (WIFEXITED(status))
+// 			{
+// 				status_code = WEXITSTATUS(status);
+// 				(*nodes)->exit_code = status_code;
+// 			}
+// 			else if (g_signal != 0)
+// 			{
+// 				status_code = 128 + g_signal;
+// 				(*nodes)->exit_code = status_code;
+// 				g_signal = 0;
+// 			}
+// 		}
+// 	}		
+// 	return (signal(SIGINT, handle_c_signal), status_code);
+// }
+
+// void	print_nodes_list(t_parser **nodes)
+// {
+// 	int	index;
+// 	int	f;
+// 	int	h;
+// 	int	d;
+// 	t_parser	*tmp;
+// 
+// 	index = 0;
+// 	if (!nodes)
+// 	{
+// 		//dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
+// 		return ;
+// 	}
+// 	if (!(*nodes)/* || !nodes*/)
+// 	{
+// 		//dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
+// 		return ;
+// 	}
+// 	tmp = (*nodes);
+// 	while (index <= ft_size_list(nodes))
+// 	{
+// 		f = 0;
+// 		h = 0;
+// 		d = 0;
+// 		while (f < 30 && tmp->file && tmp->file[f] != NULL)
+// 		{
+// 			printf("tmp->file[%d] = %s,
+					// type = %d\n", f, tmp->file[f], tmp->redir[f]);
+// 			if (d < 30 && tmp->delimiter && tmp->delimiter[d] != NULL)
+// 			{
+// 				printf("tmp->delimiter = %s\n", tmp->delimiter[d]);
+// 				d++;
+// 			}
+// 			f++;
+// 		}
+// 		while (h < 30 && tmp->command && tmp->command[h] != NULL)
+// 		{
+// 			printf("tmp->command[%d] = %s\n", h, tmp->command[h]);
+// 			h++;
+// 		}
+// 		if (!tmp->next)
+// 			break;
+// 		tmp = tmp->next;
+// 		index++;
+// 		printf("\n");
+// 	}
+// 	printf("\n");
+// }

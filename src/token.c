@@ -41,9 +41,9 @@
 // 	}
 // }
 
-int	fill_list_of_tokens(t_mega_struct *mini, char *str)
+int	fill_list_of_tokens(t_mega *mini, char *str)
 {
-	if (!expr(mini->L_input, &mini->tokens) || !parser_has_reach_end(mini->L_input))
+	if (!expr(mini->L_input, &mini->tokens) || !t_parser_has_reach_end(mini->L_input))
 	{
 		// //dprintf(2, "str = %s\n", str);
 		ft_putendl_fd("syntax error", 2);
@@ -84,7 +84,7 @@ int	add_new_token(t_token **list, t_token *new)
 	return (TRUE);
 }
 
-t_token	*create_new_token(LEXER *input, int start, int end, int type)
+t_token	*create_new_token(t_lexer *input, int start, int end, int type)
 {
 	t_token	*new;
 	int		len;
@@ -106,7 +106,7 @@ t_token	*create_new_token(LEXER *input, int start, int end, int type)
 
 // ***** RETIRER ?
 
-// int create_and_add_token(LEXER *input, int start, int end, t_token **list, int type)
+// int create_and_add_token(t_lexer *input, int start, int end, t_token **list, int type)
 // {
 //     t_token *new_node;
 

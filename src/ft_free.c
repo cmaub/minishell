@@ -13,7 +13,7 @@
 #include "minishell.h"
 
 // **** RETIRER ?
-// void	free_new_node(PARSER *new_node)
+// void	free_new_node(t_parser *new_node)
 // {
 // 	if (new_node)
 //     {
@@ -31,7 +31,7 @@
 // 	}
 // }
 
-void	check_and_free_new_node(PARSER *new_node)
+void	check_and_free_new_node(t_parser *new_node)
 {
 	if (!new_node)
 		return ;
@@ -89,7 +89,7 @@ void	free_array_and_close_fds(char **array)
 	array = NULL;
 }
 
-void	free_arr_i(int **array, PARSER *current)
+void	free_arr_i(int **array, t_parser *current)
 {
 	int	i;
 
@@ -108,15 +108,31 @@ void	free_arr_i(int **array, PARSER *current)
 	array = NULL;
 }
 
-void	close_heredoc(PARSER *current)
+void	close_heredoc(t_parser *current)
 {
 	int	i;
 
 	i = 0;
 	while (i < current->nb_heredoc)
 	{
-		s_clse(current->fd_heredoc[i]);
+		s_clse(&current->fd_heredoc[i][0]);
+		s_clse(&current->fd_heredoc[i][1]);
 		i++;
+	}
+}
+
+// UTILISEE ? 
+void	close_all_heredoc(t_mega *mini)
+{
+	t_parser	*current;
+
+	if (!mini || !mini->nodes)
+		return ;
+	current = mini->begin;
+	while (current)
+	{
+		close_heredoc(current);
+		current = current->next;
 	}
 }
 
@@ -145,7 +161,7 @@ void	free_array(char **array)
 	array = NULL;
 }
 
-void	reset_one_node(PARSER **node)
+void	reset_one_node(t_parser **node)
 {
 	if (!node)
 		return ;
@@ -174,16 +190,16 @@ void	reset_one_node(PARSER **node)
 	node = NULL;
 }
 
-void	init_mini_null(t_mega_struct *mini)
+void	init_mini_null(t_mega *mini)
 {
 	mini->nodes = NULL;
 	mini->p = NULL;
 }
 
-void	reset_node_mini(t_mega_struct *mini, PARSER **node)
+void	rst_nde_mini(t_mega *mini, t_parser **node)
 {
-	PARSER	*current;
-	PARSER	*temp;
+	t_parser	*current;
+	t_parser	*temp;
 
 	reset_one_node(node);
 	if (!mini || !mini->nodes)
@@ -201,7 +217,7 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 		if (current->redir)
 			free(current->redir);
 		if (current->nb_heredoc)
-			(close_heredoc(current), free_arr_i(current->fd_heredoc, current));
+			free_arr_i(current->fd_heredoc, current);
 		if (current)
 			free(current);
 		current = temp;
@@ -209,10 +225,10 @@ void	reset_node_mini(t_mega_struct *mini, PARSER **node)
 	init_mini_null(mini);
 }
 
-void	reset_node(PARSER **node)
+void	rst_nde(t_parser **node)
 {
-	PARSER	*current;
-	PARSER	*temp;
+	t_parser	*current;
+	t_parser	*temp;
 
 	if (!node | !*node)
 		return ;
@@ -229,8 +245,7 @@ void	reset_node(PARSER **node)
 		if (current->redir)
 			free(current->redir);
 		if (current->fd_heredoc)
-			(close_heredoc(current),
-				free_arr_i(current->fd_heredoc, current));
+			free_arr_i(current->fd_heredoc, current);
 		if (current)
 			free(current);
 		current = temp;

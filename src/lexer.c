@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexer.c                                            :+:      :+:    :+:   */
+/*   t_lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -15,7 +15,7 @@
 
 #define DEBUG_S debug(input, (char*)__FUNCTION__)
 
-void debug(LEXER* input, char* fname) {
+void debug(t_lexer* input, char* fname) {
 	printf("%-30s > \033[30;1m%.*s\033[42;30;1m%c\033[0m\033[30;1m%s\033[0m\n", fname, (int)input->head, input->data, input->data[input->head], input->data + input->head + 1);
 }
 
@@ -25,7 +25,7 @@ son but est de verifier si le char donné en param est bien le char pointé par 
 si oui: on avance la head sur le prochain char et on return TRUE
 si non ou si la head est deja arrivé a la fin de la chaine: on return FALSE
 */
-int	eat(LEXER *input, char c)
+int	eat(t_lexer *input, char c)
 {
     if (!(input->head < input->len))
         return FALSE;
@@ -42,7 +42,7 @@ identique a 'eat', mais check une range de char (utile pour verifier si le
 char pointé par head est entre 'a' et 'z' par exemple :p
 (start et end inclus)
 */
-int	eatRange(LEXER *input, int start, int end)
+int	eatRange(t_lexer *input, int start, int end)
 {
     if (!(input->head < input->len))
         return FALSE;
@@ -54,7 +54,7 @@ int	eatRange(LEXER *input, int start, int end)
     return FALSE;
 }
 
-int	PIPE(LEXER *input, t_token **list)
+int	PIPE(t_lexer *input, t_token **list)
 {
 	int	i;
 	int	start;
@@ -82,77 +82,77 @@ int	PIPE(LEXER *input, t_token **list)
 	return (TRUE);
 }
 
-int	R_ARROW(LEXER *input)
+int	R_ARROW(t_lexer *input)
 {
 	return (eat(input, '>'));
 }
 
-int	L_ARROW(LEXER *input)
+int	L_ARROW(t_lexer *input)
 {
 	return (eat(input, '<'));
 }
 
-int	SP(LEXER *input)
+int	SP(t_lexer *input)
 {
 	return (eat(input, ' '));
 }
 
-int	TAB_H(LEXER *input)
+int	TAB_H(t_lexer *input)
 {
 	return (eat(input, 9));
 }
 
-int	TAB_V(LEXER *input)
+int	TAB_V(t_lexer *input)
 {
 	return (eat(input, 11));
 }
 
-int	SQUOTE(LEXER *input)
+int	SQUOTE(t_lexer *input)
 {
 	return (eat(input, 39));
 }
 
-int	DQUOTE(LEXER * input)
+int	DQUOTE(t_lexer * input)
 {
 	return (eat(input, 34));
 }
 
-int	DOLLAR(LEXER *input)
+int	DOLLAR(t_lexer *input)
 {
 	return (eat(input, '$'));
 }
 
-int	QUESTION_M(LEXER *input)
+int	QUESTION_M(t_lexer *input)
 {
 	return (eat(input, '?'));
 }
 
-int	SLASH(LEXER *input)
+int	SLASH(t_lexer *input)
 {
 	return (eat(input, '/'));
 }
 
-int	UNDERSCORE(LEXER *input)
+int	UNDERSCORE(t_lexer *input)
 {
 	return (eat(input, '_'));
 }
 
-int	HAT(LEXER *input)
+int	HAT(t_lexer *input)
 {
 	return (eat(input, '^'));
 }
 
-int	MINUS(LEXER *input)
+int	MINUS(t_lexer *input)
 {
 	return (eat(input, '-'));
 }
 
-int	DOT(LEXER *input)
+int	DOT(t_lexer *input)
 {
 	return (eat(input, '.'));
 }
 
-int	LOW_ALPHA(LEXER *input)
+int	LOW_ALPHA(t_lexer *input)
 {
 	int	i = 0;
 
@@ -162,7 +162,7 @@ int	LOW_ALPHA(LEXER *input)
 	return (TRUE);
 }
 
-int	UP_ALPHA(LEXER *input)
+int	UP_ALPHA(t_lexer *input)
 {
 	int	i = 0;
 
@@ -172,32 +172,32 @@ int	UP_ALPHA(LEXER *input)
 	return (TRUE);
 }
 
-int	DIGIT(LEXER *input)
+int	DIGIT(t_lexer *input)
 {
 	return (eatRange(input, 48, 57));
 }
 
-int	EQUAL(LEXER *input)
+int	EQUAL(t_lexer *input)
 {
 	return (eat(input, '='));
 }
 
-int	PLUS(LEXER *input)
+int	PLUS(t_lexer *input)
 {
 	return (eat(input, '+'));
 }
 
-int	STAR(LEXER *input)
+int	STAR(t_lexer *input)
 {
 	return (eat(input, '*'));
 }
 
-int	DOTS(LEXER *input)
+int	DOTS(t_lexer *input)
 {
 	return (eat(input, ':'));
 }
 
-int	PRINTABLE_SQUOTE(LEXER *input)
+int	PRINTABLE_SQUOTE(t_lexer *input)
 {
 	int	i;
 	int	j;
@@ -213,7 +213,7 @@ int	PRINTABLE_SQUOTE(LEXER *input)
 	return (FALSE);
 }
 
-int	PRINTABLE_DQUOTE(LEXER *input)
+int	PRINTABLE_DQUOTE(t_lexer *input)
 {
 	int	i;
 	int	j;
@@ -228,14 +228,14 @@ int	PRINTABLE_DQUOTE(LEXER *input)
 	return (FALSE);
 }
 
-int	ows(LEXER *input)
+int	ows(t_lexer *input)
 {
 	while (SP(input) || TAB_H(input) || TAB_V(input))
 	{}
 	return (TRUE);
 }
 
-int ws(LEXER *input)
+int ws(t_lexer *input)
 {
 	int	save;
 
@@ -250,7 +250,7 @@ int ws(LEXER *input)
 }
 
 // entree comprise comme [""cat""] -> devrait peut-etre etre compris comme [""][cat][""] ?
-int	dquote(LEXER *input)
+int	dquote(t_lexer *input)
 {
 	int	save;
 
@@ -271,7 +271,7 @@ int	dquote(LEXER *input)
 	return (TRUE);
 }
 
-int	squote(LEXER *input)
+int	squote(t_lexer *input)
 {
 	int	save;
 
@@ -288,7 +288,7 @@ int	squote(LEXER *input)
 	return (TRUE);
 }
 
-int	arg(LEXER *input)
+int	arg(t_lexer *input)
 {
 	// DEBUG_S;
 	int	i;
@@ -307,7 +307,7 @@ int	arg(LEXER *input)
 	return (TRUE);
 }
 
-int redir(LEXER *input, t_token **list)
+int redir(t_lexer *input, t_token **list)
 {
 	// DEBUG_S;
 	int save;
@@ -339,7 +339,7 @@ int redir(LEXER *input, t_token **list)
 }
 
 
-int command(LEXER *input, t_token **list)
+int command(t_lexer *input, t_token **list)
 {
 	// DEBUG_S;
 	int save;
@@ -370,7 +370,7 @@ int command(LEXER *input, t_token **list)
 	return (TRUE);
 }
 
-int	expr(LEXER *input, t_token **list)
+int	expr(t_lexer *input, t_token **list)
 {
 	// DEBUG_S;
 	int	save;

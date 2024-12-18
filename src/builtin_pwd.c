@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int	ft_pwd(PARSER *current)
+int	ft_pwd(t_parser *current)
 {
 	char	*new_var;
 

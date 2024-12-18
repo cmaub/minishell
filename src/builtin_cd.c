@@ -51,12 +51,12 @@ int	handle_existing_var(t_env *temp, char *dest_tmp, char *src)
 	return (TRUE);
 }
 
-int	ft_setenv(char *dest, char *src, t_env **env_nodes)
+int	ft_setenv(char *dest, char *src, t_env **env_n)
 {	
 	t_env	*temp;
 	char	*dest_tmp;
 
-	temp = *env_nodes;
+	temp = *env_n;
 	dest_tmp = ft_strjoin(dest, "=");
 	if (!dest_tmp)
 		return (FALSE);
@@ -70,7 +70,7 @@ int	ft_setenv(char *dest, char *src, t_env **env_nodes)
 	{
 		if (ft_strncmp(dest_tmp, src, 6) == 0)
 		{
-			if (!handle_new_var(env_nodes, dest_tmp, src))
+			if (!handle_new_var(env_n, dest_tmp, src))
 				return (free(dest_tmp), FALSE);
 		}
 	}
@@ -93,25 +93,25 @@ int	check_args_cd(char **cmd)
 	return (TRUE);
 }
 
-int	set_old_and_new_pwd(t_pipex *p, PARSER *node)
+int	set_old_and_new_pwd(t_pipex *p, t_parser *node)
 {
 	char	*old_pwd;
 	char	*new_pwd;
 
-	old_pwd = return_var_from_env("PWD", p->env_nodes);
+	old_pwd = return_var_from_env("PWD", p->env_n);
 	if (!old_pwd)
 		return (ft_error_int("cd: error", node));
-	if (!ft_setenv("OLDPWD", old_pwd, p->env_nodes))
+	if (!ft_setenv("OLDPWD", old_pwd, p->env_n))
 		return (free(old_pwd), FALSE);
 	new_pwd = getcwd(NULL, 0);
 	if (!new_pwd)
 		return (free(old_pwd), ft_error_int("cd: error", node));
-	if (!ft_setenv("PWD", new_pwd, p->env_nodes))
+	if (!ft_setenv("PWD", new_pwd, p->env_n))
 		return (free(new_pwd), free(old_pwd), FALSE);
 	return (free(new_pwd), free(old_pwd), TRUE);
 }
 
-int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
+int	ft_cd(char **cmd, t_pipex *p, t_parser *node)
 {
 	char	*new_pwd;
 	char	*pwd_var;
@@ -122,13 +122,13 @@ int	ft_cd(char **cmd, t_pipex *p, PARSER *node)
 		node->exit_code = 1;
 		return (FALSE);
 	}
-	if (!env_var_exists(p->env_nodes, "PWD"))
+	if (!env_var_exists(p->env_n, "PWD"))
 	{
 		new_pwd = getcwd(NULL, 0);
 		pwd_var = ft_strjoin("PWD=", new_pwd);
 		if (!pwd_var)
 			return (free(new_pwd), FALSE);
-		(free(new_pwd), create_new_var(p->env_nodes, pwd_var), free(pwd_var));
+		(free(new_pwd), create_new_var(p->env_n, pwd_var), free(pwd_var));
 	}
 	if (!set_old_and_new_pwd(p, node))
 		return (FALSE);

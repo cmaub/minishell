@@ -19,7 +19,7 @@
 // verifier la syntaxe des noms de variables + des valeurs possibles
 // gerer les guillemet et les "export" ecrits avant
 
-// int	env_var_exists(t_env **env_nodes, char *var)
+// int	env_var_exists(t_env **env_n, char *var)
 // {
 // 	int		i;
 // 	int		size;
@@ -27,12 +27,12 @@
 // 	t_env	*temp;
 
 // 	i = 0;
-// 	size = lstsize_t_env(env_nodes);
+// 	size = lstsize_t_env(env_n);
 // 	sizeofvar = ft_strlen(var);
-// 	temp = *env_nodes;
+// 	temp = *env_n;
 // 	if (!var || var[0] == '\0')
 // 		return (-1);
-// 	if (!env_nodes || !(*env_nodes))
+// 	if (!env_n || !(*env_n))
 // 		return (-1);
 // 	while (temp && i < size)
 // 	{
@@ -100,15 +100,15 @@ int	is_ignored_var(char *var)
 	return (var[0] == '_' && (var[1] == '\0' || var[1] == '='));
 }
 
-void	print_sorted_env(t_env **env_nodes)
+void	print_sorted_env(t_env **env_n)
 {
 	int		i;
 	t_env	*cur;
 
 	i = 0;
-	if (!*env_nodes || !env_nodes)
+	if (!*env_n || !env_n)
 		return ;
-	cur = *env_nodes;
+	cur = *env_n;
 	while (cur != NULL)
 	{
 		if (is_ignored_var(cur->var))
@@ -163,7 +163,7 @@ void	copy_and_sort_env(t_env **env)
 	sorted_env = copy_t_env(env);
 	sort_tab_ascii(sorted_env);
 	print_sorted_env(sorted_env);
-	free_t_env(sorted_env);
+	free_env(sorted_env);
 }
 
 int	check_name(char *name)
@@ -182,7 +182,7 @@ int	check_name(char *name)
 	return (TRUE);
 }
 
-void	print_error_msg(char *str, PARSER *current, char *error_msg)
+void	print_error_msg(char *str, t_parser *current, char *error_msg)
 {
 	ft_putstr_fd("export: '", 2);
 	ft_putstr_fd(str, 2);
@@ -190,7 +190,7 @@ void	print_error_msg(char *str, PARSER *current, char *error_msg)
 	current->exit_code = 1;
 }
 
-// int	create_new_var(t_env **env_nodes, char *cmd)
+// int	create_new_var(t_env **env_n, char *cmd)
 // {
 // 	t_env	*new;
 
@@ -201,16 +201,16 @@ void	print_error_msg(char *str, PARSER *current, char *error_msg)
 // 	if (!new->var)
 // 		return (free(new), FALSE);
 // 	new->next = NULL;
-// 	ft_lstadd_env_back(env_nodes, new);
+// 	ft_lstadd_env_back(env_n, new);
 // 	return (TRUE);
 // }
 
-int	check_value_and_add(t_env **env_nodes, char *cmd, int index)
+int	check_value_and_add(t_env **env_n, char *cmd, int index)
 {
 	t_env	*temp;
 	int		j;
 
-	temp = *env_nodes;
+	temp = *env_n;
 	j = -1;
 	if (index >= 0)
 	{
@@ -224,11 +224,11 @@ int	check_value_and_add(t_env **env_nodes, char *cmd, int index)
 			return (FALSE);
 	}
 	else
-		return (create_new_var(env_nodes, cmd));
+		return (create_new_var(env_n, cmd));
 	return (TRUE);
 }
 
-void	handle_value(char *cmd, PARSER *current, t_env **env_nodes)
+void	handle_value(char *cmd, t_parser *current, t_env **env_n)
 {
 	int		index;
 	char	*equal;
@@ -239,14 +239,13 @@ void	handle_value(char *cmd, PARSER *current, t_env **env_nodes)
 	name = cmd;
 	if (!check_name(name))
 		return (print_error_msg(name, current, "': not a valid identifier"));
-	index = env_var_exists(env_nodes, name);
+	index = env_var_exists(env_n, name);
 	*equal = '=';
-	// //dprintf(2, "cmd = %s\n", cmd);
-	if (!check_value_and_add(env_nodes, cmd, index))
+	if (!check_value_and_add(env_n, cmd, index))
 		return ;
 }
 
-t_env	**handle_var_wo_value(char *cmd, PARSER *current, t_env **env_nodes)
+t_env	**handle_var_wo_value(char *cmd, t_parser *current, t_env **env_n)
 {
 	int		index;
 	int		j;
@@ -257,21 +256,21 @@ t_env	**handle_var_wo_value(char *cmd, PARSER *current, t_env **env_nodes)
 	if (!check_name(cmd))
 	{
 		print_error_msg(cmd, current, "': not a valid identifier");
-		return (env_nodes);
+		return (env_n);
 	}
-	index = env_var_exists(env_nodes, cmd);
+	index = env_var_exists(env_n, cmd);
 	if (index < 0)
-		create_new_var(env_nodes, cmd);
-	return (env_nodes);
+		create_new_var(env_n, cmd);
+	return (env_n);
 }
 
-t_env	**ft_export(PARSER *current, t_env **env_nodes)
+t_env	**ft_export(t_parser *current, t_env **env_n)
 {
 	int	i;
 
 	i = 1;
 	if (!current->command[1])
-		return (copy_and_sort_env(env_nodes), env_nodes);
+		return (copy_and_sort_env(env_n), env_n);
 	while (current->command[i])
 	{
 		if (current->command[i] && current->command[i][0] == '-')
@@ -281,14 +280,14 @@ t_env	**ft_export(PARSER *current, t_env **env_nodes)
 			if (i == 1)
 			{
 				current->exit_code = 2;
-				return (env_nodes);
+				return (env_n);
 			}				
 		}
 		if (ft_strchr(current->command[i], '=') != NULL)
-			handle_value(current->command[i], current, env_nodes);
+			handle_value(current->command[i], current, env_n);
 		else
-			handle_var_wo_value(current->command[i], current, env_nodes);
+			handle_var_wo_value(current->command[i], current, env_n);
 		i++;
 	}
-	return (env_nodes);
+	return (env_n);
 }
