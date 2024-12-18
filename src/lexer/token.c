@@ -1,33 +1,40 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   token_utils.c                                      :+:      :+:    :+:   */
+/*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 15:16:17 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/18 19:18:11 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+int	parser_has_reach_end(t_lexer *input)
+{
+	if (input->head != input->len)
+		return (FALSE);
+	return (TRUE);
+}
+
 int	fill_list_of_tokens(t_mega *mini, char *str)
 {
-	if (!expr(mini->L_input, &mini->tokens)
-		|| !parser_has_reach_end(mini->L_input))
+	if (!expr(mini->l_input, &mini->tokens)
+		|| !parser_has_reach_end(mini->l_input))
 	{
 		ft_putendl_fd("syntax error", 2);
 		g_signal = 0;
 		mini->exit_code = 2;
 		free(str);
-		free(mini->L_input);
+		free(mini->l_input);
 		free_tokens(&mini->tokens);
 		str = NULL;
-		mini->L_input = NULL;
+		mini->l_input = NULL;
 		return (FALSE);
 	}
-	free(mini->L_input);
+	free(mini->l_input);
 	return (TRUE);
 }
 

@@ -6,7 +6,7 @@
 #    By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/12/18 18:42:29 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/12/18 19:21:31 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = minishell
 
 # Compiler
 CC		= cc
-CFLAGS	= -Wall -Wextra -Werror -g
+CFLAGS	= -Wall -Wextra -Werror
 
 # Libft
 LIBFT_PATH	= libft/
@@ -27,7 +27,9 @@ INC			=	-I ./includes/\
 
 # Sources
 SRC_PATH	=	src/
-SRC_FILES			=	minishell.c \
+SRC_FILES			=		init/main_loop.c \
+							init/create_t_env.c \
+							init/init_structs.c \
 							parsing/create_node_utils.c \
 							parsing/create_node.c \
 							parsing/expand_utils.c \

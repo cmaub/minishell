@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 18:41:06 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:52:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,23 +111,3 @@ void	free_array(char **array)
 	free(array);
 	array = NULL;
 }
-
-// void	ft_free_tab(char **tab)
-// {
-// 	int	i;
-
-// 	i = 0;
-// 	if (!tab || !(*tab))
-// 		return ;
-// 	while (tab[i] && tab[i] != NULL)
-// 	{
-// 		if (tab[i] != NULL)
-// 		{
-// 			free(tab[i]);
-// 			tab[i] = NULL;
-// 		}
-// 		i++;
-// 	}
-// 	free(tab);
-// 	tab = NULL;
-// }

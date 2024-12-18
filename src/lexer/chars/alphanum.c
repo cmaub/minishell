@@ -3,14 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   alphanum.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:08:29 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 15:25:03 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/18 19:00:31 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+// chars from 0(48) to 9(57)
+int	ft_digit(t_lexer *input)
+{
+	return (eat_range(input, 48, 57));
+}
 
 // chars from a(97) to z(122)
 int	ft_l_alpha(t_lexer *input)
@@ -34,10 +40,4 @@ int	ft_u_alpha(t_lexer *input)
 	if (!i)
 		return (FALSE);
 	return (TRUE);
-}
-
-// chars from 0(48) to 9(57)
-int	ft_digit(t_lexer *input)
-{
-	return (eat_range(input, 48, 57));
 }

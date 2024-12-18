@@ -6,17 +6,11 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 18:22:52 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 18:24:26 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 19:18:58 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	ft_error_exit(char *str, int exit_c)
-{
-	perror(str);
-	exit(exit_c);
-}
 
 int	ft_error_int(char *str, t_parser *node)
 {
