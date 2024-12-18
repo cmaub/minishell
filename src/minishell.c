@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 15:32:52 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:58:51 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	g_signal = -1;
 
-int	t_parser_has_reach_end(t_lexer *input)
+int	parser_has_reach_end(t_lexer *input)
 {
 	if (input->head != input->len)
 		return (FALSE);
@@ -32,15 +32,6 @@ t_lexer	*ft_init_t_lexer_input(void)
 	new_input->len = 0;
 	new_input->head = 0;
 	return (new_input);
-}
-
-void	handle_c_signal(int signum)
-{
-	g_signal = signum;
-	ft_putstr_fd("\n", 2);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
 }
 
 void	add_new_var(t_env **mini_env, t_env *new_var)

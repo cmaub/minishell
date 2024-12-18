@@ -1,23 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cd_utils.c                                         :+:      :+:    :+:   */
+/*   dots.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
+/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/18 14:05:42 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:55:50 by cmaubert         ###   ########.fr       */
+/*   Created: 2024/12/18 15:12:54 by anvander          #+#    #+#             */
+/*   Updated: 2024/12/18 15:13:16 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	handle_existing_var(t_env *temp, char *dest_tmp, char *src)
+int	ft_dot(t_lexer *input)
 {
-	free(temp->var);
-	temp->var = NULL;
-	temp->var = ft_strjoin(dest_tmp, src);
-	if (!temp->var)
-		return (FALSE);
-	return (TRUE);
+	return (eat(input, '.'));
+}
+
+int	ft_dots(t_lexer *input)
+{
+	return (eat(input, ':'));
 }

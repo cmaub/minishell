@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:19:57 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 16:32:43 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@
 // - buffer: the block of memory in which the current working 
 // will be returned.
 // - size: the size of the block of memory passed as the first parameter.
-
 
 int	handle_new_var(t_env **nodes, char *dest_tmp, char *src)
 {
@@ -74,7 +73,7 @@ int	check_args_cd(char **cmd)
 	if (!cmd[1])
 		return (ft_putendl_fd("cd: no directory specified", 2), FALSE);
 	if (cmd[2])
-		return (ft_putendl_fd("cd: too many arguments", 2), FALSE);
+		return (ft_putendl_fd("cd: too many ARGs", 2), FALSE);
 	else
 	{
 		if (chdir(cmd[1]) == -1)

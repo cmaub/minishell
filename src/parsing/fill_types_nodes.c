@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fill_nodes.c                                       :+:      :+:    :+:   */
+/*   fill_types_nodes.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:51:30 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:51:51 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 16:28:45 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	fill_nodes_with_files(t_token **cur, t_parser **node, t_mega **mini)
 
 int	fill_nodes_with_args(t_token **cur, t_parser **node, t_mega **mini)
 {
-	if ((*cur)->type == ARGUMENT && (*cur)->value != NULL)
+	if ((*cur)->type == ARG && (*cur)->value != NULL)
 	{
 		while ((*cur) && (*cur)->value && !is_command((*cur)->value))
 			(*cur) = (*cur)->next;
@@ -46,7 +46,7 @@ int	fill_nodes_with_(t_token *cur, t_parser *new_node, t_mega *mini)
 		if (!fill_nodes_with_heredoc(&cur, &new_node, &mini))
 			return (FALSE);
 	}
-	else if (cur->type == ARGUMENT && cur->value != NULL)
+	else if (cur->type == ARG && cur->value != NULL)
 		fill_nodes_with_args(&cur, &new_node, &mini);
 	return (TRUE);
 }

@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:55:43 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:58:33 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:54:02 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ char	*print_expand(char *str, int *index, t_env **chained_env)
 		return (free(empty), expand_result);
 	return (empty);
 }
+
 char	*expand_var(t_parser *node, t_mega *mini, char *str, int *i)
 {
 	char	*expand;

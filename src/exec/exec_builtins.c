@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:23:58 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 15:35:59 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:52:27 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ int	handle_input_rediction_built(t_parser *nod, int *fd_in, int *d)
 	return (TRUE);
 }
 
-int	builtins(t_parser *nod, t_pipex *p, t_cpy *cpy, t_mega *mini)
+int	redir_builtins(t_parser *nod, t_pipex *p, t_cpy *cpy, t_mega *mini)
 {
 	int	fd_in;
 	int	d;
@@ -118,7 +118,7 @@ int	handle_builtin(t_parser *node, t_pipex *p, t_mega *mini)
 		node->exit_code = 1;
 		return (FALSE);
 	}
-	if (!builtins(node, p, &cpy, mini))
+	if (!redir_builtins(node, p, &cpy, mini))
 	{
 		restore_std(&cpy.cpy_stdin, &cpy.cpy_stdout);
 		node->exit_code = 1;
@@ -133,6 +133,3 @@ int	handle_builtin(t_parser *node, t_pipex *p, t_mega *mini)
 		(free(mini), exit(EXIT_SUCCESS));
 	return (TRUE);
 }
-
-
-

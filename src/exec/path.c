@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/17 18:56:04 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:00:32 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ char	*create_tmp_filename(char *path, char *cmd)
 
 	tmp_path = ft_strjoin(path, "/");
 	if (!tmp_path)
-		return (NULL); //free(path) enleve
+		return (NULL);
 	tmp_filename = ft_strjoin(tmp_path, cmd);
 	if (!tmp_filename)
-		return (free(tmp_path), NULL); //free(path) enleve
+		return (free(tmp_path), NULL);
 	free(tmp_path);
 	return (tmp_filename);
 }
@@ -76,19 +76,9 @@ char	*get_path(char *cmd, char **env)
 char	*get_path_and_check(char **split_cmd, char **env)
 {
 	char	*new_path;
-	
+
 	new_path = get_path(split_cmd[0], env);
 	if (!new_path)
-	{
-		// dprintf(2, "(%s, %d)\n", __FILE__, __LINE__);
 		try_find_cmd_file(split_cmd, env);
-		// ft_putstr_fd(split_cmd[0], 2);
-		// ft_putendl_fd(": command not found", 2);
-		// ft_free_tab(split_cmd);
-		// ft_free_tab(env);
-		// exit(127);
-	}
 	return (new_path);
 }
-
-

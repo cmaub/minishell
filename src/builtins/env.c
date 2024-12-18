@@ -61,7 +61,7 @@ int	ft_env(t_parser *current, t_env **env)
 	curr = *env;
 	if (current->command[1])
 	{
-		ft_putstr_fd("Too many arguments\n", 2);
+		ft_putstr_fd("Too many ARGs\n", 2);
 		current->exit_code = 2;
 		return (FALSE);
 	}

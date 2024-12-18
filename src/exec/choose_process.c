@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:27:55 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 15:31:47 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:53:09 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ void	first_child(t_pipex *p, t_parser **nodes, t_mega *mini)
 	s_clse(&p->pipefd[1]);
 	if (!(*nodes)->command)
 		free_exit(p, mini, EXIT_SUCCESS);
+	close_all_heredoc(mini);
 	if (!execute(nodes, p, mini))
 		(msg_not_executable((*nodes)->command[0]), free_exit(p, mini, 126));
 }
@@ -62,7 +63,7 @@ void	inter_child(t_pipex *p, t_parser **nodes, t_mega *mini)
 		if (dup2(p->pipefd[1], STDOUT_FILENO) == -1)
 			(clse_n_x(NULL, p, "pipe"), free_exit(p, mini, 1));
 	}
-	s_clse(&p->pipefd[1]);
+	(s_clse(&p->pipefd[1]), close_all_heredoc(mini));
 	if (!(*nodes)->command)
 		free_exit(p, mini, EXIT_SUCCESS);
 	if (!execute(nodes, p, mini))
@@ -89,6 +90,7 @@ void	last_child(t_pipex *p, t_parser **nodes, t_mega *mini)
 	}
 	if (!(*nodes)->command)
 		free_exit(p, mini, EXIT_SUCCESS);
+	close_all_heredoc(mini);
 	if (!execute(nodes, p, mini))
 	{
 		msg_not_executable((*nodes)->command[0]);

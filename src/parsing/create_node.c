@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:42:29 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:50:42 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:54:44 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ void	calloc_tab_of_node(t_parser *node)
 		}
 	}
 }
+
 int	calculate_size_of_tab(t_token *cur, t_parser *node, t_mega *mini)
 {
 	char	*tmp;
@@ -52,7 +53,7 @@ int	calculate_size_of_tab(t_token *cur, t_parser *node, t_mega *mini)
 		}
 		node->nb_file++;
 	}
-	else if (cur->type == ARGUMENT)
+	else if (cur->type == ARG)
 	{
 		if (!update_value_in_node(&cur, node, mini))
 			return (FALSE);
@@ -111,7 +112,7 @@ int	create_nodes(t_mega *mini)
 	while (cur)
 	{
 		init_mini_counters(mini);
-		if (g_signal == 2)							
+		if (g_signal == 2)
 			mini->exit_code = g_signal + 128;
 		g_signal = 0;
 		new_node = alloc_new_node(cur, mini, mini->exit_code);

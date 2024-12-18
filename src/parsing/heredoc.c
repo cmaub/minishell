@@ -6,20 +6,11 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:38:55 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:41:04 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:55:17 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	handle_c_signal_heredoc(int signum)
-{
-	g_signal = signum;
-	write(1, "\n", 1);
-	rl_replace_line("", 0);
-	rl_done = 1;
-	close(STDIN_FILENO);
-}
 
 int	loop_readline(char *delimiter, int *fd_heredoc)
 {
@@ -40,7 +31,6 @@ int	loop_readline(char *delimiter, int *fd_heredoc)
 		if (ft_strncmp(input, delimiter, ft_strlen(delimiter)) == 0)
 		{
 			(s_clse(fd_heredoc), free(input));
-			close(STDIN_FILENO); //tester /!/
 			break ;
 		}
 		else
@@ -55,7 +45,6 @@ int	create_heredoc(t_parser *node, t_token *current, int *f, int *d)
 	int	fd;
 	int	result;
 
-	// result = 0;
 	fd = dup(STDIN_FILENO);
 	if (fd == -1)
 		return (perror("dup"), FALSE);
@@ -76,10 +65,7 @@ int	create_heredoc(t_parser *node, t_token *current, int *f, int *d)
 	if (dup2(fd, STDIN_FILENO) == -1)
 		return (perror ("dup"), FALSE);
 	if (result == 2)
-	{
-		dprintf(2, "COUCOU ctr-D\n");
 		s_clse(&node->fd_heredoc[*d][0]);
-	}
 	return (s_clse(&fd), TRUE);
 }
 
@@ -91,7 +77,6 @@ int	fill_nodes_with_heredoc(t_token **cur, t_parser **node, t_mega **mini)
 	if (!create_heredoc((*node), (*cur), &(*mini)->f, &(*mini)->d))
 	{
 		close_heredoc(*node);
-		// s_clse(&(*node)->fd_heredoc[(*mini)->d][0]);
 		rst_nde_mini(*mini, node);
 		free((*mini)->nodes);
 		(*mini)->nodes = NULL;

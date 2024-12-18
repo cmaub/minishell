@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:19:22 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:56:01 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ int	check_exit_arg(char *cmd)
 
 void	free_exit(t_pipex *p, t_mega *mini, int exit_c)
 {
+	close_all_heredoc(mini);
 	free_env(p->env_n);
 	free_pipex(&p);
 	if (mini->begin)
@@ -85,4 +86,3 @@ int	ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini)
 	}
 	return (TRUE);
 }
-
