@@ -20,7 +20,7 @@ exit ferme le shell si:
 Message d'erreur:
 - si 1 seul arg > long long max ou < long long min => not a numeric arg
 - si plusieurs args et que le 1er est valide => too many args et n'exit pas
-- si plusieurs args et 1er invalide => not a numeric argument
+- si plusieurs args et 1er invalide => not a numeric ARG
 */
 
 void	input_ok(t_pipex *p, char *cmd, t_parser *node)
@@ -39,7 +39,7 @@ void	too_many(t_pipex *p, t_parser *node)
 	if (p->flag == 1)
 	{
 		ft_putstr_fd("exit\n", 1);
-		ft_putstr_fd("exit: too many arguments\n", 2);
+		ft_putstr_fd("exit: too many ARGs\n", 2);
 	}
 	node->exit_code = 1;
 }
@@ -49,7 +49,7 @@ void	not_a_num(t_pipex *p, t_parser *node)
 	if (p->flag == 1)
 	{
 		ft_putstr_fd("exit\n", 1);
-		ft_putstr_fd("exit: numeric argument required\n", 2);
+		ft_putstr_fd("exit: numeric ARG required\n", 2);
 		p->exit = 1;
 	}
 	node->exit_code = 2;

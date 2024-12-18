@@ -473,7 +473,7 @@ int	update_value_in_node(t_token **cur, t_parser *new_node, t_env **env)
 // 		}
 // 		new_node->nb_file++;
 // 	}
-// 	else if (cur->type == ARGUMENT)
+// 	else if (cur->type == ARG)
 // 	{
 // 		tmp = ft_strdup(cur->value);
 // 		if (!tmp)
@@ -506,7 +506,7 @@ int	calculate_size_of_tab(t_token *cur, t_parser *new_node, t_env **chained_env)
 		}
 		new_node->nb_file++;
 	}
-	else if (cur->type == ARGUMENT)
+	else if (cur->type == ARG)
 	{
 		if (!update_value_in_node(&cur, new_node, chained_env))
 			return (FALSE);
@@ -645,7 +645,7 @@ int	fill_nodes_with_heredoc(t_token **current, t_parser **new_node, t_mega **min
 
 int	fill_nodes_with_args(t_token **current, t_parser **new_node, t_mega **mini)
 {
-	if ((*current)->type == ARGUMENT && (*current)->value != NULL)
+	if ((*current)->type == ARG && (*current)->value != NULL)
 	{
 		while ((*current) && (*current)->value && !is_command((*current)->value))
 			(*current) = (*current)->next;
@@ -673,7 +673,7 @@ int	fill_nodes_with_(t_token *cur, t_parser *new_node, t_mega *mini)
 		if (!fill_nodes_with_heredoc(&cur, &new_node, &mini))
 			return (FALSE);
 	}
-	else if (cur->type == ARGUMENT && cur->value != NULL)
+	else if (cur->type == ARG && cur->value != NULL)
 		fill_nodes_with_args(&cur, &new_node, &mini);
 	return (TRUE);
 }
@@ -724,7 +724,7 @@ int	create_nodes(t_mega *mini)
 // 				if (!fill_nodes_with_heredoc(&cur, &new_node, &mini))
 // 					return (FALSE);
 // 			}
-// 			else if (cur->type == ARGUMENT && cur->value != NULL)
+// 			else if (cur->type == ARG && cur->value != NULL)
 // 				fill_nodes_with_args(&cur, &new_node, &mini);
 // 			cur = cur->next;			
 // 		}
@@ -789,11 +789,11 @@ int	create_nodes(t_mega *mini)
 // 					new_node->file[f] = ft_strdup(current->value);
 // 					new_node->redir[f++] = current->type;
 // 			}
-// 			else if (current->type == ARGUMENT && current->value != NULL)
+// 			else if (current->type == ARG && current->value != NULL)
 // 			{
 // 				while (current && current->value && !is_command(current->value))
 // 					current = current->next;
-// 				if (current->type == ARGUMENT && current->value != NULL)
+// 				if (current->type == ARG && current->value != NULL)
 // 					new_node->command[cmd++] = ft_strdup(current->value);
 // 			}
 // 			current = current->next;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
+/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 18:53:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 15:43:08 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@
 # define PIPEX 5 /* | */
 # define COMMAND 6 // plus besoin ?
 # define OPTION 7 /* - + taile de 3 */
-# define ARGUMENT 8
+# define ARG 8
 # define FILENAME 9
 # define TBD 10
 # define DELIMITER 11
@@ -168,9 +168,9 @@ int	ft_here_doc(t_parser *nodes);
 // int	execute(t_parser *current, t_pipex *p, t_mega *mini);
 int	execute(t_parser **current, t_pipex *p, t_mega *mini);
 int    ft_wait(pid_t last_pid, t_parser **nodes);
-int	add_new_token(t_token **list, t_token *new);
+int	add_new(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
-t_token	*create_new_token(t_lexer *input, int start, int end, int type);
+t_token	*create_new(t_lexer *input, int start, int end, int type);
 // int create_and_add_token(t_lexer *input, int start, int end, t_token **list, int type);
 
 /* NODES */
@@ -213,35 +213,33 @@ void	free_exit(t_pipex *p, t_mega *mini, int exit_c);
 void	close_heredoc(t_parser *current);
 
 /* t_lexer */
-int 	PIPE(t_lexer *input, t_token **list);
-int 	R_ARROW(t_lexer *input);
-int 	L_ARROW(t_lexer *input);
-int 	SP(t_lexer *input);
-int 	S_QUOTE(t_lexer *input);
-int 	D_QUOTE(t_lexer *input);
-int 	DOLLAR(t_lexer *input);
-int 	QUESTION_M(t_lexer *input);
-int 	LOW_ALPHA(t_lexer *input);
-int 	UP_ALPA(t_lexer *input);
-int 	DIGIT(t_lexer *input);
-int 	SLASH(t_lexer *input);
-int 	MINUS(t_lexer *input);
-int 	DOT(t_lexer *input);
-int 	UNDERSCORE(t_lexer *input);
-int 	BACKSLASH(t_lexer *input);
-int 	ESPER(t_lexer *input);
-int 	SEMI_COL(t_lexer *input);
-int 	PRINTABLE_SQUOTE(t_lexer *input);
-int 	PRINTABLE_DQUOTE(t_lexer *input);
-int 	HAT(t_lexer *input);
-int	EQUAL(t_lexer *input);
-int	PLUS(t_lexer *input);
-int	STAR(t_lexer *input);
-int	TAB_H(t_lexer *input);
-int	TAB_V(t_lexer *input);
-int	HASHTAG(t_lexer *input);
-int	DOTS(t_lexer *input);
+int 	ft_pipe(t_lexer *input, t_token **list);
+int 	ft_r_arrow(t_lexer *input);
+int 	ft_l_arrow(t_lexer *input);
+int 	ft_space(t_lexer *input);
+int 	ft_squote(t_lexer *input);
+int 	ft_dquote(t_lexer *input);
+int 	ft_dollar(t_lexer *input);
+int 	ft_question(t_lexer *input);
+int 	ft_l_alpha(t_lexer *input);
+int 	ft_u_alpha(t_lexer *input);
+int 	ft_digit(t_lexer *input);
+int 	ft_slash(t_lexer *input);
+int 	ft_min(t_lexer *input);
+int 	ft_dot(t_lexer *input);
+int 	ft_undescore(t_lexer *input);
+int 	print_ft_squote(t_lexer *input);
+int 	print_ft_dquote(t_lexer *input);
+int 	ft_hat(t_lexer *input);
+int	ft_equal(t_lexer *input);
+int	ft_plus(t_lexer *input);
+int	ft_star(t_lexer *input);
+int	ft_tab_h(t_lexer *input);
+int	ft_tab_v(t_lexer *input);
+int	ft_dots(t_lexer *input);
 
+int	eat(t_lexer *input, char c);
+int	eat_range(t_lexer *input, int start, int end);
 int	ows(t_lexer *input);
 int	squote(t_lexer *input);
 int	dquote(t_lexer *input);
@@ -250,7 +248,7 @@ int	redir(t_lexer *input, t_token **list);
 int	command(t_lexer *input, t_token **list);
 int	expr(t_lexer *input, t_token **list);
 int	start(t_lexer *input);
-int	t_parser_has_reach_end(t_lexer *input);
+int	parser_has_reach_end(t_lexer *input);
 
 extern int	g_signal;
 #endif

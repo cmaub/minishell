@@ -12,8 +12,8 @@
 
 #include "minishell.h"
 
-/*si cd est appele sans arguments -> fail (cf sujet)
-si plus d'un argument -> fail
+/*si cd est appele sans ARGs -> fail (cf sujet)
+si plus d'un ARG -> fail
 
 chdir() permet de changer de repertoire. 
 Retourne 0 en cas de succes et -1 si elle echoue
@@ -84,7 +84,7 @@ int	check_args_cd(char **cmd)
 	if (!cmd[1])
 		return (ft_putendl_fd("cd: no directory specified", 2), FALSE);
 	if (cmd[2])
-		return (ft_putendl_fd("cd: too many arguments", 2), FALSE);
+		return (ft_putendl_fd("cd: too many ARGs", 2), FALSE);
 	else
 	{
 		if (chdir(cmd[1]) == -1)

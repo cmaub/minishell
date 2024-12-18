@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
+#    By: anvander <anvander@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/12/11 14:34:15 by anvander         ###   ########.fr        #
+#    Updated: 2024/12/18 15:46:26 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,10 +28,20 @@ INC			=	-I ./includes/\
 # Sources
 SRC_PATH	=	src/
 SRC_FILES			=	minishell.c \
-							token.c \
 							nodes.c \
 							utils.c \
-							lexer.c \
+							lexer/command.c \
+							lexer/eat.c \
+							lexer/expr.c \
+							lexer/token.c \
+							lexer/chars/alphanum.c \
+							lexer/chars/arrows.c \
+							lexer/chars/dots.c \
+							lexer/chars/quotes1.c \
+							lexer/chars/quotes2.c \
+							lexer/chars/spaces.c \
+							lexer/chars/specials.c \
+							lexer/chars/maths_op.c \
 							exec.c \
 							get_next_line.c \
 							path.c \
@@ -43,21 +53,24 @@ SRC_FILES			=	minishell.c \
 							builtin_unset.c \
 							builtin_export.c \
 							ft_free.c
+
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects
 OBJ_PATH	= obj/
-OBJ			= $(SRC_FILES:.c=.o)
-OBJS		= $(addprefix $(OBJ_PATH), $(OBJ))
+OBJ_FILES	= $(SRC_FILES:.c=.o)
+OBJS		= $(addprefix $(OBJ_PATH), $(OBJ_FILES))
 
+# Sous-dossiers pour les objets
+DIRS		= $(sort $(dir $(OBJS)))
 
 all: $(OBJ_PATH) $(LIBFT) $(NAME)
 
+$(OBJ_PATH):
+	@mkdir -p $(DIRS)
+
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@$(CC) $(CFLAGS) -c $< -o $@ $(INC)
-
-$(OBJ_PATH):
-	@mkdir -p $(OBJ_PATH)
 
 $(LIBFT):
 	@echo "Making libft..."

@@ -377,7 +377,7 @@ int	calculate_size_of_tab(t_token *cur, t_parser *node, t_mega *mini)
 		}
 		node->nb_file++;
 	}
-	else if (cur->type == ARGUMENT)
+	else if (cur->type == ARG)
 	{
 		if (!update_value_in_node(&cur, node, mini))
 			return (FALSE);
@@ -522,7 +522,7 @@ int	fill_nodes_with_heredoc(t_token **cur, t_parser **node, t_mega **mini)
 
 int	fill_nodes_with_args(t_token **cur, t_parser **node, t_mega **mini)
 {
-	if ((*cur)->type == ARGUMENT && (*cur)->value != NULL)
+	if ((*cur)->type == ARG && (*cur)->value != NULL)
 	{
 		while ((*cur) && (*cur)->value && !is_command((*cur)->value))
 			(*cur) = (*cur)->next;
@@ -552,7 +552,7 @@ int	fill_nodes_with_(t_token *cur, t_parser *new_node, t_mega *mini)
 		if (!fill_nodes_with_heredoc(&cur, &new_node, &mini))
 			return (FALSE);
 	}
-	else if (cur->type == ARGUMENT && cur->value != NULL)
+	else if (cur->type == ARG && cur->value != NULL)
 		fill_nodes_with_args(&cur, &new_node, &mini);
 	return (TRUE);
 }
