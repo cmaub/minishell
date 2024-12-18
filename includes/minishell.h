@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 18:53:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 16:06:22 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,7 @@
 # include <string.h>
 # include <unistd.h>
 # include <signal.h>
-
-# define true 1
-# define false 0
+# include <errno.h>
 
 # define REDIRECT_IN 1 /* < */
 # define REDIRECT_OUT 2 /* > */
@@ -128,7 +126,77 @@ typedef struct s_mega
 	int	idx;
 } t_mega;
 
+/* BUILTINS */
+int		ft_echo(char **cmd);
+int		ft_pwd(t_parser *current);
+int		ft_env(t_parser *current, t_env **env);
+t_env	**ft_unset(t_parser *current, t_env **env_n);
+/* exit */
+int		ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini);
+void	input_ok(t_pipex *p, char *cmd, t_parser *node);
+int		lenght_exit_code(char *cmd);
+void	not_a_num(t_pipex *p, t_parser *node);
+void	too_many(t_pipex *p, t_parser *node);
+/* cd */
+int		ft_cd(char **cmd, t_pipex *p, t_parser *node);
+int		handle_existing_var(t_env *temp, char *dest_tmp, char *src);
+/* export */
+t_env	**ft_export(t_parser *current, t_env **env_n);
+int		check_name(char *name);
+void	copy_and_sort_env(t_env **env);
+int		create_new_var(t_env **node, char *str);
+int		env_var_exists(t_env **env_n, char *var);
+int		is_ignored_var(char *var);
+void	print_error_msg(char *str, t_parser *current, char *error_msg);
+void	print_sorted_env(t_env **env_n);
+void	sort_tab_ascii(t_env **env);
+void	write_var(char *sorted_env);
 
+/* PARSING */
+/* create_node */
+void	add_new_node(t_mega *mini, t_parser **nodes, t_parser *new);
+void	add_null_to_tab(t_parser *new_node, t_mega *mini);
+int		create_nodes(t_mega *mini);
+int		fill_nodes_with_heredoc(t_token **cur, t_parser **node, t_mega **mini);
+void	init_mini_counters(t_mega *mini);
+int		update_value_in_node(t_token **cur, t_parser *node, t_mega *mini);
+int		ft_size_list(t_parser **nodes);
+/* expand */
+char	*expand_var(t_parser *node, t_mega *mini, char *str, int *i);
+char	*isolate_expand(char *str, int index);
+int		is_expandable(char *str, int i, int flag);
+char	*join_char(char c, char *result);
+/* fill type nodes */
+int	fill_nodes_with_(t_token *cur, t_parser *new_node, t_mega *mini);
+/* heredoc */
+int	fill_nodes_with_heredoc(t_token **cur, t_parser **node, t_mega **mini);
+/* process string */
+char	*process_string(t_parser *node, t_mega *mini, char *str, int *i);
+/* withdraw_quotes */
+char	*withdraw_double(t_parser *node, t_mega *mini, char *str, char *res);
+char	*withdraw_quotes(t_parser *node, t_mega *mini, char *str);
+char	*withdraw_unquoted(t_parser *node, t_mega *mini, char *str, char *res);
+
+/* EXEC */
+void	c_child(int signum);
+void	q_child(int signum);
+void	choose_process(t_pipex *p, t_parser **nodes, t_mega *mini);
+void	s_clse_array(int **array, t_parser **node);
+void	s_clse(int *fd);
+void	close_pipefds(t_pipex *p);
+char	**copy_list_in_str(t_env **env_n);
+int		cpy_std(int *cpy_stdin, int *cpy_stdout);
+int		execute(t_parser **cur, t_pipex *p, t_mega *m);
+int		exc_built(t_parser *current, t_pipex *p, t_cpy *cpy, t_mega *mini);
+int		find_path(char **env);
+void	free_exit_tab_str(char **env, char **cmd, char *other_cmd, int code);
+int		handle_builtin(t_parser *node, t_pipex *p, t_mega *mini);
+int		handle_output_redirection(t_parser **n, t_pipex *p, int *flag_output);
+int		handle_input_redirection(t_parser **n, t_pipex *p, int *d);
+int		is_command(char *cmd);
+int		is_builtin(t_parser *current);
+void	msg_not_executable(char *str);
+int		restore_std(int *cpy_stdin, int *cpy_stdout);
 void	try_find_cmd_file(char **tmp_cmd, char **str_env);
 
 // ENV
@@ -144,15 +212,13 @@ char	**find_path_line(char **env);
 
 /* MINISHELL */
 char	*get_path_and_check(char **split_cmd, char **env);
-char	**copy_tab(char **envp);
 int	ft_error_int(char *str, t_parser *node);
 void	ft_error_exit(char *str, int exit_c);
 void	clse_n_x(int *fd, t_pipex *p, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, t_parser *nodes);
-void	s_clse(int *fd);
-// int		handle_output_redirection(t_parser **nodes, t_pipex *p, int fd_out);
-int		handle_output_redirection(t_parser **nodes, t_pipex *p, int *flag_output);
+
+
 void	handle_c_signal(int signum);
 void	handle_c_signal_wait(int signum);
 // void	handle_c_signal_child(int signum);
@@ -161,8 +227,8 @@ void	handle_c_signal_wait(int signum);
 /* TOKENS */
 int	fill_list_of_tokens(t_mega *mini, char *str);
 int	no_envp(char **tab);
-// int	handle_input(t_parser **nodes, t_pipex *p);
-int	handle_input(t_parser **nodes, t_pipex *p, t_mega *mini);
+// int	create_process(t_parser **nodes, t_pipex *p);
+int	create_process(t_parser **nodes, t_pipex *p, t_mega *mini);
 int	ft_here_doc(t_parser *nodes);
 // int	execute(t_parser *current, t_pipex *p);
 // int	execute(t_parser *current, t_pipex *p, t_mega *mini);
@@ -173,25 +239,10 @@ void	print_tokens_list(t_token **list);
 t_token	*create_new_token(t_lexer *input, int start, int end, int type);
 // int create_and_add_token(t_lexer *input, int start, int end, t_token **list, int type);
 
-/* NODES */
-int	create_nodes(t_mega *mini);
-void	print_nodes_list(t_parser **nodes);
-// void	add_new_node(t_parser **nodes, t_parser *new_node);
-void	add_new_node(t_mega *mini, t_parser **nodes, t_parser *new);
-int	ft_size_list(t_parser **nodes);
-int	is_command(char *cmd);
 
-/* BUILTINS */
-int	ft_echo(char **cmd);
-int	ft_pwd(t_parser *current);
-int	ft_env(t_parser *current, t_env **env);
-int	ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini);
-int	ft_cd(char **cmd, t_pipex *p, t_parser *node);
-int	create_new_var(t_env **node, char *str);
-int	env_var_exists(t_env **env_n, char *var);
-void	print_sorted_env(t_env **env_n);
-t_env	**ft_unset(t_parser *current, t_env **env_n);
-t_env	**ft_export(t_parser *current, t_env **env_n);
+
+
+char	**copy_tab(char **tab);
 
 /* ALLOC AND FREE */
 void	ft_free_tab(char **tab);

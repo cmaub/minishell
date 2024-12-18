@@ -1,32 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin_cd.c                                       :+:      :+:    :+:   */
+/*   cd.c                                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 19:05:06 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/18 14:19:57 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*si cd est appele sans arguments -> fail (cf sujet)
-si plus d'un argument -> fail
+// if cd is called without arguments -> fail (see topic)
+// if more than one argument -> fail
 
-chdir() permet de changer de repertoire. 
-Retourne 0 en cas de succes et -1 si elle echoue
+// chdir() is used to change directories. 
+// Returns 0 if successful and -1 if unsuccessful.
 
-avant de changer de repertoire sauvegarder PWD dans OLDPWD
-si le changement reussi, mettre a jour la nouvelle position
+// before changing directory save PWD in OLDPWD
+// if the change succeeds, update the new position
 
-char *getcwd( char *buffer, size_t size );
-permet de recuperer le chemin absolu du repertoire courant
-- buffer : le bloc de mémoire dans lequel le chemin de travail 
-courant vous sera retourné.
-- size : la taille du bloc de mémoire passé en premier paramètre.
-*/
+// char *getcwd( char *buffer, size_t size );
+// retrieves the absolute path of the current directory
+// - buffer: the block of memory in which the current working 
+// will be returned.
+// - size: the size of the block of memory passed as the first parameter.
+
 
 int	handle_new_var(t_env **nodes, char *dest_tmp, char *src)
 {
@@ -38,16 +38,6 @@ int	handle_new_var(t_env **nodes, char *dest_tmp, char *src)
 	if (!create_new_var(nodes, new_var))
 		return (free(new_var), FALSE);
 	free(new_var);
-	return (TRUE);
-}
-
-int	handle_existing_var(t_env *temp, char *dest_tmp, char *src)
-{
-	free(temp->var);
-	temp->var = NULL;
-	temp->var = ft_strjoin(dest_tmp, src);
-	if (!temp->var)
-		return (FALSE);
 	return (TRUE);
 }
 

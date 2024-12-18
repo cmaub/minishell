@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 18:48:23 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 15:32:52 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,7 +184,7 @@ void	free_exec_input(t_mega *mini)
 	else
 	{
 		ft_init_struct(mini->p, mini->chained_env, mini->nodes);
-		handle_input(&mini->nodes, mini->p, mini);
+		create_process(&mini->nodes, mini->p, mini);
 		if (mini->nodes)
 			mini->exit_code = mini->nodes->exit_code;
 		free_pipex(&mini->p);

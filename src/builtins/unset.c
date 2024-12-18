@@ -6,12 +6,12 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 09:41:15 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 14:20:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// Supprime une ou des variable d'environnement
-// Si une variable n'existe pas, unset ne doit pas provoquer la fin du programme
+// Deletes one or more environment variables
+// If a variable does not exist, unset must not cause the program to terminate
 
 #include "minishell.h"
 

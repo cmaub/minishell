@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: anvander < anvander@student.42.fr >        +#+  +:+       +#+         #
+#    By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/12/11 14:34:15 by anvander         ###   ########.fr        #
+#    Updated: 2024/12/18 16:07:05 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,35 +29,54 @@ INC			=	-I ./includes/\
 SRC_PATH	=	src/
 SRC_FILES			=	minishell.c \
 							token.c \
-							nodes.c \
+							parsing/create_node_utils.c \
+							parsing/create_node.c \
+							parsing/expand_utils.c \
+							parsing/expand.c \
+							parsing/fill_types_nodes.c \
+							parsing/heredoc.c \
+							parsing/process_strings.c \
+							parsing/withdraw_quotes.c \
 							utils.c \
 							lexer.c \
-							exec.c \
-							get_next_line.c \
+							exec/choose_exec.c \
+							exec/choose_process.c \
+							exec/create_process.c \
+							exec/exec_builtins.c \
+							exec/exec_utils.c \
+							exec/fds_utils.c \
+							exec/redir.c \
+							exec/signals.c \
 							path.c \
-							builtin_echo.c \
-							builtin_pwd.c \
-							builtin_env.c \
-							builtin_exit.c \
-							builtin_cd.c \
-							builtin_unset.c \
-							builtin_export.c \
+							builtins/echo.c \
+							builtins/pwd.c \
+							builtins/env.c \
+							builtins/exit.c \
+							builtins/exit_utils.c \
+							builtins/cd.c \
+							builtins/cd_utils.c \
+							builtins/unset.c \
+							builtins/export.c \
+							builtins/export_utils.c \
+							builtins/export_utils2.c \
 							ft_free.c
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects
 OBJ_PATH	= obj/
-OBJ			= $(SRC_FILES:.c=.o)
-OBJS		= $(addprefix $(OBJ_PATH), $(OBJ))
+OBJ_FILES	= $(SRC_FILES:.c=.o)
+OBJS		= $(addprefix $(OBJ_PATH), $(OBJ_FILES))
 
+# Sous-dossiers pour les objets
+DIRS		= $(sort $(dir $(OBJS)))
 
 all: $(OBJ_PATH) $(LIBFT) $(NAME)
 
+$(OBJ_PATH):
+	@mkdir -p $(DIRS)
+
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
 	@$(CC) $(CFLAGS) -c $< -o $@ $(INC)
-
-$(OBJ_PATH):
-	@mkdir -p $(OBJ_PATH)
 
 $(LIBFT):
 	@echo "Making libft..."
