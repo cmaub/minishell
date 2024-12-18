@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*																			*/
-/*														:::	  ::::::::   */
-/*   utils.c											:+:	  :+:	:+:   */
-/*													+:+ +:+		 +:+	 */
-/*   By: anvander < anvander@student.42.fr >		+#+  +:+	   +#+		*/
-/*												+#+#+#+#+#+   +#+		   */
-/*   Created: 2024/10/16 15:53:14 by anvander		  #+#	#+#			 */
-/*   Updated: 2024/11/25 11:38:55 by anvander		 ###   ########.fr	   */
-/*																			*/
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/18 16:01:47 by anvander          #+#    #+#             */
+/*   Updated: 2024/12/18 18:19:34 by anvander         ###   ########.fr       */
+/*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
@@ -169,21 +169,6 @@ char	**copy_tab(char **tab)
 // 	new_tab[i] = NULL;
 // 	return (new_tab);
 // }
-
-void	ft_init_struct(t_pipex *p, t_env **chained_env, t_parser *nodes)
-{
-	p->env_n = chained_env;
-	p->nb_cmd = ft_size_list(&nodes);
-	p->i = 0;
-	p->d = 0;
-	p->prev_fd = -1;
-	p->pid = 0;
-	p->last_pid = 0;
-	p->exit = 0;
-	p->flag = 0;
-	p->pipefd[0] = -1;
-	p->pipefd[1] = -1;
-}
 
 void	ft_free_tab(char **tab)
 {
@@ -356,3 +341,4 @@ int	ft_wait(pid_t last_pid, t_parser **nodes)
 // 	}
 // 	printf("\n");
 // }
+

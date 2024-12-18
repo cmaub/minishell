@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_free.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
+/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/14 16:17:04 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/17 18:34:11 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:23:09 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,43 @@
 // 		free(new_node);
 // 	}
 // }
+
+void	free_env(t_env **mini_env)
+{
+	t_env	*next;
+
+	if (!mini_env || !(*mini_env))
+		return ;
+	while (*mini_env)
+	{
+		next = (*mini_env)->next;
+		if ((*mini_env)->var)
+		{
+			free((*mini_env)->var);
+			(*mini_env)->var = NULL;
+		}
+		free((*mini_env));
+		*mini_env = next;
+	}
+	free(mini_env);
+}
+
+void	free_exec_input(t_mega *mini)
+{
+	free_tokens(&mini->tokens);
+	mini->p = try_malloc(sizeof(t_pipex));
+	if (!mini->p)
+	{
+	}
+	else
+	{
+		init_pipex(mini->p, mini->chained_env, mini->nodes);
+		create_process(&mini->nodes, mini->p, mini);
+		if (mini->nodes)
+			mini->exit_code = mini->nodes->exit_code;
+		free_pipex(&mini->p);
+	}
+}
 
 void	check_and_free_new_node(t_parser *new_node)
 {

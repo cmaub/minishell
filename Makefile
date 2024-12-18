@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+         #
+#    By: anvander <anvander@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/12/18 17:58:14 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/12/18 18:24:12 by anvander         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,9 @@ INC			=	-I ./includes/\
 
 # Sources
 SRC_PATH	=	src/
-SRC_FILES			=	minishell.c \
+SRC_FILES			=		init/main_loop.c \
+							init/create_t_env.c \
+							init/init_structs.c \
 							parsing/create_node_utils.c \
 							parsing/create_node.c \
 							parsing/expand_utils.c \

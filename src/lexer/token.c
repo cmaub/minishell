@@ -1,16 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   token_utils.c                                      :+:      :+:    :+:   */
+/*   token.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 15:16:17 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:08:47 by anvander         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+int	parser_has_reach_end(t_lexer *input)
+{
+	if (input->head != input->len)
+		return (FALSE);
+	return (TRUE);
+}
 
 int	fill_list_of_tokens(t_mega *mini, char *str)
 {
