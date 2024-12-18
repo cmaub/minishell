@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 18:00:32 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:16:14 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,17 +60,17 @@ char	*get_path(char *cmd, char **env)
 	{
 		tmp_filename = create_tmp_filename(path[i++], cmd);
 		if (!tmp_filename)
-			return (ft_free_tab(path), NULL);
+			return (free_array(path), NULL);
 		if (access(tmp_filename, F_OK) == 0)
 		{
 			if (access(tmp_filename, R_OK) == -1)
-				return (ft_free_tab(path), free(tmp_filename), NULL);
+				return (free_array(path), free(tmp_filename), NULL);
 			filename = tmp_filename;
 			break ;
 		}
 		free(tmp_filename);
 	}
-	return (ft_free_tab(path), filename);
+	return (free_array(path), filename);
 }
 
 char	*get_path_and_check(char **split_cmd, char **env)

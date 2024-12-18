@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:59:02 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:41:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,12 +203,12 @@ void	handle_c_signal_heredoc(int signum);
 void	handle_c_signal(int signum);
 
 // ENV
-int	lstsize_t_env(t_env **lst);
+int		lstsize_t_env(t_env **lst);
 void	ft_lstadd_env_back(t_env **lst, t_env *new);
 void	add_new_var(t_env **mini_env, t_env *new_var);
 void	print_t_env(t_env **mini_env);
-int	count_env_var(char **list);
-int	env_var_exists(t_env **env_n, char *var);
+int		count_env_var(char **list);
+int		env_var_exists(t_env **env_n, char *var);
 char	*return_var_from_env(char *str, t_env **chained_env);
 t_env	**copy_t_env(t_env **env);
 char	**find_path_line(char **env);
@@ -221,34 +221,17 @@ void	clse_n_x(int *fd, t_pipex *p, char *str);
 void	check_open(int fd);
 void	ft_init_struct(t_pipex *p, t_env **chained_env, t_parser *nodes);
 
-
-void	handle_c_signal(int signum);
-void	handle_c_signal_wait(int signum);
-// void	handle_c_signal_child(int signum);
-// void	check_signal_handler();
-
 /* TOKENS */
 int	fill_list_of_tokens(t_mega *mini, char *str);
-int	no_envp(char **tab);
-// int	create_process(t_parser **nodes, t_pipex *p);
 int	create_process(t_parser **nodes, t_pipex *p, t_mega *mini);
 int	ft_here_doc(t_parser *nodes);
-// int	execute(t_parser *current, t_pipex *p);
-// int	execute(t_parser *current, t_pipex *p, t_mega *mini);
 int	execute(t_parser **current, t_pipex *p, t_mega *mini);
 int    ft_wait(pid_t last_pid, t_parser **nodes);
 int	add_new(t_token **list, t_token *new);
 void	print_tokens_list(t_token **list);
 t_token	*create_new(t_lexer *input, int start, int end, int type);
-// int create_and_add_token(t_lexer *input, int start, int end, t_token **list, int type);
-
-
-
-
-char	**copy_tab(char **tab);
 
 /* ALLOC AND FREE */
-void	ft_free_tab(char **tab);
 char	**copy_tab_free(char **envp);
 void	free_new_node(t_parser *new_node);
 void	rst_nde(t_parser **node);
@@ -256,16 +239,22 @@ void	rst_nde_mini(t_mega *mini, t_parser **node);
 void	free_tokens(t_token **tokens);
 void	check_and_free_new_node(t_parser *new_node);
 void	free_env(t_env **mini_env);
-void	free_array_int(int **array, t_parser *current);
 void	reset_one_node(t_parser **node);
-// void   close_error_and_free(int *fd, t_pipex *p, t_parser **nodes, char *str, int exit_c);
 void	close_error_and_free(int *fd, t_mega *mini, char *str, int exit_c);
 void	free_array(char **array);
 void	free_pipex(t_pipex **p);
-int	restore_std(int *cpy_stdin, int *cpy_stdout);
+int		restore_std(int *cpy_stdin, int *cpy_stdout);
 void	free_exit(t_pipex *p, t_mega *mini, int exit_c);
 void	close_heredoc(t_parser *current);
 void	close_all_heredoc(t_mega *mini);
+void	free_exec_input(t_mega *mini);
+void	free_array_and_close_fds(char **array);
+void	free_arr_i(int **array, t_parser *current);
+
+
+/* UTILS */
+char	**copy_tab(char **tab);
+void    init_pipex(t_pipex *p, t_env **chained_env, t_parser *nodes);
 
 /* t_lexer */
 int 	ft_pipe(t_lexer *input, t_token **list);

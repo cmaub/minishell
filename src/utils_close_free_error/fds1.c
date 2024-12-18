@@ -6,11 +6,23 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:26:15 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:52:46 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:04:55 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	s_clse(int *fd)
+{
+	if (*fd != -1)
+	{
+		if (close(*fd) == -1)
+			return ;
+		*fd = -1;
+	}
+	else
+		return ;
+}
 
 void	s_clse_array(int **array, t_parser **node)
 {

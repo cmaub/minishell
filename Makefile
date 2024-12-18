@@ -6,7 +6,7 @@
 #    By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/12/18 17:58:14 by cmaubert         ###   ########.fr        #
+#    Updated: 2024/12/18 18:42:29 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,13 +36,12 @@ SRC_FILES			=	minishell.c \
 							parsing/heredoc.c \
 							parsing/process_strings.c \
 							parsing/withdraw_quotes.c \
-							utils.c \
 							exec/choose_exec.c \
 							exec/choose_process.c \
 							exec/create_process.c \
 							exec/exec_builtins.c \
 							exec/exec_utils.c \
-							exec/fds_utils.c \
+							exec/ft_wait.c \
 							exec/redir.c \
 							exec/signals.c \
 							exec/path.c \
@@ -69,8 +68,14 @@ SRC_FILES			=	minishell.c \
 							builtins/export.c \
 							builtins/export_utils.c \
 							builtins/export_utils2.c \
-							ft_free.c
-
+							utils_close_free_error/chained_list_utils.c \
+							utils_close_free_error/fds1.c \
+							utils_close_free_error/fds2.c \
+							utils_close_free_error/free1.c \
+							utils_close_free_error/free2.c \
+							utils_close_free_error/ft_error.c \
+							utils_close_free_error/reset_nodes.c 
+							
 SRCS		= $(addprefix $(SRC_PATH), $(SRC_FILES))
 
 # Objects

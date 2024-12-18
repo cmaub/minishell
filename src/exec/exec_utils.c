@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 15:40:58 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:28:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,34 @@ char	**copy_list_in_str(t_env **env_n)
 	return (str_env);
 }
 
+char	**copy_tab(char **tab)
+{
+	char	**new_tab;
+	int		i;
+
+	i = 0;
+	if (!tab)
+		return (NULL);
+	while (tab[i])
+		i++;
+	new_tab = try_malloc((i + 1) * sizeof(char *));
+	if (!new_tab)
+		return (NULL);
+	i = 0;
+	while (tab[i])
+	{
+		new_tab[i] = ft_strdup(tab[i]);
+		if (!new_tab[i])
+		{
+			free_array(new_tab);
+			return (NULL);
+		}
+		i++;
+	}
+	new_tab[i] = NULL;
+	return (new_tab);
+}
+
 int	is_command(char *cmd)
 {
 	if (!cmd || cmd[0] == '\0' || ft_is_only_spaces(cmd))
@@ -61,27 +89,4 @@ int	find_path(char **env)
 		i++;
 	}
 	return (FALSE);
-}
-
-void	free_exit_tab_str(char **env, char **cmd, char *other_cmd, int code)
-{
-	if (cmd[0])
-	{
-		ft_putstr_fd(cmd[0], 2);
-		ft_putendl_fd(": not executable", 2);
-		free_array(cmd);
-	}
-	else
-		ft_putendl_fd("execve failed", 2);
-	if (env)
-		free_array(env);
-	if (other_cmd)
-		free(other_cmd);
-	exit(code);
-}
-
-void	msg_not_executable(char *str)
-{
-	ft_putstr_fd(str, 2);
-	ft_putendl_fd(": not executable", 2);
 }

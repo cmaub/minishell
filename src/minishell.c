@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:58:51 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:41:55 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,25 +41,7 @@ void	add_new_var(t_env **mini_env, t_env *new_var)
 	ft_lstadd_env_back(mini_env, new_var);
 }
 
-void	free_env(t_env **mini_env)
-{
-	t_env	*next;
 
-	if (!mini_env || !(*mini_env))
-		return ;
-	while (*mini_env)
-	{
-		next = (*mini_env)->next;
-		if ((*mini_env)->var)
-		{
-			free((*mini_env)->var);
-			(*mini_env)->var = NULL;
-		}
-		free((*mini_env));
-		*mini_env = next;
-	}
-	free(mini_env);
-}
 
 // A isoler dans un fichier a part et pas l'appeler
 void	print_t_env(t_env **mini_env)
@@ -165,23 +147,6 @@ int	loop_readline_main(t_lexer **L_input, char **str)
 	return (TRUE);
 }
 
-void	free_exec_input(t_mega *mini)
-{
-	free_tokens(&mini->tokens);
-	mini->p = try_malloc(sizeof(t_pipex));
-	if (!mini->p)
-	{
-	}
-	else
-	{
-		ft_init_struct(mini->p, mini->chained_env, mini->nodes);
-		create_process(&mini->nodes, mini->p, mini);
-		if (mini->nodes)
-			mini->exit_code = mini->nodes->exit_code;
-		free_pipex(&mini->p);
-	}
-}
-
 void	init_mega(t_mega *mini)
 {
 	mini->p = NULL;
@@ -225,4 +190,18 @@ int	main(int argc, char **argv, char **env)
 		}
 	}
 	return (free_env(mini->chained_env), free(mini), TRUE);
+}
+void    init_pipex(t_pipex *p, t_env **chained_env, t_parser *nodes)
+{
+    p->env_n = chained_env;
+    p->nb_cmd = ft_size_list(&nodes);
+    p->i = 0;
+    p->d = 0;
+    p->prev_fd = -1;
+    p->pid = 0;
+    p->last_pid = 0;
+    p->exit = 0;
+    p->flag = 0;
+    p->pipefd[0] = -1;
+    p->pipefd[1] = -1;
 }
