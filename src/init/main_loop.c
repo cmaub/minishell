@@ -6,13 +6,13 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 19:18:11 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 10:01:38 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	g_signal = -1;
+int	g_signal = 0;
 
 t_lexer	*ft_init_t_lexer_input(void)
 {

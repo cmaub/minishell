@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 19:20:43 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 09:59:57 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 // # include <stddef.h>
 // # include <string.h>
 // # include <unistd.h>
-// # include <signal.h>
+# include <signal.h>
 
 # define REDIRECT_IN 1
 # define REDIRECT_OUT 2 /* > */
