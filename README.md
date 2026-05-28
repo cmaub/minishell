@@ -6,7 +6,6 @@
 
 **A minimal Unix shell implementation written in C** 
 
- ![Language](https://img.shields.io/badge/language-C-blue)
  ![Score](score.png)
 
 </div>
@@ -222,7 +221,7 @@ heredoc read loop:
   SIGQUIT → SIG_IGN
 ```
 
-`g_signal` is the only global variable. It is a `volatile sig_atomic_t`-compatible `int`, set exclusively in signal handlers and read in the main loop to detect interruption. It is reset to 0 at the start of each readline cycle.
+`g_signal` is the only global variable. It is set exclusively in signal handlers and read in the main loop to detect interruption. It is reset to 0 at the start of each readline cycle.
 
 ---
 
@@ -286,7 +285,7 @@ hello world
 
 # Exit code propagation
 minishell > ls /nonexistent
-ls: /nonexistent: No such file or directory
+ls: cannot access '/nonexistent': No such file or directory
 minishell > echo $?
 2
 
@@ -315,7 +314,6 @@ minishell > echo $?
 - [POSIX Shell & Utilities specification](https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html)
 - `man 2 fork`, `man 2 execve`, `man 2 pipe`, `man 2 dup2`, `man 2 waitpid`
 - `man 3 readline`, `man 3 add_history`
-- `man 7 signal`, `man 2 sigaction`
 - *Advanced Programming in the UNIX Environment* — W. Richard Stevens
 - *The Linux Programming Interface* — Michael Kerrisk
 
@@ -323,5 +321,4 @@ minishell > echo $?
 
 ## Author
 
-**cmaubert** — 42 Paris| Not implemented | Would require a conditional execution layer in the executor |
-| Job control (`bg`, `fg`, `
+**cmaubert** — 42 Paris
