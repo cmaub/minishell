@@ -6,15 +6,29 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:34:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 15:12:06 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 15:50:36 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*withdraw_unquoted(t_parser *node, t_mega *mini, char *str, char *res)
+char	*non_expandable(char *str, char **res, t_mega *mini)
 {
 	char	*tmp;
+
+	tmp = join_char(str[mini->idx], *res);
+	if (!tmp)
+		return (free(*res), NULL);
+	*res = tmp;
+	if (tmp[ft_strlen(tmp) - 1] == '$' && (str[(mini->idx) + 1] == 39
+			|| str[(mini->idx) + 1] == 34))
+		tmp[ft_strlen(tmp) - 1] = '\0';
+	(mini->idx)++;
+	return (*res);
+}
+
+char	*withdraw_unquoted(t_parser *node, t_mega *mini, char *str, char *res)
+{
 	char	*tmp_result;
 	char	*expand;
 
@@ -29,16 +43,10 @@ char	*withdraw_unquoted(t_parser *node, t_mega *mini, char *str, char *res)
 			return (free(res), NULL);
 		free(res);
 		res = tmp_result;
+		return (res);
 	}
 	else
-	{
-		tmp = join_char(str[mini->idx], res);
-		if (!tmp)
-			return (free(res), NULL);
-		res = tmp;
-		(mini->idx)++;
-	}
-	return (res);
+		return (non_expandable(str, &res, mini));
 }
 
 char	*withdraw_double(t_parser *node, t_mega *mini, char *str, char *res)
@@ -93,7 +101,7 @@ char	*withdraw_quotes(t_parser *node, t_mega *mini, char *str)
 		result = tmp_result;
 		tmp_result = NULL;
 	}
-	if (!result || !*result)
+	if (!result || !*result || ft_is_only_spaces(result))
 		return (free(result), NULL);
 	return (result);
 }

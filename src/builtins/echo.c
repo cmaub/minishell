@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin_echo.c                                     :+:      :+:    :+:   */
+/*   echo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander < anvander@student.42.fr >        +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/13 19:08:14 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/19 13:27:42 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	all_n(char *str)
 
 int	check_args(char **cmd, int *i, int *is_n)
 {
-	if (!cmd[*i])
+	if (!cmd[*i] || cmd[*i][0] == '\0')
 		return (-1);
 	while (ft_strncmp(cmd[*i], "-n", 2) == 0 && all_n(cmd[*i]))
 	{

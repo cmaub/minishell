@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:38:37 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 16:03:20 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 18:34:53 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	exec_no_env_or_path(char **tmp_cmd, char **str_env)
 	{
 		if (access(tmp_cmd[0], R_OK) == -1)
 			(free_exit_tab_str(str_env, tmp_cmd, NULL, 126));
-		if (execve(tmp_cmd[0], tmp_cmd, NULL) == -1)
+		if (execve(tmp_cmd[0], tmp_cmd, str_env) == -1)
 			(free_exit_tab_str(str_env, tmp_cmd, NULL, 126));
 		exit(126);
 	}

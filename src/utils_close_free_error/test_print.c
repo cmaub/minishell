@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 18:55:51 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 19:01:16 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 11:07:00 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,15 @@
 // 	int	d;
 // 	t_parser	*tmp;
 //
-// 	dprintf(2, "entree dans print_nodes_list\n");
+// 	printf("entree dans print_nodes_list\n");
 // 	if (!nodes)
 // 	{
-// 		dprintf(2, "*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
+// 		printf("*** nodes est null (%s, %d)\n", __FILE__, __LINE__);
 // 		return ;
 // 	}
 // 	if (!(*nodes)/* || !nodes*/)
 // 	{
-// 		dprintf(2, "*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
+// 		printf("*** *nodes est null (%s, %d)\n", __FILE__, __LINE__);
 // 		return ;
 // 	}
 // 	tmp = (*nodes);
@@ -72,4 +72,23 @@
 // 		printf("\n");
 // 	}
 // 	printf("\n");
+// }
+// 
+// void	print_tokens_list(t_token **list)
+// {
+// 	int	i;
+// 
+// 	i = 0;
+// 	if (!*list)
+// 	{
+// 		return ;
+// 	}
+// 	while ((*list)->next)
+// 	{
+// 		if ((*list)->value)
+// 			printf("[%s] de type %d\n", (*list)->value, (*list)->type);
+// 		(*list) = (*list)->next;
+// 		i++;
+// 	}
+// 	printf("[%s] de type %d\n", (*list)->value, (*list)->type);
 // }

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   d_quotes.c                                         :+:      :+:    :+:   */
+/*   quotes2.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:03:47 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 15:04:44 by anvander         ###   ########.fr       */
+/*   Updated: 2024/12/19 18:48:12 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,14 @@ int	print_ft_dquote(t_lexer *input)
 {
 	int	i;
 	int	j;
+	int	k;
 	int	save;
 
 	save = input->head;
 	i = eat_range(input, 32, 33);
 	j = eat_range(input, 35, 126);
-	if (i || j)
+	k = eat_range(input, 9, 11);
+	if (i || j || k)
 		return (TRUE);
 	input->head = save;
 	return (FALSE);

@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 17:00:17 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 19:18:11 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 18:39:04 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ int	fill_list_of_tokens(t_mega *mini, char *str)
 		mini->l_input = NULL;
 		return (FALSE);
 	}
+	free(mini->l_input->data);
 	free(mini->l_input);
 	return (TRUE);
 }
@@ -80,23 +81,4 @@ t_token	*create_new(t_lexer *input, int start, int end, int type)
 	new->prev = NULL;
 	new->next = NULL;
 	return (new);
-}
-
-void	print_tokens_list(t_token **list)
-{
-	int	i;
-
-	i = 0;
-	if (!*list)
-	{
-		return ;
-	}
-	while ((*list)->next)
-	{
-		if ((*list)->value)
-			printf("[%s] de type %d\n", (*list)->value, (*list)->type);
-		(*list) = (*list)->next;
-		i++;
-	}
-	printf("[%s] de type %d\n", (*list)->value, (*list)->type);
 }

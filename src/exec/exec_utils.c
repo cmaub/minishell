@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 17:04:02 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 18:28:38 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 11:03:48 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,18 +75,4 @@ int	is_command(char *cmd)
 		return (FALSE);
 	}
 	return (TRUE);
-}
-
-int	find_path(char **env)
-{
-	int	i;
-
-	i = 0 ;
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], "PATH", 4) == 0)
-			return (TRUE);
-		i++;
-	}
-	return (FALSE);
 }

@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:38:55 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:55:17 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 17:18:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,15 @@ int	create_heredoc(t_parser *node, t_token *current, int *f, int *d)
 
 int	fill_nodes_with_heredoc(t_token **cur, t_parser **node, t_mega **mini)
 {
+	if (*cur && (*cur)->value)
+		(*node)->file[(*mini)->f] = ft_strdup("heredoc");
+	else
+	{
+		(rst_nde_mini(*mini, node), free((*mini)->nodes));
+		return (free((*node)), free_tokens(&(*mini)->tokens), FALSE);
+	}
 	if (pipe((*node)->fd_heredoc[(*mini)->d]) == -1)
 		return (perror("pipe"), FALSE);
-	(*node)->file[(*mini)->f] = ft_strdup("heredoc");
 	if (!create_heredoc((*node), (*cur), &(*mini)->f, &(*mini)->d))
 	{
 		close_heredoc(*node);

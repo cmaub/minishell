@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 16:57:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/19 10:01:38 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 18:36:57 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ int	loop_readline_main(t_lexer **l_input, char **str)
 		return (FALSE);
 	signal(SIGINT, handle_c_signal);
 	signal(SIGQUIT, SIG_IGN);
-	*str = readline("\001\033[36;1m\002minishell ➜ \001\033[0m\002");
+	*str = readline("\001\033[36;1m\002minishell > \001\033[0m\002");
 	if (!*str)
 	{
 		ft_putstr_fd("exit\n", 1);
@@ -72,7 +72,7 @@ int	main(int argc, char **argv, char **env)
 		{
 			if (create_nodes(mini))
 				free_exec_input(mini);
-			(rst_nde_mini(mini, NULL), free(mini->str));
+			(rst_nde_mini(mini, NULL));
 		}
 	}
 	return (free_env(mini->chained_env), free(mini), TRUE);

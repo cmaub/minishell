@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:25:33 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/19 09:50:24 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/20 11:18:13 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	handle_input_redirection(t_parser **n, t_pipex *p, int *d)
 		s_clse(&(*n)->fd_heredoc[*d][1]);
 		if (dup2((*n)->fd_heredoc[*d][0], STDIN_FILENO) == -1)
 		{
-			clse_n_x(&(*n)->fd_heredoc[*d][0], p, NULL);
+			s_clse(&(*n)->fd_heredoc[*d][0]);
 			return (TRUE);
 		}
 		s_clse(&(*n)->fd_heredoc[*d][0]);

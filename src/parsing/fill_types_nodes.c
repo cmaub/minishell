@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:51:30 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 16:28:45 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 17:17:59 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,11 @@
 
 int	fill_nodes_with_files(t_token **cur, t_parser **node, t_mega **mini)
 {
-	(*node)->file[(*mini)->f] = ft_strdup((*cur)->value);
-	if (!(*node)->file[(*mini)->f])
+	if ((*cur) && (*cur)->value)
+		(*node)->file[(*mini)->f] = ft_strdup((*cur)->value);
+	else
+		return (FALSE);
+	if (!(*node)->file || !(*node)->file[(*mini)->f])
 		return (FALSE);
 	(*node)->redir[(*mini)->f++] = (*cur)->type;
 	return (TRUE);
@@ -27,7 +30,11 @@ int	fill_nodes_with_args(t_token **cur, t_parser **node, t_mega **mini)
 	{
 		while ((*cur) && (*cur)->value && !is_command((*cur)->value))
 			(*cur) = (*cur)->next;
-		(*node)->command[(*mini)->cmd] = ft_strdup((*cur)->value);
+		if ((*cur))
+		{
+			if ((*cur)->type == ARG && (*cur)->value != NULL)
+				(*node)->command[(*mini)->cmd] = ft_strdup((*cur)->value);
+		}
 		if (!(*node)->command[(*mini)->cmd])
 			return (FALSE);
 		(*mini)->cmd++;
@@ -40,8 +47,10 @@ int	fill_nodes_with_(t_token *cur, t_parser *new_node, t_mega *mini)
 	if (cur->type == REDIRECT_IN
 		|| cur->type == REDIRECT_OUT
 		|| cur->type == APPEND_OUT)
+	{
 		fill_nodes_with_files(&cur, &new_node, &mini);
-	else if (cur->type == HEREDOC && cur->value != NULL)
+	}
+	else if (cur->type == HEREDOC)
 	{
 		if (!fill_nodes_with_heredoc(&cur, &new_node, &mini))
 			return (FALSE);

@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 18:19:20 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/19 10:23:57 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 18:36:32 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void	update_exit_code(int status, t_parser **nodes, int *code, int *flag)
 	}
 	else if (g_signal != 0)
 	{
+		if (g_signal == 2)
+			write(1, "\n", 1);
 		*code = 128 + g_signal;
 		(*nodes)->exit_code = *code;
 		g_signal = 0;

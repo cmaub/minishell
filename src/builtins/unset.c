@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   builtin_unset.c                                    :+:      :+:    :+:   */
+/*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 12:33:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:20:21 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 18:39:34 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,6 @@
 // If a variable does not exist, unset must not cause the program to terminate
 
 #include "minishell.h"
-
-int	count_env_var(char **list)
-{
-	int	len;
-
-	len = 0;
-	while (list[len] != NULL)
-	{
-		len++;
-	}
-	return (len);
-}
 
 int	check_args_unset(t_parser *current, t_env **env_n)
 {
@@ -92,7 +80,7 @@ t_env	**ft_unset(t_parser *current, t_env **env_n)
 			size_env = lstsize_t_env(env_n);
 			if (size_env == 1)
 			{
-				ft_putendl_fd("empty envp not allowed\n", 2);
+				ft_putendl_fd("empty envp not allowed", 2);
 				break ;
 			}
 			env_n = browse_env_and_unset_var(env_n, index);

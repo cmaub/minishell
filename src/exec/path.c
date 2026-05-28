@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 16:10:16 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 18:16:14 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 11:04:00 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,4 +81,18 @@ char	*get_path_and_check(char **split_cmd, char **env)
 	if (!new_path)
 		try_find_cmd_file(split_cmd, env);
 	return (new_path);
+}
+
+int	find_path(char **env)
+{
+	int	i;
+
+	i = 0 ;
+	while (env[i])
+	{
+		if (ft_strncmp(env[i], "PATH", 4) == 0)
+			return (TRUE);
+		i++;
+	}
+	return (FALSE);
 }

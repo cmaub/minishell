@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:19:04 by cmaubert         ###   ########.fr       */
+/*   Updated: 2024/12/19 15:49:39 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	check_value_and_add(t_env **env_n, char *cmd, int index)
 	j = -1;
 	if (index >= 0)
 	{
-		while (temp && j++ < index)
+		while (temp && j++ < index -1)
 			temp = temp->next;
 		if (!temp)
 			return (FALSE);
