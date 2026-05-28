@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:03:00 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:55:09 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:15:21 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,10 @@
 char	*process_unquoted(t_parser *node, t_mega *mini, char *str, int *i)
 {
 	char	*result;
-	char	*tmp_result;
-	char	*tmp;
 
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
-	tmp_result = NULL;
-	tmp = NULL;
 	while (str[*i] != 39 && str[*i] != 34 && str[*i] != '\0')
 		result = withdraw_unquoted(node, mini, str, result);
 	return (result);
@@ -54,14 +50,10 @@ char	*process_single_quotes(char *str, int *index)
 char	*process_double(t_parser *node, t_mega *mini, char *str, int *i)
 {
 	char	*result;
-	char	*tmp;
-	char	*tmp_result;
 
 	result = ft_strdup("");
 	if (!result)
 		return (NULL);
-	tmp_result = NULL;
-	tmp = NULL;
 	(*i)++;
 	while (str[*i] != 34 && str[*i] != '\0')
 		result = withdraw_double(node, mini, str, result);

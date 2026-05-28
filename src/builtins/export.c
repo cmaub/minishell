@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 21:04:35 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/19 15:49:39 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:17:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,11 +62,7 @@ void	handle_value(char *cmd, t_parser *current, t_env **env_n)
 t_env	**handle_var_wo_value(char *cmd, t_parser *current, t_env **env_n)
 {
 	int		index;
-	int		j;
-	t_env	*new_var;
 
-	j = 0;
-	new_var = NULL;
 	if (!check_name(cmd))
 	{
 		print_error_msg(cmd, current, "': not a valid identifier");

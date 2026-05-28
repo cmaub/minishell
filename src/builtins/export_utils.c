@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:08:19 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 14:11:34 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:18:41 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,10 +44,8 @@ int	is_ignored_var(char *var)
 
 void	print_sorted_env(t_env **env_n)
 {
-	int		i;
 	t_env	*cur;
 
-	i = 0;
 	if (!*env_n || !env_n)
 		return ;
 	cur = *env_n;
@@ -76,13 +74,11 @@ t_env	**copy_t_env(t_env **env)
 	t_env	**sorted_env;
 	t_env	*new_var;
 	t_env	*current;
-	int		count;
 
 	current = *env;
 	sorted_env = try_malloc(sizeof(t_env *));
 	if (!sorted_env)
 		return (env);
-	count = lstsize_t_env(&current);
 	while (current != NULL)
 	{
 		new_var = try_malloc(sizeof(t_env));

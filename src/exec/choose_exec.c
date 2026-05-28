@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 15:38:37 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/19 18:34:53 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:15:56 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,11 +73,9 @@ void	exec_without_pb(char **tmp_cmd, char **str_env)
 int	execute(t_parser **cur, t_pipex *p, t_mega *m)
 {
 	char	**tmp_cmd;
-	char	**tmp_minienv;
 	char	**str_env;
 
 	tmp_cmd = NULL;
-	tmp_minienv = NULL;
 	str_env = NULL;
 	if (is_builtin(*cur) == 1)
 		(exc_built(*cur, p, NULL, m), rst_nde(&m->begin), free_env(p->env_n),

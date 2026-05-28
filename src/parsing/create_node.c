@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:42:29 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/19 10:23:15 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:14:04 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,6 @@ void	calloc_tab_of_node(t_parser *node)
 
 int	calculate_size_of_tab(t_token *cur, t_parser *node, t_mega *mini)
 {
-	char	*tmp;
-
-	tmp = NULL;
 	if (cur->type == REDIRECT_IN || cur->type == HEREDOC
 		|| cur->type == REDIRECT_OUT || cur->type == APPEND_OUT)
 	{

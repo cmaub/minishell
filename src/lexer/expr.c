@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expr.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: anvander <anvander@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:28:38 by anvander          #+#    #+#             */
-/*   Updated: 2024/12/18 15:33:08 by anvander         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:16:55 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,6 @@ int	ft_pipe(t_lexer *input, t_token **list)
 
 int	expr(t_lexer *input, t_token **list)
 {
-	int	save;
-
-	save = input->head;
 	if (ows(input) && input->len == input->head)
 		return (TRUE);
 	if (!command(input, list))
