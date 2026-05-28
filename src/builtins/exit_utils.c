@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/18 14:13:20 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:56:41 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:23:47 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ void	not_a_num(t_pipex *p, t_parser *node)
 	node->exit_code = 2;
 }
 
-int	lenght_exit_code(char *cmd)
+int	length_exit_code(char *cmd)
 {
 	long long int	max;
 	long long int	min;

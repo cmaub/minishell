@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 11:43:49 by cmaubert          #+#    #+#             */
-/*   Updated: 2024/12/18 17:56:01 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:23:47 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ int	ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini)
 	if (node->command[1])
 	{
 		if (!check_exit_arg(node->command[1])
-			|| !lenght_exit_code(node->command[1]))
+			|| !length_exit_code(node->command[1]))
 			invalid_arg(p, node, cpy, mini);
 	}
 	if (node->command[2])

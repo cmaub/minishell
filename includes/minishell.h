@@ -6,7 +6,7 @@
 /*   By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 10:32:21 by cmaubert          #+#    #+#             */
-/*   Updated: 2026/05/28 12:11:36 by cmaubert         ###   ########.fr       */
+/*   Updated: 2026/05/28 12:29:55 by cmaubert         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@
 # include <readline/history.h>
 # include <sys/types.h>
 # include <sys/wait.h>
-# include "libft.h"
 # include <stddef.h>
 # include <signal.h>
+# include "libft.h"
 
 # define REDIRECT_IN 1
 # define REDIRECT_OUT 2
@@ -117,7 +117,7 @@ int		env_var_exists(t_env **env_n, char *var);
 /* exit */
 int		ft_exit(t_pipex *p, t_parser *node, t_cpy *cpy, t_mega *mini);
 void	input_ok(t_pipex *p, char *cmd, t_parser *node);
-int		lenght_exit_code(char *cmd);
+int		length_exit_code(char *cmd);
 void	not_a_num(t_pipex *p, t_parser *node);
 void	too_many(t_pipex *p, t_parser *node);
 /* cd */
@@ -257,7 +257,7 @@ int		dquote(t_lexer *input);
 /*chars/spaces*/
 int		ows(t_lexer *input);
 int		ws(t_lexer *input);
-/*chars/speacials*/
+/*chars/specials*/
 int		ft_dollar(t_lexer *input);
 int		ft_hat(t_lexer *input);
 int		ft_question(t_lexer *input);

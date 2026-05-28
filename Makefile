@@ -6,7 +6,7 @@
 #    By: cmaubert <cmaubert@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/22 17:11:30 by cmaubert          #+#    #+#              #
-#    Updated: 2024/12/19 18:59:56 by cmaubert         ###   ########.fr        #
+#    Updated: 2026/05/28 14:27:49 by cmaubert         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,17 +27,17 @@ INC			=	-I ./includes/\
 
 # Sources
 SRC_PATH	=	src/
-SRC_FILES			=		init/main_loop.c \
+SRC_FILES			=		main.c \
 							init/create_t_env.c \
 							init/init_structs.c \
-							parsing/create_node_utils.c \
-							parsing/create_node.c \
-							parsing/expand_utils.c \
-							parsing/expand.c \
-							parsing/fill_types_nodes.c \
-							parsing/heredoc.c \
-							parsing/process_strings.c \
-							parsing/withdraw_quotes.c \
+							parser/create_node_utils.c \
+							parser/create_node.c \
+							parser/expand_utils.c \
+							parser/expand.c \
+							parser/fill_types_nodes.c \
+							parser/heredoc.c \
+							parser/process_strings.c \
+							parser/withdraw_quotes.c \
 							exec/choose_exec.c \
 							exec/choose_process.c \
 							exec/create_process.c \
